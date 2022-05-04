@@ -1,0 +1,21 @@
+/* 
+    To provide a column page look.
+*/
+
+body{
+    margin: 0px;
+    padding: 0px;
+    background-color: #F5F5F5;
+}
+
+/* 
+    To make code blocks stand out.
+*/
+
+code {
+    color: black;
+}
+
+.code {
+    background-color:lightgray;
+}
