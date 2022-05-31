@@ -28,7 +28,7 @@ export default function QNA(props) {
             }
             {!props.QLeft && 
                 <Row>
-                    <Col style={{textAlign: "justify", marginTop: "4.5%", borderRight: "1px solid black"}}>
+                    <Col style={{textAlign: "justify", marginTop: "4.5%", borderRight: "1px solid lightGrey"}}>
                         <p style={{height: "100%", paddingLeft: "2%", paddingRight: "2%", background: "LightGrey"}}>
                             {handleHTML(props.Answer)}
                         </p>

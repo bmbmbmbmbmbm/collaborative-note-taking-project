@@ -1,8 +1,12 @@
 const express = require('express');
 const app = express();
 
-app.get("/api", (req, res) => {
-    res.json({ "users": ["userOne", "userTwo", "userThree"] })
-})
+// Sets up routes to be used for specific or general pages
 
-app.listen(5000, () => { console.log("server port 5000") })
+const entryRouter = require('./routes/entry-display/Entry');
+app.use("/entry", entryRouter);
+
+const createEntryRouter = require('./routes/entry-creator/EntryCreator');
+app.use("/entry-creator", createEntryRouter);
+
+app.listen(5000, () => { console.log("server port 5000") });

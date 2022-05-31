@@ -10,42 +10,44 @@ export default function RichTextEditor() {
     const renderElement = useCallback(props => <Element {...props} />, [])
     const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
-    // ./defaultyEntry.json was taken from using the Slate editor in local storage. Which is why it's a single line json if you look at it.
     const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || require('./DefaultEntry.json'), [])
 
-
-    return (
-        <Slate editor={editor} value={initialValue} onChange={value => onChange(value, editor)}>
-            <Tabs defaultActiveKey="stylings" className="mb-3">
-                <Tab eventKey="stylings" title="Stylings">
-                <Toolbar>
-                    
-                    <MarkButton type="bold" name="Bold" />
-                    <MarkButton type="italic" name="Italic" />
-                    <MarkButton type="underline" name="Underline" />
-                    
-                    <BlockButton type="block-quote" name="Block Quote" />
-                    <BlockButton type="numbered-list" name="Numbered List" />
-                    <BlockButton type="bulleted-list" name="Bulleted List" />
-                    <BlockButton type="image" name="Image" />
-
-                    <MarkButton type="code" name="Code"/>
-                </Toolbar>
-                </Tab>
-                <Tab eventKey="headings" title="Headings">
-                <Toolbar>    
-
-                    <BlockButton type="heading-one" name="Heading 1" />
-                    <BlockButton type="heading-two" name="Heading 2" />
-                    <BlockButton type="heading-three" name="Heading 3" />
-                    <BlockButton type="heading-four" name="Heading 4" />
-                    <BlockButton type="heading-five" name="Heading 5" />
-                </Toolbar>
-                </Tab>
-            </Tabs>
-            <Editable renderElement={renderElement} renderLeaf={renderLeaf} onKeyDown={event => onKeyDown(event, editor)}/>
-        </Slate>
-    )
+    if(initialValue) {
+        return (
+            <Slate editor={editor} value={initialValue} onChange={value => onChange(value, editor)}>
+                <Tabs defaultActiveKey="stylings" className="mb-3">
+                    <Tab eventKey="stylings" title="Stylings">
+                    <Toolbar>
+                        
+                        <MarkButton type="bold" name="Bold" />
+                        <MarkButton type="italic" name="Italic" />
+                        <MarkButton type="underline" name="Underline" />
+                        
+                        <BlockButton type="block-quote" name="Block Quote" />
+                        <BlockButton type="numbered-list" name="Numbered List" />
+                        <BlockButton type="bulleted-list" name="Bulleted List" />
+                        <BlockButton type="image" name="Image" />
+    
+                        <MarkButton type="code" name="Code"/>
+                    </Toolbar>
+                    </Tab>
+                    <Tab eventKey="headings" title="Headings">
+                    <Toolbar>    
+    
+                        <BlockButton type="heading-one" name="Heading 1" />
+                        <BlockButton type="heading-two" name="Heading 2" />
+                        <BlockButton type="heading-three" name="Heading 3" />
+                        <BlockButton type="heading-four" name="Heading 4" />
+                        <BlockButton type="heading-five" name="Heading 5" />
+                    </Toolbar>
+                    </Tab>
+                </Tabs>
+                <Editable renderElement={renderElement} renderLeaf={renderLeaf} onKeyDown={event => onKeyDown(event, editor)}/>
+            </Slate>
+        )
+    }
+    
+    return(<></>)
 }
 
 function onChange(value, editor) {

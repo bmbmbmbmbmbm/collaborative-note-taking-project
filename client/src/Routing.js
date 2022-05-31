@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import React from 'react';
-import {Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container } from 'react-bootstrap';
 
 import SiteAccess from './pages/authentication/SiteAccess'
 import Contribute from './pages/contribute/Contribute'
@@ -12,7 +12,7 @@ import Home from './pages/home/Home'
 import Profile from './pages/profile/Profile'
 import ThreadCreator from './pages/thread-creator/ThreadCreator'
 
-function App() {
+function Routing() {
   return (
     <>
       <Router>
@@ -32,16 +32,6 @@ function App() {
               <Nav.Link href="/contribute">Contribute</Nav.Link>
               <Nav.Link href="/site-access">Login</Nav.Link>
             </Nav>
-            
-            <Form className="d-flex">
-              <Form.Control
-                type="search"
-                placeholder="Search"
-                className="me-2"
-                aria-label="Search"
-              />
-              <Button variant="outline-primary">Search</Button>
-            </Form>
 
           </Container>
         </Navbar>
@@ -69,4 +59,4 @@ function App() {
   );
 }
 
-export default App;
+export default Routing;
