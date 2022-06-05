@@ -21,54 +21,18 @@ export default function Dashboard(props) {
     });
 
     return (
-        <div className='dashboard' >
-            <Row style={{marginBottom: "1%"}}>
-            <h1>Dashboard</h1>
-            </Row>
-            <Row style={{marginBottom: "1%"}}> 
+        <div className='dashboard'>
+            <Row>
                 <Col>
-                    <Card>
-                        <Card.Header>
-                            My Entries
-                        </Card.Header>
-                        <Card.Body>
-                            Some entries
-                        </Card.Body>
-                    </Card>
+                    <h1>User Stuff</h1>
+                </Col>
+                <Col xs={6}>
+                    <h1>Latest Entries and Threads</h1>
                 </Col>
                 <Col>
-                    <Card>
-                        <Card.Header>
-                            Followed Entries
-                        </Card.Header>
-                        <Card.Body>
-                            Some more entries
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-            <Row style={{marginBottom: "1%"}}>
-                <Col>
-                    <Card>
-                        <Card.Header>
-                            Enrolled Units
-                        </Card.Header>
-                        <Card.Body>
-                            <Row xs="auto" md="auto" className="g-2">
-                            {units.map( unit =>
-                            <Col key={unit.id} md="2">
-                                <Card style={{margin: 'auto'}} bg="info">
-                                    <Card.Body>
-                                        {unit.name}
-                                    </Card.Body> 
-                                </Card> 
-                            </Col>
-                                
-                            )}
-                            </Row>
-                            
-                        </Card.Body>
-                    </Card>
+                    <h1>History</h1>
+                    <h1>My Entries</h1>
+                    <h1>Followed Entries</h1>
                 </Col>
             </Row>
         </div>

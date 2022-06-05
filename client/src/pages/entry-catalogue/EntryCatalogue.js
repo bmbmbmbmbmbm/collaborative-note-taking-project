@@ -76,11 +76,11 @@ export default function EntryCatalogue(props) {
     return (
         <div>
             <Row>
-                <Col className="h-100" md="3" style={{backgroundColor: '#DCDCDC', paddingTop: '1%', minHeight: '100vh', height: '100vh'}}>
+                <Col  md="3" style={{backgroundColor: '#DCDCDC', paddingLeft: "1%", minHeight: '100vh', height: '100vh'}}>
                     
-                    <h4>
+                    <h1>
                         Options
-                    </h4>
+                    </h1>
                     <h5>
                         Units
                     </h5>

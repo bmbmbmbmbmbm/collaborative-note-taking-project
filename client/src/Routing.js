@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
+import Footer from './components/Footer';
 
 import SiteAccess from './pages/authentication/SiteAccess'
 import Contribute from './pages/contribute/Contribute'
@@ -18,7 +19,7 @@ function Routing() {
       <Router>
 
         <Navbar bg="dark" variant="dark" expand="lg">
-          <Container>
+          <Container className="navigation">
 
             <Navbar.Brand href="/" style={{fontFamily: 'Times New Roman, Times, serif'}}>
               <img alt="" src="/icon.ico" width="30" height="30" className="d-inline-block align-top"/>
@@ -26,17 +27,16 @@ function Routing() {
             </Navbar.Brand>
 
             <Nav className="me-auto">
-              <Nav.Link href="/dashboard">Dashboard</Nav.Link>
-              <Nav.Link href="/view-entries">Entries</Nav.Link>
-              <Nav.Link href="/my-profile">My Profile</Nav.Link>
-              <Nav.Link href="/contribute">Contribute</Nav.Link>
-              <Nav.Link href="/site-access">Login</Nav.Link>
+              <Nav.Link href="/dashboard">dashboard</Nav.Link>
+              <Nav.Link href="/view-entries">entries</Nav.Link>
+              <Nav.Link href="/my-profile">profile</Nav.Link>
+              <Nav.Link href="/contribute">contribute</Nav.Link>
+              <Nav.Link href="/site-access">login</Nav.Link>
             </Nav>
 
           </Container>
         </Navbar>
 
-        <Container className="h-100" style={{backgroundColor: 'white', minHeight: `100vh`, height: `100vh`}}>
           <Routes>
             
             <Route path="/dashboard" element={<Dashboard/>}/>
@@ -50,10 +50,11 @@ function Routing() {
             <Route path="/site-access" element={<SiteAccess/>}/>
             <Route path="*" element={<ErrorPage/>}/>
           </Routes>
-        </Container>
+
         
 
       </Router>
+      <Footer />
     </>
       
   );

@@ -1,21 +1,37 @@
-/* 
-    To provide a column page look.
-*/
-
-body{
-    margin: 0px;
-    padding: 0px;
-    background-color: #F5F5F5;
+html, body {
+    background-color: whitesmoke;
+    margin: 0;
+    padding: 0;
 }
 
-/* 
-    To make code blocks stand out.
-*/
+footer {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
 
 code {
     color: black;
 }
 
+.dashboard {
+    height: 100vh;
+}
+
 .code {
     background-color:lightgray;
+}
+
+.container {
+    padding-top: 1%;
+    padding-bottom: 1%;
+}
+
+.nav-link {
+    text-transform: capitalize;
+}
+
+.footerTitle {
+    text-align: center;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, FloatingLabel, Button } from 'react-bootstrap';
+import { Form, FloatingLabel, Button, Container } from 'react-bootstrap';
 
 import RichTextEditor from '../../components/rich-text-editor/RichTextEditor';
 
@@ -17,7 +17,7 @@ export default function CreateEntry() {
     }
 
     return (
-        <div className="entryCreator" style={{paddingTop: "1%"}}>
+        <Container style={{backgroundColor: "white"}}>
             <Form onSubmit={handleSubmit}>
                 <FloatingLabel controlId="floatinginput" label="Entry Title" style={{paddingBottom: "1.5%"}}>
                     <Form.Control autoFocus type="text" placeholder="What's the thread about?" onChange={(e) => setTitle(e.target.value)}/>
@@ -28,6 +28,6 @@ export default function CreateEntry() {
                 
                 <Button type="submit">Save</Button>
             </Form>
-        </div>
+        </Container>
     )
 }

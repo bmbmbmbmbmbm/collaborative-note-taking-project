@@ -1,5 +1,5 @@
 import React from 'react';
-import { Carousel, Button } from 'react-bootstrap';
+import { Carousel, Button, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import QNA from '../../components/QNA.js';
 
@@ -37,7 +37,7 @@ export default function Home() {
                     />
                     <Carousel.Caption>
                         <img alt="" src="../icon.ico" width="50" height="50" className="d-inline-block align-top"/>
-                        <h1>Improve your grades today</h1>
+                        <h1>Improve your grades</h1>
                         <p>Share your notes and get feedback from fellow students</p>
                     </Carousel.Caption>
                 </Carousel.Item>
@@ -57,21 +57,38 @@ export default function Home() {
                 </Carousel.Item>
             </Carousel>
 
-            <div className="signUpPrompt" style={{textAlign: "center", marginTop: "2%"}}>
-                <h1>Want to sign up?</h1>
-                <Button size="lg" onClick={sendToRegister}>Click here</Button>
-            </div>
-                
-            <QNA 
-                Question="What is Grady?"
-                Answer="Grady is a free platform for University of Bath students to create and share their notes with other students. Putting your knowledge out there for people to collect and critique allows for your knowledge to improve, and Grady looks to help provide a healthy environment to facilitate this."
-                QLeft={true}
-            />
-            <QNA 
-                Question="How does it work?"
-                Answer="Users can create either notes or posts that other users can look at and discuss. Notes are where you have written about your subject, whether these are lecture notes, revision notes or something else entirely. Posts are more social, where students can talk about anything relating to their studies."
-                QLeft={false}
-            />
+            <Container style={{backgroundColor: "white", paddingTop: "2%", paddingBottom: "2%"}}>
+                <div className="signUpPrompt" style={{textAlign: "center", paddingBottom: "4%"}}>
+                    <h1>Want to sign up?</h1>
+                    <Button size="lg" onClick={sendToRegister}>Click here</Button>
+                </div>
+                <Row>
+                    <Col>
+                        <img 
+                            alt="" 
+                            src="https://i.imgur.com/vHzpNC4.png"
+                            style={{width: "100%", maxHeight: "50vh", objectFit: "cover"}}
+                        />
+                    </Col>
+                    <Col>
+                        <h1>What is Grady?</h1>
+                        <p>Grady is a free platform for University of Bath students to create and share their notes with other students. Putting your knowledge out there for people to collect and critique allows for your knowledge to improve, and Grady looks to help provide a healthy environment to facilitate this.</p>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <h1>How does it work?</h1>
+                        <p>Users can create either notes or posts that other users can look at and discuss. Notes are where you have written about your subject, whether these are lecture notes, revision notes or something else entirely. Posts are more social, where students can talk about anything relating to their studies.</p>
+                    </Col>
+                    <Col>
+                        <img 
+                            alt="" 
+                            src="https://i.imgur.com/tWz5DzN.png"
+                            style={{width: "100%", maxHeight: "50vh", objectFit: "cover"}}
+                        />
+                    </Col>
+                </Row>
+            </Container>
         </div>
     );
 }
