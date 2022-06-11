@@ -74,7 +74,7 @@ export default function EntryCatalogue(props) {
     }
 
     return (
-        <div>
+        <div className='entryCatalogue' style={{paddingRight: "0.606%"}}>
             <Row>
                 <Col  md="3" style={{backgroundColor: '#DCDCDC', paddingLeft: "1%", minHeight: '100vh', height: '100vh'}}>
                     

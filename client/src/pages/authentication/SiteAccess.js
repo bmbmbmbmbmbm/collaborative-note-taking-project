@@ -15,7 +15,7 @@ export default function SiteAccess(props) {
     }
     
     return (
-        <div style={{ paddingTop: `11.1%` }}>
+        <div style={{ padding: "11.1%" }}>
             <Card>
                 <Card.Header>
                     <Nav variant="tabs" defaultActiveKey="#login">

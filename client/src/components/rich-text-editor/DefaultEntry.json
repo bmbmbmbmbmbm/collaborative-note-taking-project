@@ -1,1 +1,195 @@
-[{"children":[{"text":"This is an ","underline":true},{"text":"example","bold":true,"underline":true},{"text":" ","underline":true},{"text":"document","italic":true,"underline":true}],"type":"heading-one"},{"type":"paragraph","children":[{"text":"Just showing off what you can do in this text editor. If you want to quickly delete everything, do ctrl + a and backspace :)"}]},{"type":"heading-two","children":[{"text":"What should I write?"}]},{"type":"paragraph","children":[{"text":"You can write a lot of different stuff here, maybe even..."}]},{"type":"numbered-list","children":[{"type":"list-item","children":[{"text":"Your lecture notes"}]},{"type":"list-item","children":[{"text":"Revision notes"}]},{"type":"list-item","children":[{"text":"Something you find interesting about your subject"}]}]},{"type":"paragraph","children":[{"text":"Just make sure you follow community etiquete regarding entries, in other words be respectful."}]},{"type":"heading-four","children":[{"text":"Keybinds"}]},{"type":"paragraph","children":[{"text":"Something you may find useful when writing are some keybinds for different text stylings."}]},{"type":"bulleted-list","children":[{"type":"list-item","children":[{"text":"Bold","bold":true},{"text":" = ctrl + b"}]},{"type":"list-item","children":[{"text":"Italics","italic":true},{"text":" = ctrl + i"}]},{"type":"list-item","children":[{"text":"Underline","underline":true},{"text":" = ctrl + u"}]},{"type":"list-item","children":[{"text":"Quote = ctrl + q"}]},{"type":"list-item","children":[{"text":"Image = ctrl + p (make sure to have included an image url)"}]},{"type":"list-item","children":[{"text":"Code = ctrl + `"}]},{"type":"list-item","children":[{"text":"Headings 1 to 5 = ctrl + 1 to 5"}]}]},{"type":"paragraph","children":[{"text":"If you want to check these again later, visit the entry help page."}]},{"type":"paragraph","children":[{"text":"This website was developed by someone who has only used windows, so feel free to shoot some advice my way for other platforms. It would be much appreciated :)"}]}]
+[
+  {
+    "type": "heading-one",
+    "children": [
+      {
+        "text": "Entry Creator"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "This is where you can create entries. This text editor should work like any other word processor you use, with some altered functionality. This is done to keep entry formats semi-consistent as it's beneficial for readability and comprehension for all users. Additionally, every entry is given a contents page by default, which is generated from any headings you add to the document. Furthermore, anytime you"
+      },
+      {
+        "text": " ",
+        "italic": true
+      },
+      {
+        "text": "make something a primary heading (heading 1), it will break off into a new page in the public entry."
+      }
+    ]
+  },
+  {
+    "type": "heading-two",
+    "children": [
+      {
+        "text": "Useful Things to Know"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "There are quite few different tools in this editor you can use to help make entries."
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Keybinds"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "There are a number of useful keybinds that you can use to make writing a bit quicker, here is the list..."
+      }
+    ]
+  },
+  {
+    "type": "bulleted-list",
+    "children": [
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "Bold",
+            "bold": true
+          },
+          {
+            "text": ": ctrl + b"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "Italic",
+            "italic": true
+          },
+          {
+            "text": ": ctrl + i"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "Underline",
+            "underline": true
+          },
+          {
+            "text": ": ctrl + u"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "code: ct﻿rl + `",
+            "code": true
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "subscript",
+            "subscript": true
+          },
+          {
+            "text": ": ctrl + ."
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "superscript",
+            "superscript": true
+          },
+          {
+            "text": ": ctrl + ,"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "Headings 1 to 5: ctrl + 1 to 5"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Public and Private Entries"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Not all entries have to be public for everyone to see. When submitting an entry, you can choose to keep it private so it's just for your viewing. You can undo this at any time, so if you want to make an entry private or public again, you may do so."
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Tags"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "These are just keywords for your entry to give users, including yourself, an idea of what to expect in the entry. When submitting an entry you'll be asked to add some tags but you do not have to add any. However, it is recommended."
+      }
+    ]
+  },
+  {
+    "type": "heading-two",
+    "children": [
+      {
+        "text": "What Should I Write?"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Realistically, you should write something to do with the units you are engaging with. This means you could write lecture notes, revision notes, or potentially some coursework although I would recommend using a word processor for that type of work. Entries are meant to be more akin to a wikipedia article than an actual document for submission. In other words, the styling may be inadequate. "
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Additionally, please do not submit entries which are unrelated to a unit. These will be removed if made public, and you will temporarily be unable to contribute to any unit. Otherwise, go wild."
+      }
+    ]
+  }
+]

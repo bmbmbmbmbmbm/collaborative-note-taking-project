@@ -72,13 +72,13 @@ export default function Home() {
                     </Col>
                     <Col>
                         <h1>What is Grady?</h1>
-                        <p>Grady is a free platform for University of Bath students to create and share their notes with other students. Putting your knowledge out there for people to collect and critique allows for your knowledge to improve, and Grady looks to help provide a healthy environment to facilitate this.</p>
+                        <p className="homePara">A free platform for University of Bath students, Grady allows users to create and share their notes with other students both in and out of their course. Sharing notes allows for everyones knowledge to be improved. Others may critique your notes to help you improve them, and likewise they gain knowledge from reading them. Additionally, Grady allows for general student discussion regarding their time at university.</p>
                     </Col>
                 </Row>
                 <Row>
                     <Col>
                         <h1>How does it work?</h1>
-                        <p>Users can create either notes or posts that other users can look at and discuss. Notes are where you have written about your subject, whether these are lecture notes, revision notes or something else entirely. Posts are more social, where students can talk about anything relating to their studies.</p>
+                        <p className="homePara">Users can create either notes or posts that other users can look at and discuss. Notes are where you have written about your subject, whether these are lecture notes, revision notes or something else entirely. Posts are more social, where students can talk about anything relating to their studies.</p>
                     </Col>
                     <Col>
                         <img 

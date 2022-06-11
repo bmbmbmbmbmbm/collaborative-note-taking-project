@@ -35,3 +35,27 @@ code {
 .footerTitle {
     text-align: center;
 }
+
+.homePara {
+    font-size: larger;
+}
+
+.heading-one {
+    text-indent: 0px;
+}
+
+.heading-two {
+    text-indent: 10px;
+}
+
+.heading-three {
+    text-indent: 20px;
+}
+
+.heading-four {
+    text-indent: 30px;
+}
+
+.heading-five {
+    text-indent: 40px;
+}

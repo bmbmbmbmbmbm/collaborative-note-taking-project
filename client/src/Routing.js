@@ -12,6 +12,8 @@ import ErrorPage from './pages/error-page/ErrorPage'
 import Home from './pages/home/Home'
 import Profile from './pages/profile/Profile'
 import ThreadCreator from './pages/thread-creator/ThreadCreator'
+import Entry from './pages/entry-display/Entry'
+import Thread from './pages/thread-display/Thread'
 
 function Routing() {
   return (
@@ -38,7 +40,8 @@ function Routing() {
         </Navbar>
 
           <Routes>
-            
+            <Route path='/default-entry' element={<Entry/>}/>
+            <Route path='/default-thread' element={<Thread isRoot={true} title="title" user="Ted" tags={["tag", "tag2"]} content="text"/>}/>
             <Route path="/dashboard" element={<Dashboard/>}/>
             <Route path="/view-entries" element={<EntryCatalogue/>}/>
             <Route path="/contribute" element={<Contribute/>}/>

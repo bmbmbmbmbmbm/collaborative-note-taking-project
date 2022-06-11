@@ -15,15 +15,21 @@ export default function Footer() {
                         </ul>
                     </Col>
                     <Col>
-                        <h4 className='footerTitle'>About</h4>
+                        <h4 className='footerTitle'>Help</h4>
                         <ul>
+                            <li>
+                                Entries
+                            </li>
+                            <li>
+                                Threads
+                            </li>
                             <li>
                                 Feedback
                             </li>
                         </ul>
                     </Col>
                     <Col>
-                        <h4 className='footerTitle'>About</h4>
+                        <h4 className='footerTitle'>Feedback</h4>
                         <ul>
                             <li>
                                 Feedback

@@ -1,60 +1,165 @@
-import React from 'react';
-import { Tabs, Tab, Badge } from 'react-bootstrap';
-import parse from 'html-react-parser';
-import DOMPurify from 'dompurify';
-import Thread from '../thread-display/Thread.js'
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { Container, ButtonGroup, Button, Tabs, Tab } from 'react-bootstrap';
+import { Slate, Editable, withReact } from 'slate-react';
+import { createEditor } from 'slate';
+import ThreadCreator from '../thread-creator/ThreadCreator.js';
 
-export default function Entry(props) {
+export default function Entry() {
+    const editor = useMemo(() => withReact(createEditor()), [])
+    const [entry, setEntry] = useState([{}]);
 
-    function handleHTML(parseMe) {
-        const santized = DOMPurify.sanitize(parseMe);
-        return (parse(santized));
+    useEffect(() => {
+        fetch("/entry/0").then(
+            response => response.json()
+        ).then(
+            data => {
+                setEntry(data)
+            }
+        )
+    }, [])
+
+    const renderElement = useCallback(props => <Element {...props} />, [])
+    const renderLeaf = useCallback(props => <Leaf {...props} />, [])
+
+    function isHeading(element) {
+        return element.type.includes("heading")
+    }
+
+    function createContents() {
+        const messyContents = entry.filter(isHeading);
+        var refinedContents = [];
+        for(let i = 0; i < messyContents.length; ++i) {
+            for(let j = 0; j < messyContents[i].children.length; ++j){
+                refinedContents[i] += messyContents[i].children[j].text;
+            }
+            refinedContents[i] = refinedContents[i].substring(9);
+        }
+        return refinedContents;
     }
 
     return (
         <div className='entry'>
-            <h1>
-                {props.title}
-                {props.isPrivate && <Badge bg="success" md="auto" style={{marginLeft: "0.5%"}}>Private</Badge>}
-            </h1>
-            <h5>
-                {props.tags.map(tag => 
-                    <Badge bg="light" text="dark" key={tag} md="auto" style={{marginRight: "0.2%"}}>{tag}</Badge>
-                )}
-            </h5>
-            <h5>
-                By Name 
-            </h5>
-            
-            <Tabs defaultActiveKey="entry" className="mb-3">
-
-                <Tab eventKey="entry" title="Entry">
-                    {handleHTML(props.data)}
-                </Tab>
-
-                {props.includesReferences && 
-                    <Tab eventKey="references" title="References">
-                        <p>{props.references}</p>
-                    </Tab>
+            <Container style={{backgroundColor: "white"}}>
+                {(typeof entry[0].type === 'undefined') ? 
+                    (<p>Loading</p>) 
+                : 
+                    <Tabs defaultActiveKey="document" id="default-entry" className="mb-3">
+                        <Tab eventKey="document" title="Entry">
+                            <Slate editor={editor} value={entry}>
+                                <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} placeholder='Some text' />
+                            </Slate>
+                        </Tab>
+                        <Tab eventKey="contents" title="Contents">
+                            <ButtonGroup>
+                                {createContents().map(heading => 
+                                    <Button key={heading}>{heading}</Button>    
+                                )}
+                            </ButtonGroup>
+                        </Tab>
+                        <Tab eventKey="Discussion" title="Discussion">
+                            <ThreadCreator isLoggedIn={true}/>
+                        </Tab>
+                    </Tabs>
                 }
-
-                {!props.isPreview && 
-                    <Tab eventKey="editHistory" title="Edit History">
-
-                    </Tab>
-                }
-                {!props.isPreview &&
-                    <Tab eventKey="discussion" title="Discussion">
-                        <Thread isRoot={true} user="Edit Suggestions" title="" content="What could be improved?" tags={[]}/>
-                        <Thread isRoot={true} user="References" title="" content="Are references missing or needed?" tags={[]}/>
-                        <Thread isRoot={true} user="Praise" title="" content="What's been done well" tags={[]}/>
-                        <Thread isRoot={true} user="General Discussion" title="" content="General thoughts" tags={[]}/>
-                    </Tab>
-                }
-
-            </Tabs>
-            
+                
+            </Container>
         </div>
     );
-    
+}
+
+function Element({attributes, children, element}) {
+    switch(element.type) {
+        case 'block-quote':
+            return (
+                <blockquote {...attributes}>
+                    {children}
+                </blockquote>
+            )
+        case 'bulleted-list':
+            return (
+                <ul  {...attributes}>
+                    {children}
+                </ul>
+            )
+        case 'heading-one':
+            return (
+                <h1  {...attributes}>
+                    {children}
+                </h1>
+            )
+        case 'heading-two':
+            return (
+                <h2  {...attributes}>
+                    {children}
+                </h2>
+            )
+        case 'heading-three':
+            return (
+                <h3 {...attributes}>
+                    {children}
+                </h3>
+            )
+        case 'heading-four':
+            return (
+                <h4 {...attributes}>
+                    {children}
+                </h4>
+            )
+        case 'heading-five':
+            return (
+                <h5>
+                    {children}
+                </h5>
+            )
+        case 'list-item':
+            return (
+                <li  {...attributes}>
+                    {children}
+                </li>
+            )
+        case 'numbered-list':
+            return (
+                <ol  {...attributes}>
+                    {children}
+                </ol>
+            )
+        case 'image':
+            return (
+                <img alt="" src={children} />
+            )
+        default:
+            return (
+                <p  {...attributes}>
+                    {children}
+                </p>
+            )
+    }
+}
+
+function Leaf({attributes, children, leaf}) {
+    if (leaf.bold) {
+        children = <strong>{children}</strong>
+    }
+
+    if (leaf.code) {
+        children = <div className="code"><code>{children}</code></div>
+    }
+
+    if (leaf.italic) {
+        children = <em>{children}</em>
+    }
+
+    if (leaf.underline) {
+        children = <u>{children}</u>
+    }
+
+    if (leaf.subscript) {
+        children = <sub>{children}</sub>
+    }
+
+    if (leaf.superscript) {
+        children = <sup>{children}</sup>
+    }
+
+    return <span {...attributes}>{children}</span>
 }

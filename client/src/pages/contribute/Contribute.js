@@ -21,7 +21,7 @@ export default function SelectEntryType(props) {
     })
 
     return ( 
-        <div className="SelectEntryType" style={{paddingTop: "2%", textAlign: "center",}}>
+        <div className="SelectEntryType" style={{paddingTop: "2%", textAlign: "center", paddingLeft: "0.606%", paddingRight: "0.606%"}}>
             <Row>
                 <h1 style={{paddingBottom: "2%"}}>What do you want to do?</h1>
                 <Col style={{borderRight: "1px solid black"}}>

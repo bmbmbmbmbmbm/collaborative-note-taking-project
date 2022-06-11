@@ -40,8 +40,8 @@ function Thread(props) {
                     <div className="userOptions">
                         {isRoot && 
                             <>
-                                <Card.Link>Pin Thread</Card.Link>
-                                <Card.Link>Report Thread</Card.Link>
+                                <Card.Link>Pin</Card.Link>
+                                <Card.Link>Report</Card.Link>
                             </>
                         }
                         {!isRoot && 

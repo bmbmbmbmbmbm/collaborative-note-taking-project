@@ -17,7 +17,7 @@ export default function CreateEntry() {
     }
 
     return (
-        <Container style={{backgroundColor: "white"}}>
+        <Container style={{backgroundColor: "white", minHeight: '100vh'}}>
             <Form onSubmit={handleSubmit}>
                 <FloatingLabel controlId="floatinginput" label="Entry Title" style={{paddingBottom: "1.5%"}}>
                     <Form.Control autoFocus type="text" placeholder="What's the thread about?" onChange={(e) => setTitle(e.target.value)}/>
