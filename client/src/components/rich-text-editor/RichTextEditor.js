@@ -10,7 +10,7 @@ export default function RichTextEditor() {
     const renderElement = useCallback(props => <Element {...props} />, [])
     const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
-    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || require('./DefaultEntry.json'), [])
+    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')), [])
 
     if(initialValue) {
         return (

@@ -1,6 +1,9 @@
 const express = require('express');
 const app = express();
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
 const registerRouter = require('./routes/authentication/Register');
 app.use("/register", registerRouter);
 

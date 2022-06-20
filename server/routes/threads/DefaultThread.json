@@ -1,0 +1,27 @@
+{
+    "title": "How are you meant to do references?",
+    "content": "I can't find the university referencing guide. Can someone give me the link?",
+    "user": "eu001",
+    "id": "0",
+    "comments": [
+        {
+            "content": "Here's the link, https://library.bath.ac.uk/referencing/harvard-bath",
+            "user": "eu002",
+            "id": "0:0",
+            "comments": [
+                {
+                    "content": "There's also a reference generator you can use to helphttps://www.citethisforme.com/",
+                    "user": "eu003",
+                    "id": "0:0:0",
+                    "comments": []
+                }
+            ]
+        },
+        {
+            "content": "https://library.bath.ac.uk/referencing/harvard-bath",
+            "user": "eu003",
+            "id": "0:1",
+            "comments": []
+        }
+    ]
+}

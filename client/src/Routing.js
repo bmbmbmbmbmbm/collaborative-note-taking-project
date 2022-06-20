@@ -41,7 +41,7 @@ function Routing() {
 
           <Routes>
             <Route path='/default-entry' element={<Entry/>}/>
-            <Route path='/default-thread' element={<Thread isRoot={true} title="title" user="Ted" tags={["tag", "tag2"]} content="text"/>}/>
+            <Route path='/default-thread' element={<Thread isRoot={true}/>}/>
             <Route path="/dashboard" element={<Dashboard/>}/>
             <Route path="/view-entries" element={<EntryCatalogue/>}/>
             <Route path="/contribute" element={<Contribute/>}/>

@@ -25,14 +25,34 @@ export default function Entry() {
         return element.type.includes("heading")
     }
 
+    function headingType(type){
+        switch(type) {
+            case "heading-one":
+                return "1";
+            case "heading-two":
+                return "2";
+            case "heading-three":
+                return "3";
+            case "heading-four":
+                return "4";
+            case "heading-five":
+                return "5";
+            default:
+                return "";
+        }
+    }
+
     function createContents() {
         const messyContents = entry.filter(isHeading);
-        var refinedContents = [];
+        var refinedContents = [""];
         for(let i = 0; i < messyContents.length; ++i) {
-            for(let j = 0; j < messyContents[i].children.length; ++j){
-                refinedContents[i] += messyContents[i].children[j].text;
+            for(let j = 0; j < messyContents[i].children.length; ++j) {
+                refinedContents[i] = refinedContents[i] + messyContents[i].children[j].text;
             }
-            refinedContents[i] = refinedContents[i].substring(9);
+            if(refinedContents[i].includes("undefined")){
+                refinedContents[i] = refinedContents[i].substring(9);
+            }
+            refinedContents[i] = headingType(messyContents[i].type) + refinedContents[i];
         }
         return refinedContents;
     }
@@ -43,7 +63,7 @@ export default function Entry() {
                 {(typeof entry[0].type === 'undefined') ? 
                     (<p>Loading</p>) 
                 : 
-                    <Tabs defaultActiveKey="document" id="default-entry" className="mb-3">
+                    <Tabs defaultActiveKey="document" className="mb-3">
                         <Tab eventKey="document" title="Entry">
                             <Slate editor={editor} value={entry}>
                                 <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} placeholder='Some text' />
@@ -52,7 +72,7 @@ export default function Entry() {
                         <Tab eventKey="contents" title="Contents">
                             <ButtonGroup>
                                 {createContents().map(heading => 
-                                    <Button key={heading}>{heading}</Button>    
+                                    <Button key={heading.substring(1)} className={`head-${heading.charAt(0)}`}>{heading.substring(1)}</Button>    
                                 )}
                             </ButtonGroup>
                         </Tab>

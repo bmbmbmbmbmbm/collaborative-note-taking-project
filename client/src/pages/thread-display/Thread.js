@@ -1,115 +1,107 @@
-import React, { useState } from 'react';
-import { Card, Form, Button, InputGroup, Badge } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Container, Card, Tabs, Tab } from 'react-bootstrap';
+import Reply from './Reply';
 
-function Thread(props) {
-    const isRoot = props.isRoot;
-    const [childThreads, setChildThreads] = useState([]);
-    const [addComment, setAddComment] = useState(false);
-    const [comment, setComment] = useState("");
+export default function Thread(props) {
+    const [threadData, setThreadData] = useState();
+    const [showReply, setShowReply] = useState(false);
 
-    function submitComment(e) {
-        e.preventDefault();
-        
-        let newThread = { content: comment, user: "eu002" };
-        const currentThreads = [...childThreads, newThread];
-        setChildThreads(currentThreads);
-        console.log(currentThreads);
-    }
+    useEffect(() => {
+        if(props.isRoot) {
+            fetch("/threads/0").then(
+                response => response.json()
+            ).then(
+                data => {
+                    setThreadData(data);
+                }
+            )
+        }
+    }, []);
 
     return ( 
-        <div className="thread" style={{paddingTop:'1%'}}>
-            <Card>
-                <Card.Header>
-                    {props.user}
-                </Card.Header>
-                <Card.Body>
-                    <div className="title">  
-                        <h1>{props.title}</h1>
-                    </div>
+        <>
+            {props.isRoot ? 
+                (typeof threadData === 'undefined'?
+                    <Container>
+                        <h1>Loading...</h1>
+                    </Container>
 
-                    <div className="tags">
-                        {props.tags.map(tag => 
-                            <Badge bg="light" text="dark" key={tag} md="auto" style={{marginRight: "0.2%"}}>{tag}</Badge>
-                        )}
-                    </div>
-
-                    <div className="content" style={{marginTop: '0.5%'}}>
-                        <p>{props.content}</p>
-                    </div>
-
-                    <div className="userOptions">
-                        {isRoot && 
-                            <>
-                                <Card.Link>Pin</Card.Link>
-                                <Card.Link>Report</Card.Link>
-                            </>
-                        }
-                        {!isRoot && 
-                            <>
-                                <Card.Link onClick={() => setAddComment(!addComment)}>Add Comment</Card.Link>
-                                <Card.Link>Report Comment</Card.Link>
-                            </>
-                        }
-                    </div>
-
-                    
-                    <div className="threadAddComment">
-                        {isRoot && 
-                            <Card style={{marginTop: "1%"}}>
+                :
+                    <Container>
+                        <div className="thread" style={{paddingTop:'1%'}}>
+                            <Card>
                                 <Card.Body>
-                                    <Form onSubmit={submitComment}>
-                                        <InputGroup>
-                                            <InputGroup.Text>
-                                                Thoughts?
-                                            </InputGroup.Text>
-                                            <Form.Control as="textarea" aria-label="With textarea" onChange={(e) => setComment(e.target.value)}/>
-                                        </InputGroup>
-                                        <Button variant="primary" type="submit" style={{marginTop: "1%"}}>
-                                            Add Comment
-                                        </Button>
-                                    </Form>
+                                    <Card.Title>
+                                        {threadData.title}
+                                    </Card.Title>
+                                    <Card.Subtitle>
+                                        {threadData.user}
+                                    </Card.Subtitle>
+                                    <Card.Text>
+                                        {threadData.content}
+                                    </Card.Text>
+                                    <Card.Link>Pin</Card.Link>
+                                    <Card.Link>Report</Card.Link>
                                 </Card.Body>
                             </Card>
-                        }
-                        {(!isRoot && addComment) &&
-                            <Card style={{marginTop: "1%"}}>
+                            
+                            <Reply 
+                                comments={threadData.comments}
+                                parentId={threadData.id}    
+                            />
+
+                            {threadData.comments.map(comment => 
+                                <Thread
+                                    key={comment.user + comment.content}
+                                    isRoot={false}
+                                    comment={comment}
+                                />    
+                            )}
+                            
+                        </div>
+                    </Container>
+                )
+            : 
+                <div className="comment" style={{paddingTop: "1%"}}>
+                    <Card bg={((props.comment.id.replace(/[^:]/g, "").length) % 2 === 0) ? "light" : ""}>
+                        <Tabs defaultActiveKey="show">
+                            <Tab eventKey="show" title="Show">
                                 <Card.Body>
-                                    <Form onSubmit={submitComment}>
-                                        <InputGroup>
-                                            <InputGroup.Text>
-                                                Thoughts?
-                                            </InputGroup.Text>
-                                            <Form.Control as="textarea" aria-label="With textarea" onChange={(e) => setComment(e.target.value)}/>
-                                        </InputGroup>
-                                        <Button variant="primary" type="submit" style={{marginTop: "1%"}}>
-                                            Add Comment
-                                        </Button>
-                                    </Form>
+                                    <Card.Subtitle>
+                                        {props.comment.user}
+                                    </Card.Subtitle>
+                                    <Card.Text>
+                                        {props.comment.content}
+                                    </Card.Text>
+                                    <Card.Link onClick={() => setShowReply(!showReply)}>Reply</Card.Link>
+                                    <Card.Link>Report</Card.Link>
+                                    {showReply && 
+                                        <Reply 
+                                            comments={props.comment.comments} 
+                                            parentId={props.comment.id}
+                                        />
+                                    }
+                                    {props.comment.comments.map(comment => 
+                                        <Thread
+                                            key={comment.content + comment.user}
+                                            isRoot={false}
+                                            comment={comment}
+                                        />      
+                                    )}
                                 </Card.Body>
-                            </Card>
-                        }
-
-                    </div>
-
-                    <div className="threadComments">
-
-                        {childThreads.map( childThread => 
-                            <Thread 
-                                key={childThread.content + childThread.user}
-                                isRoot={false} 
-                                title={""} 
-                                content={childThread.content} 
-                                user={childThread.user}
-                                tags={[]}
-                            />)
-                        }
-
-                    </div>
-
-                </Card.Body>
-            </Card>
-        </div>
+                            </Tab>
+                            <Tab eventKey="hide" title="Hide">
+                                <Card.Body>
+                                    <Card.Text>
+                                        Hidden comment by {props.comment.user}
+                                    </Card.Text>
+                                </Card.Body>
+                            </Tab>
+                        </Tabs>              
+                    </Card>
+                </div>
+            }
+        </>
      );
 }
 
-export default Thread;
