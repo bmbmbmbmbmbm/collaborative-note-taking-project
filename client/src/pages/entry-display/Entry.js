@@ -9,7 +9,7 @@ export default function Entry() {
     const [entry, setEntry] = useState([{}]);
 
     useEffect(() => {
-        fetch("/entry/0").then(
+        fetch("/entry/view/1").then(
             response => response.json()
         ).then(
             data => {

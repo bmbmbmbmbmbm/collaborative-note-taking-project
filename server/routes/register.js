@@ -1,22 +1,18 @@
 const express = require('express');
+const bcrypt = require('bcrypt')
 const db = require('../database');
 
 const router = express.Router();
 
 router.post('/', async function(req, res) {
-    const { email, password } = req.body;
+    const { email, password, subject } = req.body;
     if(email && password) {
-        console.log(email);
-        if(email.substring(email.indexOf('@')) === "@bath.ac.uk") {
-            try{
-                await db.promise().query(`INSERT INTO USERS VALUES('${username}', '${password}', FALSE, FALSE)`);
-                res.status(201).json({ msg: 'Created user'});
-            } catch(err) {
-                console.log(err);
-                res.status(404);
-            }
+        if(email.substring(email.indexOf('@')) === "@bath.ac.uk" && password.length > 6) {
+            const subId = await db.promise().query(`SELECT subject_id FROM subject WHERE subject=${subject};`)
+            await db.promise().query(`INSERT INTO users(username, email, password, moderator, admin, subject_id) VALUES('${email.substring(0, email.indexOf('@'))}', '${email}', '${password}', FALSE, FALSE, ${subId})`)
+            res.status(200).send({"message": "created account"});
         } else {
-            res.status(400).send("Invalid email");
+            res.status(400).send("Invalid credentials");
         }
     } else {
         res.status(400).send("Invalid");

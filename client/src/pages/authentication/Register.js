@@ -43,7 +43,7 @@ export default function Register () {
         setValidated(true);
 
         const token = { email: email, password: password }
-        const response = await fetch('http://localhost:5000/register/', 
+        await fetch('http://localhost:5000/register/', 
             {
                 method: "POST",
                 headers: {
@@ -51,7 +51,6 @@ export default function Register () {
                 },
                 body: JSON.stringify(token)
             });
-        console.log(response);
     }
 
     function onClick() {

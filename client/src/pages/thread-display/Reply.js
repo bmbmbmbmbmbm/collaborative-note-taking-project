@@ -7,10 +7,21 @@ function Reply(props) {
     function addReply(event) {
         event.preventDefault();
         let temp = {
-            "content": reply,
-            "user": "eu004",
-            "id": props.id + ":" + props.comments.length.toString(16)
+            "comment": reply,
+            "username": "eu004",
+            "parentId": props.id.substring(0, props.id.indexOf(':'))
         }
+
+        console.log(props.id.substring(0, props.id.indexOf(':')))
+
+        fetch(`/threads/update/${props.id.substring(0, props.id.indexOf(':'))}`, {
+            method: "POST",
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: temp
+        })
+        
     }
 
     return ( 

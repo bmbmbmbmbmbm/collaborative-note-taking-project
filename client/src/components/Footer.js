@@ -7,10 +7,13 @@ export default function Footer() {
             <Container>
                 <Row>
                     <Col>
-                        <h4 className='footerTitle'>About</h4>
+                        <h4 className='footerTitle'>Grady</h4>
                         <ul>
                             <li>
-                                Feedback
+                                Questions
+                            </li>
+                            <li>
+                                Help
                             </li>
                         </ul>
                     </Col>
@@ -24,7 +27,7 @@ export default function Footer() {
                                 Threads
                             </li>
                             <li>
-                                Feedback
+                                Account
                             </li>
                         </ul>
                     </Col>
