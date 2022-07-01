@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, FloatingLabel, Row, Col } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 
-export default function Login (props) {
+export default function Login () {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [result, setResult] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if(result){ 
+            navigate('/dashboard');
+        }
+    }, []);
 
     function validateForm() {
         
@@ -21,13 +28,11 @@ export default function Login (props) {
 
     function handleSubmit(event) {
         event.preventDefault();
-        /*
-        Queries db for username and password
-        Shows if successful
-        Reacts appropriately
-        */
-        props.onSuccess();
-        navigate("/dashboard");
+        fetch("localhost:5000/login").then(
+            res => res.json()
+        ).then(
+            data => setResult(data.result)
+        )
     }
 
 

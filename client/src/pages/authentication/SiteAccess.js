@@ -28,8 +28,8 @@ export default function SiteAccess(props) {
                     </Nav>
                 </Card.Header>
                 <Card.Body>
-                    {isLoggingIn && ( <Login onSuccess={props.onSuccess}/> )}
-                    {!isLoggingIn && ( <Register onSuccess={props.onSuccess}/> )}
+                    {isLoggingIn && ( <Login/> )}
+                    {!isLoggingIn && ( <Register/> )}
                 </Card.Body>
                 
             </Card>
