@@ -1,49 +1,67 @@
-import React, { useEffect, useState } from 'react';
-import { Form, FloatingLabel, Spinner } from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
+import React, { useEffect, useState } from "react";
+import { Form, FloatingLabel, Spinner, InputGroup } from "react-bootstrap";
+import Button from "react-bootstrap/Button";
 
-export default function Register () {
-
-    const [validated, setValidated] = useState(false);
+export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [subjects, setSubjects] = useState([{}]);
+    const [chosenSubject, setChosen] = useState(0);
 
-    useEffect(function() {
-        fetch('http://localhost:5000/subject').then(
-            response => response.json()
-        ).then(
-            data => setSubjects(data)
-        );
-    }, [])
+    const [validated, setValidated] = useState(false);
 
-    function validateForm() {
-        
-        if(email.length > 0 && password === confirm) {
-            const domainName = email.substring(email.indexOf('@'));
-            console.log(domainName);
-            return domainName === "@bath.ac.uk" && password.length > 0;
+    useEffect(() => {
+        fetch("/subject")
+            .then((response) => response.json())
+            .then((data) => {
+                setSubjects(data);
+            });
+    }, []);
+
+    function validatePasswords() {
+        const regular = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;
+        if (password === confirm && regular.test(password)) {
+            console.log("password", true);
+            return true;
         }
-        return email.length > 0 && password.length > 0;
+        return false;
     }
 
-    function match() {
-        if(confirm.length === 0 || confirm === password) return true;
+    function validateEmail() {
+        // Don't know the max length of a username, but assumed it would not be greater than 8 characters in length based on my own.
+        if (email.length > 11 && email.length < 19) {
+            const domainName = email.substring(email.indexOf("@"));
+            console.log(domainName, domainName === "@bath.ac.uk");
+            return domainName === "@bath.ac.uk";
+        }
         return false;
+    }
+
+    function validateSubject() {
+        console.log("subject", chosenSubject !== 0);
+        return chosenSubject !== 0;
+    }
+
+    function validateForm() {
+        // Are all their credentials valid?
+        return validateEmail() && validatePasswords() && validateSubject();
     }
 
     async function handleSubmit(event) {
         const form = event.currentTarget;
-        if(form.checkValidity() === false) {
+        if (form.checkValidity() === false) {
             event.preventDefault();
-            event.stopPropogation();
+            event.stopPropagation();
         }
 
-        setValidated(true);
-
-        const token = { email: email, password: password }
-        await fetch('http://localhost:5000/register/', 
+        if(!validateForm()) {
+            setValidated(false);
+            return;
+        }
+  
+        const token = { email: email, password: password, subject_id: chosenSubject }
+        await fetch('/register/', 
             {
                 method: "POST",
                 headers: {
@@ -51,45 +69,86 @@ export default function Register () {
                 },
                 body: JSON.stringify(token)
             });
-    }
 
-    function onClick() {
-        console.log(subjects);
+        setValidated(true);
     }
 
     return (
-        <div onClick={onClick}>
-            {(subjects[0].type === 'undefined') ? 
-                <Spinner animation="border" role="status">
+        <>
+            {/*  
+            The statement below is querying if the subjects users can choose from has been loaded from the backend yet. If they haven't been, then they should have
+            undefined types, in this case a spinner is displayed to show it's being loaded.
+            */}
+            {typeof subjects[0].subject_title === "undefined" ? (
+                <Spinner animation="border" role="status" style={{ align: "center" }}>
                     <span className="visually-hidden">Loading...</span>
                 </Spinner>
-            : 
+            ) : (
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3" controlId="formBasicEmail" >
+                    <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Email address</Form.Label>
-                        <FloatingLabel controlId="floatingInput" label="Enter your university email">
-                            <Form.Control required autoFocus type="email" placeholder="Enter university email" onChange={(e) => setEmail(e.target.value)}/>
+                        <FloatingLabel
+                            controlId="floatingInput"
+                            label="Enter your university email address"
+                        >
+                            <Form.Control
+                                type="email"
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
                         </FloatingLabel>
+                        <Form.Control.Feedback type="invalid">
+                            Please enter a valid email
+                        </Form.Control.Feedback>
                     </Form.Group>
-                    <Form.Group className="mb-3" controldId="formBasicPassword">
+                    <Form.Group className="mb-3" controlId="formBasicPassword1">
                         <Form.Label>Password</Form.Label>
-                        <FloatingLabel controlId="floatingInput" label="Enter a password">
-                            <Form.Control required type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)}/>
+                        <FloatingLabel controlId="floatingInput" label="Choose a password">
+                            <Form.Control
+                                type="password"
+                                placeholder="password"
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
                         </FloatingLabel>
-                        
+                        <Form.Control.Feedback type="invalid">
+                            Please enter a valid password
+                        </Form.Control.Feedback>
                     </Form.Group>
-                    <Form.Group className="mb-3" controldId="formBasicPassword">
+                    <Form.Group className="mb-3" controlId="formBasicPassword2">
                         <Form.Label>Confirm password</Form.Label>
-                        <FloatingLabel controlId="floatingInput" label="Confirm that password">
-                            <Form.Control required type="password" placeholder="Confirm password" onChange={(e) => setConfirm(e.target.value)}/>
+                        <FloatingLabel controlId="floatingInput" label="Choose a password">
+                            <Form.Control
+                                type="password"
+                                placeholder="password"
+                                onChange={(e) => setConfirm(e.target.value)}
+                                required
+                            />
                         </FloatingLabel>
-                        
+                        <Form.Control.Feedback type="invalid">
+                            Please enter a valid password
+                        </Form.Control.Feedback>
                     </Form.Group>
-                    <Button variant="primary" type="submit" disabled={!validateForm()}>
-                        Register
-                    </Button>
+
+                    <Form.Group className="mb-3" controlId="formSubject">
+                        <Form.Label>What subject do you take?</Form.Label>
+                        <FloatingLabel controlId="floatingInput" label="Choose a password">
+                            <Form.Select onChange={(e) => setChosen(e.target.value)} required>
+                                {subjects.map((subject) => (
+                                    <option key={subject.subject_id} value={subject.subject_id}>
+                                        {subject.subject_title}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </FloatingLabel>
+                        <Form.Control.Feedback type="invalid">
+                            Please enter a valid password
+                        </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Button type="submit">Submit form</Button>
                 </Form>
-            }
-        </div>
+            )}
+        </>
     );
 }

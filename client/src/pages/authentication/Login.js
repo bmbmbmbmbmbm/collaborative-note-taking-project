@@ -7,32 +7,41 @@ export default function Login () {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [result, setResult] = useState(false);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if(result){ 
-            navigate('/dashboard');
-        }
-    }, []);
 
     function validateForm() {
         
         if(email.length > 0) {
             const domainName = email.substring(email.indexOf('@'));
-            console.log(domainName);
             return domainName === "@bath.ac.uk" && password.length > 6;
         }
         return email.length > 0 && password.length > 6;
     }
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
-        fetch("localhost:5000/login").then(
+
+        let token = { 
+            email: email,
+            password: password
+        };
+
+        var result;
+
+        await fetch("/login/", {
+            method: "POST",
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(token)
+        }).then(
             res => res.json()
         ).then(
-            data => setResult(data.result)
+            data => result = data
         )
+        if(result) {
+            navigate("/dashboard");
+        }
     }
 
 

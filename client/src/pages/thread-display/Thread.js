@@ -8,7 +8,7 @@ export default function Thread(props) {
 
     useEffect(() => {
         if(props.isRoot) {
-            fetch("/threads/1").then(
+            fetch("/threads/view/1").then(
                 response => response.json()
             ).then(
                 data => {

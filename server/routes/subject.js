@@ -12,7 +12,7 @@ router.get('/:id', async function(req, res) {
              INNER JOIN subject ON subject_unit.subject_id=subject.subject_id 
              WHERE subject.subject_title='${subject}';`
              );
-        res.status(201).send(results[0]);
+        res.status(201).json(results[0]);
     } catch(err) {
         console.log(err);
         res.status(404);
@@ -22,8 +22,7 @@ router.get('/:id', async function(req, res) {
 router.get('/', async function(req, res) {
     try{
         const results = await db.promise().query(`SELECT * FROM subject`);
-        console.log(results[0]);
-        res.status(201).send(results[0]);
+        res.status(201).json(results[0]);
     } catch(err) {
         console.log(err);
         res.status(404);

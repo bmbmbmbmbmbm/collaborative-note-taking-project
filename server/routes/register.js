@@ -5,18 +5,33 @@ const db = require('../database');
 const router = express.Router();
 
 router.post('/', async function(req, res) {
-    const { email, password, subject } = req.body;
-    if(email && password) {
-        if(email.substring(email.indexOf('@')) === "@bath.ac.uk" && password.length > 6) {
-            const subId = await db.promise().query(`SELECT subject_id FROM subject WHERE subject=${subject};`)
-            await db.promise().query(`INSERT INTO users(username, email, password, moderator, admin, subject_id) VALUES('${email.substring(0, email.indexOf('@'))}', '${email}', '${password}', FALSE, FALSE, ${subId})`)
-            res.status(200).send({"message": "created account"});
+    try{ 
+        const { email, password, subject_id } = req.body;
+        await db.promise().query(`SELECT subject_id FROM subject WHERE subject_id=${subject_id}`)
+
+        if(email && password && subject_id > 0) {
+            if(email.substring(email.indexOf('@')) === "@bath.ac.uk" && password.length > 6) {
+                bcrypt.hash(password, 10, async function(err, hash) {
+                    if(err) {
+                        console.log(err)
+                        res.status(404);
+                    } else {
+                        await db.promise().query(`INSERT INTO users(username, email, password, moderator, admin, subject_id) VALUES('${email.substring(0, email.indexOf('@'))}', '${email}', '${hash}', FALSE, FALSE, ${subject_id})`)
+                        res.status(200).json({ message: "created account" });
+                    }
+                })
+                
+            } else {
+                res.status(400).json({ message: "Invalid credentials"});
+            }
         } else {
-            res.status(400).send("Invalid credentials");
+            res.status(400).json({ message: "Invalid credentials"});
         }
-    } else {
-        res.status(400).send("Invalid");
+    } catch(err) {
+        console.log(err);
+        res.status(404).json({ message: "server error"});
     }
+    
 })
 
 router.get('/', async function(req, res) {
