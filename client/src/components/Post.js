@@ -5,7 +5,7 @@ import { Badge, Card } from 'react-bootstrap';
 export default function Post(props) {
   const isEntry = props.isEntry;
   return (
-    <div className="post" style={{ paddingTop: '1%' }} onClick={() => props.onClick(props.Path)}>
+    <div className="post" style={{ paddingTop: '1%' }}>
       <Card border="success" >
 
           
@@ -25,11 +25,6 @@ export default function Post(props) {
             by {props.User}
           </Card.Subtitle>
         </Card.Body>
-        <Card.Footer>
-          {props.Tags.map(tag => 
-              <Badge key={tag} bg="info" style={{marginRight: '0.5%'}}>{tag}</Badge>
-          )}
-        </Card.Footer>
       </Card>
     </div>
   );

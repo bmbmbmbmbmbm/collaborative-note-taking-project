@@ -10,10 +10,7 @@ export default function CreateEntry() {
         event.preventDefault();
 
         const content = JSON.parse(localStorage.getItem('content'));
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/entry-creator/user-entry", false);
-        xhr.setRequestHeader('Content-Type', 'application/json')
-        xhr.send(JSON.stringify(content));
+        
     }
 
     return (

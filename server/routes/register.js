@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/', async function(req, res) {
     try{ 
         const { email, password, subject_id } = req.body;
-        await db.promise().query(`SELECT subject_id FROM subject WHERE subject_id=${subject_id}`)
+        await db.promise().query(`SELECT id FROM subjects WHERE id=${subject_id}`)
 
         if(email && password && subject_id > 0) {
             if(email.substring(email.indexOf('@')) === "@bath.ac.uk" && password.length > 6) {

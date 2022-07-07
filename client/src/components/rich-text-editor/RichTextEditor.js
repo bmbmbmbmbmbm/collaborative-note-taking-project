@@ -10,7 +10,10 @@ export default function RichTextEditor() {
     const renderElement = useCallback(props => <Element {...props} />, [])
     const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
-    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')), [])
+    const initialValue = useMemo(() => [{
+        type: "paragraph",
+        children: [{ text: "A line of text in a paragraph"}]
+    }], [])
 
     if(initialValue) {
         return (

@@ -14,8 +14,10 @@ import Profile from './pages/profile/Profile'
 import ThreadCreator from './pages/thread-creator/ThreadCreator'
 import Entry from './pages/entry-display/Entry'
 import Thread from './pages/thread-display/Thread'
+import Units from './pages/unit-selection/Units'
 
 function Routing() {
+  const AuthContext = React.createContext(null);
   return (
     <>
       <Router>
@@ -48,7 +50,7 @@ function Routing() {
             <Route path="/thread-creator" element={<ThreadCreator/>}/>
             <Route path="/my-profile" element={<Profile/>}/>
             <Route path="/entry-creator" element={<EntryCreator/>}/>
-
+            <Route path="/unit-selection" element={<Units/>}/>
             <Route path='/' element={<Home/>}/>
             <Route path="/site-access" element={<SiteAccess/>}/>
             <Route path="*" element={<ErrorPage/>}/>
