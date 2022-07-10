@@ -1,89 +1,159 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Row, Col, Button, Spinner } from 'react-bootstrap';
-import Post from '../../components/Post';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+    Container,
+    Row,
+    Col,
+    DropdownButton,
+    Dropdown,
+    Form,
+    FloatingLabel,
+    Tabs,
+    Tab,
+} from "react-bootstrap";
+import Prompt from "../../components/Prompt";
 
 export default function Dashboard(props) {
-    const [units, setUnits] = useState([{}]);
-    const [posts, setPosts] = useState([{}]);
-    const navigate = useNavigate();
+    const [search, setSearch] = useState("");
+
+    const [units, setUnits] = useState([]);
+    const [entries, setEntries] = useState([]);
+    const [threads, setThreads] = useState([]);
+    const [pinnedEntries, setPinnedEntries] = useState([]);
+    const [pinnedThreads, setPinnedThreads] = useState([]);
+
+    const [chooseSort, setChooseSort] = useState(0);
+    const sortBy = ["Recent", "Newest", "Oldest"];
+
+    const user = "bm639";
 
     useEffect(() => {
-        fetch('/entry/view-all', {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ username: "bm639" })
-        }).then(
-            response => response.json()
-        ).then(
-            data => {
-                setPosts(data);
-                console.log(data);
-            }
-        )
+        fetch(`/entry/view-all/${user}`)
+            .then((response) => {
+                if (response.status === 200) {
+                    setEntries(response.json())
+                } else {
+                    console.log(response.json())
+                }
+            });
 
-        const username = "bm639";
-
-        fetch('/subject/user/bm639').then(
-            response => response.json()
-        ).then(
-            data => {
-                setUnits(data);
-                console.log(data);
-            }
-        )
-
-
+        fetch(`/threads/view-all/${user}`)
+            .then((response) => {
+                if (response.status === 200) {
+                    setThreads(response.json())
+                } else {
+                    console.log(response.json())
+                }
+            });
     }, []);
 
     return (
-        <div className='dashboard'>
-            {(typeof posts[0].created === 'undefined') ?
-                <Spinner animation="border" role="status" style={{ align: "center" }}>
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-                :
-                <Row>
-                    <Col style={{ backgroundColor: '#DCDCDC', paddingLeft: "1%", minHeight: '100vh', height: '100vh' }}>
+        <div className="dashboard">
+            <div clasName="searchAndFilter" style={{ backgroundColor: "white" }}>
+                <Container >
+                    <Row>
+                        <Col xs={1}>
+                            <h4 style={{ marginTop: "auto", marginBottom: "auto" }}>
+                                {sortBy[chooseSort]}
+                            </h4>
+                        </Col>
+                        <Col xs={10}>
+                            <Form>
+                                <Form.Group>
+                                    <Form.Control
+                                        type="search"
+                                        placeholder="Search"
+                                        className="me-2"
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </Form.Group>
+                            </Form>
+                        </Col>
+                        <Col xs={1}>
+                            <DropdownButton title="Sort By" style={{float: "right"}}>
+                                {sortBy.map(option =>
+                                    <Dropdown.Item>{option}</Dropdown.Item>
+                                )}
+                            </DropdownButton>
+                        </Col>
+                    </Row>
+                </Container>
+            </div>
 
-                        <div className="d-grid gap-2">
-                            <h1>Filter</h1>
-                            <Button variant="primary" size="lg">
-                                My Entries
-                            </Button>
-                            <Button variant="secondary" size="lg">
-                                My Threads
-                            </Button>
-                            <h1>Current Units</h1>
-                            {units.map(unit =>
-                                <Button variant="secondary" size="lg" key={unit.code}>
-                                    {unit.title}
-                                </Button>
-                            )}
-                        </div>
-                    </Col>
-                    <Col xs={6}>
-                        <h1>My Entries and Threads</h1>
-                        {posts.map(post =>
-                            <Post
-                                key={post.id}
-                                isEntry={true}
-                                User={"Dave"}
-                                Unit={post.unit_code}
-                                Title={post.title}
+
+            <Tabs defaultActiveKey="My Entries" className="mb-3" style={{ backgroundColor: "white", justifyContent: "center" }}>
+                <Tab eventKey="My Entries" title="My Entries">
+                    <Container>
+                        {entries.length > 0 ? (
+                            <div>Stuff</div>
+                        ) : (
+                            <Prompt
+                                title="Create an entry"
+                                img="https://i.imgur.com/vHzpNC4.png"
+                                desc="You can make and share your notes with others, or keep them private if you so choose. You have the option to change this later. So, you do you."
+                                link="/entry-creator"
                             />
                         )}
-                    </Col>
-                    <Col style={{ backgroundColor: '#DCDCDC' }}>
-                        <h1>Followed Entries</h1>
-                        <h1>History</h1>
-                    </Col>
-                </Row>
-            }
+                    </Container>
 
+                </Tab>
+                <Tab eventKey="My Threads" title="My Threads">
+                    <Container>
+                        {threads.length > 0 ? (
+                            <div>Stuff</div>
+                        ) : (
+                            <Prompt
+                                title="Create a thread"
+                                img="https://i.imgur.com/tWz5DzN.png"
+                                desc="These are public for either users in your enrolled units, or can be seen by everyone if you want. Ask a question, start a discussion, or just have chat."
+                                link="/thread-creator"
+                            />
+                        )}
+                    </Container>
+
+                </Tab>
+                <Tab eventKey="My Units" title="My Units">
+                    <Container>
+                        {units.length > 0 ? (
+                            <div>Stuff</div>
+                        ) : (
+                            <div className="noPosts" style={{ textAlign: "center" }}>
+                                <h4>There's nothing here...</h4>
+                                <Link to="/enrolment">Why not enrol in some units?</Link>
+                            </div>
+                        )}
+                    </Container>
+
+                </Tab>
+                <Tab eventKey="Pinned Entries" title="Pinned Entries">
+                    <Container>
+                        {pinnedEntries.length > 0 ? (
+                            <div>Stuff</div>
+                        ) : (
+                            <div className="noPosts" style={{ textAlign: "center" }}>
+                                <h4>There's nothing here...</h4>
+                                <Link to="/entry-creator">Why not make an entry?</Link>
+                                <Link to="/entry-creator">or a thread?</Link>
+                            </div>
+                        )}
+                    </Container>
+
+                </Tab>
+                <Tab eventKey="Pinned Threads" title="Pinned Threads">
+                    <Container>
+                        {pinnedThreads.length > 0 ? (
+                            <div>Stuff</div>
+                        ) : (
+                            <div className="noPosts" style={{ textAlign: "center" }}>
+                                <h4>There's nothing here...</h4>
+                                <Link to="/entry-creator">Why not make an entry?</Link>
+                                <Link to="/entry-creator">or a thread?</Link>
+                            </div>
+                        )}
+                    </Container>
+
+                </Tab>
+            </Tabs>
         </div>
     );
-
 }
