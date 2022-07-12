@@ -1,82 +1,116 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Row, Col, Card } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import Post from '../../components/Post.js';
 
-export default function Profile(props) {
-    const navigate = useNavigate();
-    
+export default function Profile() {
+    const params = useParams();
+    const [subject, setSubject] = useState();
+    const [publicEntries, setPublicEntries] = useState();
+    const [threads, setThreads] = useState();
+    const [units, setUnits] = useState()
+
     useEffect(() => {
-        if(props.isLoggedIn === false) {
-            navigate("/site-access")
-        }
-    });
-    
+        fetch(`/subject/user/${params.username}`)
+            .then(
+                response => response.json()
+            ).then(
+                data => setSubject(data)
+            );
+
+        fetch(`/subject/units/user/${params.username}`)
+            .then(
+                response => response.json()
+            ).then(
+                data => setUnits(data)
+            );
+
+        fetch(`/entry/public/${params.username}`)
+            .then(
+                response => response.json()
+            ).then(
+                data => setPublicEntries(data)
+            );
+
+        fetch(`/threads/view-all/${params.username}`)
+            .then(
+                response => response.json()
+            ).then(
+                data => setThreads(data)
+            )
+    }, [])
+
+    const navigate = useNavigate();
+
+
+
     return (
-        <div>
-            <Row style={{ paddingTop: '1%'}}>
-                <h1>eu001's Profile Page</h1>
-            </Row>
-            <Row style={{ marginTop: '1%', marginBottom: '1%' }}>
-                <Col>
-                    <Card>
-                        <Card.Header>
-                            <h2>Subjects</h2>
-                        </Card.Header>   
-                        <Card.Body>
-                            Their subjects.
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-            <Row style={{ marginTop: '1%', marginBottom: '1%' }}>
-                <Col>
-                    <Card>
-                        <Card.Header>
-                            <h2>Post Score</h2>
-                        </Card.Header>
-                        <Card.Body>
-                            How well received their posts are.
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-            <Row style={{ marginTop: '1%', marginBottom: '1%' }}>
-                <Col>
-                    <Card>
-                        <Card.Header>
-                            <h2>Public Entries</h2>
-                        </Card.Header>   
-                        <Card.Body>
-                            <Post isEntry={true} User="eu001" Title="Arm Processors" Content="Some content" Tags={["Arm Processors", "CPU", "RISK Processors"]}/>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col>
-                    <Card>
-                        <Card.Header>
-                            <h2>Threads</h2>
-                        </Card.Header>
-                        <Card.Body>
-                            <Post isEntry={false} User="eu002" Title="How do I reference stuff?" Content="Does anyone know how you're meant to reference papers?" Tags={["Referencing", "Library"]}/>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-            <Row style={{ marginTop: '1%', paddingBottom: '1%' }}>
-                <Col>
-                    <Card>
-                        <Card.Header>
-                            <h2>History</h2>
-                        </Card.Header>   
-                        <Card.Body>
-                            <Post isEntry={false} User="eu002" Title="How do I reference stuff?" Content="Does anyone know how you're meant to reference papers?" Tags={["Referencing", "Library"]}/>
-                            <Post isEntry={true} User="eu001" Title="Arm Processors" Content="Some content" Tags={["Arm Processors", "CPU", "RISK Processors"]}/>   
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
+        <div className="Profile">
+            <div className="user" style={{ backgroundColor: "white" }}>
+                <Container>
+                    {(subject === undefined) ?
+                        <Spinner animation="border" role="status" style={{ align: "center" }}>
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner>
+                        :
+                        <div>
+                            <h1>{params.username}</h1>
+                            <h4>{subject.title}</h4>
+                        </div>
+                    }
+                </Container>
+            </div>
+            <div className="information">
+                <Container>
+                    <Row>
+                        {(units === undefined) ?
+                            <Spinner animation="border" role="status" style={{ align: "center" }}>
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                            :
+                            <div className="units">
+                                <h3 style={{ borderBottom: "1px solid grey", marginBottom: "1%" }}>Units</h3>
+                                <ul>
+                                    {units.map(unit =>
+                                        <li key={unit.code}><Link to={`/unit/${unit.code}`}>{unit.code} - {unit.title}</Link></li>
+                                    )}
+                                </ul>
+                            </div>
+
+                        }
+
+                    </Row>
+                    <Row>
+                        <Col>
+
+                            {(publicEntries === undefined) ?
+                                <Spinner animation="border" role="status" style={{ align: "center" }}>
+                                    <span className="visually-hidden">Loading...</span>
+                                </Spinner>
+                                :
+                                <div className='userEntries'>
+                                    <h3 style={{ borderBottom: "1px solid grey", marginBottom: "1%" }}>Entries</h3>
+                                    
+                                </div>
+                            }
+
+                        </Col>
+                        <Col>
+                            {(threads === undefined) ?
+                                <Spinner animation="border" role="status" style={{ align: "center" }}>
+                                    <span className="visually-hidden">Loading...</span>
+                                </Spinner>
+                                :
+                                <div className='userThreads'>
+                                    <h3 style={{ borderBottom: "1px solid grey", marginBottom: "1%" }}>Threads</h3>
+                                </div>
+                            }
+
+                        </Col>
+                    </Row>
+                </Container>
+            </div>
         </div>
     );
-    
+
 }

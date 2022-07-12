@@ -150,6 +150,7 @@ export default function EntryCatalogue(props) {
                             Content={post.contentPreview}
                             Tags={post.tags}
                             Path={post.path}
+                            needsBadge={true}
                             onClick={redirect}
                         />
                     )}

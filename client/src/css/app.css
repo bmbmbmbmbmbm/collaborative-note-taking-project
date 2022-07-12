@@ -15,6 +15,10 @@ code {
     color: black;
 }
 
+p, li, ul, code {
+    font-size: 14pt;
+}
+
 .dashboard {
     height: 100vh;
 }

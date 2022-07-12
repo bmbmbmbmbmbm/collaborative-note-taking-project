@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../database');
+const auth = require('../verify');
 
 const router = express.Router();
 
@@ -7,6 +8,45 @@ function filterSpecial(entry) {
   filtered = JSON.stringify(entry).replace(/'/g, "\\" + "\'");
   return filtered;
 }
+
+
+router.get('/public/:id', async function (req, res) {
+  try {
+    const username = req.params.id;
+    if (username) {
+      const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
+      if (user[0].length > 0) {
+        const publicEntries = await db.promise().query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
+        res.status(200).json(publicEntries[0]);
+      } else {
+        res.status(400).json({ message: "invalid credentials" });
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(404);
+  }
+});
+
+router.get('/:id/view', async function (req, res) {
+  try {
+      const unitCode = req.params.id;
+      if (unitCode) {
+          const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+          if (record[0].length > 0) {
+              const entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE unit_code='${unitCode}'`);
+              res.status(200).json(entries[0]);
+          } else {
+              res.status(404);
+          }
+      } else {
+          res.status(400).json({ message: "unit does not exist" });
+      }
+  } catch (err) {
+      console.log(err);
+      res.status(404);
+  }
+});
 
 router.get('/view-all/:id', async function (req, res) {
   try {
@@ -42,7 +82,7 @@ router.get('/view/:id', async function (req, res) {
   }
 });
 
-router.put('/update/:id', async function (req, res) {
+router.put('/update/:id', auth.verifyToken, async function (req, res) {
   try {
     const { username, entry, entryId } = req.body;
     // Aquire the user_id
@@ -60,26 +100,29 @@ router.put('/update/:id', async function (req, res) {
   }
 });
 
-router.post('/create', async function (req, res) {
+router.post('/create', auth.verifyToken, async function (req, res) {
   try {
-    // Grab the username and the entry to be added
-    const { username, entry } = req.body;
-    // Aquire the user_id
-    const select = `SELECT id FROM users WHERE username=${username}`
-    const user = await db.promise().query(select);
-    // Remove characters that mysql can't handle
-    const filteredEntry = filterSpecial(entry);
-    // Insert the new record into the entries table
-    const insert = `INSERT INTO entries(entry, user_id, created, updated) VALUES('${filteredEntry}', ${user.id}, NOW(), NOW())`;
-    await db.promise().query(insert);
-    res.status(200).send({ "message": "created entry" });
+    const { username, title, entry, unitCode, private } = req.body;
+    if (username) {
+      const record = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`)
+      if (record[0].length > 0) {
+        const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
+                        VALUES ('${title}', '${filterSpecial(entry)}', NOW(), NOW(), ${record[0][0].id}, '${unitCode}', ${private}, 0 , 0);`;
+        await db.promise().query(insert);
+        res.status(200).json({ message: 'OK' });
+      } else {
+        res.status(400).json({ message: 'invalid credentials' });
+      }
+    } else {
+      res.status(400).json({ message: 'invalid credentials' });
+    }
   } catch (err) {
     console.log(err);
     res.status(404);
   }
 });
 
-router.delete('/delete/:id', async function (req, res) {
+router.delete('/delete/:id', auth.verifyToken, async function (req, res) {
   try {
 
   } catch (err) {

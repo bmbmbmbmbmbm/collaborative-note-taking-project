@@ -28,28 +28,33 @@ export default function Dashboard(props) {
     const user = "bm639";
 
     useEffect(() => {
+        let status = 0;
+
         fetch(`/entry/view-all/${user}`)
-            .then((response) => {
-                if (response.status === 200) {
-                    setEntries(response.json())
-                } else {
-                    console.log(response.json())
-                }
-            });
+            .then(
+                response => response.json()
+            ).then(
+                data => setEntries(data)
+            );
 
         fetch(`/threads/view-all/${user}`)
-            .then((response) => {
-                if (response.status === 200) {
-                    setThreads(response.json())
-                } else {
-                    console.log(response.json())
-                }
-            });
+            .then(
+                response => response.json()
+            ).then(
+                data => setThreads(data)
+            );
+
+        fetch(`/subject/units/user/${user}`)
+            .then(
+                response => response.json()
+            ).then(
+                data => setUnits(data)
+            );
     }, []);
 
     return (
         <div className="dashboard">
-            <div clasName="searchAndFilter" style={{ backgroundColor: "white" }}>
+            <div className="searchAndFilter" style={{ backgroundColor: "white" }}>
                 <Container >
                     <Row>
                         <Col xs={1}>
@@ -70,9 +75,9 @@ export default function Dashboard(props) {
                             </Form>
                         </Col>
                         <Col xs={1}>
-                            <DropdownButton title="Sort By" style={{float: "right"}}>
+                            <DropdownButton title="Sort By" style={{ float: "right" }}>
                                 {sortBy.map(option =>
-                                    <Dropdown.Item>{option}</Dropdown.Item>
+                                    <Dropdown.Item key={option}>{option}</Dropdown.Item>
                                 )}
                             </DropdownButton>
                         </Col>
@@ -117,10 +122,12 @@ export default function Dashboard(props) {
                         {units.length > 0 ? (
                             <div>Stuff</div>
                         ) : (
-                            <div className="noPosts" style={{ textAlign: "center" }}>
-                                <h4>There's nothing here...</h4>
-                                <Link to="/enrolment">Why not enrol in some units?</Link>
-                            </div>
+                            <Prompt
+                                title="Enrol in some units"
+                                img="https://i.imgur.com/fEJuEh5.png"
+                                desc="To interact with the other users, or make entries and threads you need to enrol in some units from your subject"
+                                link="/enrolment"
+                            />
                         )}
                     </Container>
 

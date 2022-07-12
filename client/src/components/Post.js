@@ -1,31 +1,16 @@
 import React from 'react';
-import { Badge, Card } from 'react-bootstrap';
+import { Badge, Card, Row, Col } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 
-export default function Post(props) {
-  const isEntry = props.isEntry;
+export default function Post({ isEntry, id, title, user, created, updated, code, positive, negative }) {
   return (
-    <div className="post" style={{ paddingTop: '1%' }}>
-      <Card border="success" >
-
-          
-
-        <Card.Body>
-          <Card.Title>
-              {!isEntry && 
-                <Badge bg="warning" style={{marginRight: '1%'}}>Thread</Badge>
-              }
-              {isEntry && 
-                <Badge bg="danger" style={{marginRight: '1%'}}>Entry</Badge>
-              }
-              {props.Title}
-            
-          </Card.Title>
-          <Card.Subtitle>
-            by {props.User}
-          </Card.Subtitle>
-        </Card.Body>
-      </Card>
+    <div className="post" style={{ marginBottom: "0.5%", paddingBottom: "0.5%", borderBottom: "1px solid lightgrey"}}>
+      <h5><Link to={`/${code}/${id}`}>{title}</Link></h5>
+      <h6><Link to={`/${code}`}>{code}</Link></h6>
+      <label>Created by <Link to={`profile/${user}`}>{user}</Link></label>
+      <label>Submitted {created}  Updated {updated}</label>
+      <label>{positive - negative}</label>
     </div>
   );
 }

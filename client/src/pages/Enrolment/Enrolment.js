@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Spinner, Container, Form, FloatingLabel, Row, Col } from "react-bootstrap";
+import { Card, Button, Spinner, Container, Form, Row, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 export default function Enrolment() {
     const [units, setUnits] = useState([{}]);
-    const [enrolled, setEnrolled] = useState([{}])
+    const [enrolled, setEnrolled] = useState([])
     const [search, setSearch] = useState("");
+
+    const navigate = useNavigate();
+    const username = "bm639"
 
     useEffect(() => {
         fetch(`/subject/Computer_Science`)
@@ -13,9 +17,7 @@ export default function Enrolment() {
                 setUnits(value);
             });
 
-        const username = "bm639"
-
-        fetch(`/subject/user/${username}`).then(
+        fetch(`/subject/units/user/${username}`).then(
             response => response.json()
         ).then(
             value => {
@@ -25,22 +27,26 @@ export default function Enrolment() {
     }, []);
 
     function isEnrolled(unit) {
-        var i = 0;
-        console.log(enrolled);
-        while (i < enrolled.length && unit.unit_code !== enrolled[i].unit_code) {
-            ++i;
+        for(var i = 0; i < enrolled.length; ++i) {
+            if(unit.code === enrolled[i].code) return true;
         }
-        return unit.unit_code === enrolled[i].unit_code;
     }
 
-    function removeEnrolled(unit) {
-        var enroll = enrolled;
-        var i = 0;
-        while (i < enroll.length && enroll[i].unit_code !== unit.unit_code) ++i;
-        if (enroll[i].unit_code === unit.unit_code) {
-            enroll.splice(i, 1);
-            setEnrolled(enroll);
-        }
+    function handleEnrol(unit) {
+        if(enrolled.length === 0) {
+            setEnrolled([unit]);
+        } else {
+            var enrol = enrolled;
+            var i = 0;
+            while (i < enrol.length - 1 && enrol[i].code !== unit.code) ++i;
+
+            if (enrol[i].code === unit.code) {
+                enrol.splice(i, 1);
+                setEnrolled(enrol);
+            } else {
+                setEnrolled([...enrol, unit]);
+            }
+        }  
     }
 
     function checkSearch(available) {
@@ -55,7 +61,30 @@ export default function Enrolment() {
         return filtered;
     }
 
+    function enrolUnits(event) {
+        event.preventDefault();
+        
+        let token = {
+            username: username,
+            units: enrolled
+        };
 
+        fetch('/subject/enrol', {
+            method: "POST",
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(token)
+        }).then(
+            response => {
+                if(response.status === 200) {
+                    navigate('/dashboard');
+                } else {
+                    alert(response.json());
+                }
+            }
+        )
+    }
 
     return (
         <div className="units">
@@ -69,7 +98,7 @@ export default function Enrolment() {
                         <Container>
                             <Row>
                                 <h1>
-                                    Unit enrolment
+                                    Unit Enrolment
                                 </h1>
                                 <p>
                                     Choose units to enroll into. Obviously, the units you are taking are probably the best choice but feel free to explore units available on your course.
@@ -77,7 +106,7 @@ export default function Enrolment() {
                                
                                 </p>
                             </Row>
-                                <Form style={{ marginTop: "0.5%" }}>
+                                <Form onSubmit={enrolUnits}>
                                     <Row>
                                     <Col xs={11}>
                                         <Form.Group>
@@ -90,8 +119,8 @@ export default function Enrolment() {
                                         </Form.Group>
                                     </Col>
                                     <Col xs={1}>
-                                        <Button style={{float: "right"}}>
-                                            Enroll
+                                        <Button style={{float: "right"}} type="submit">
+                                            Enrol
                                         </Button>
                                     </Col>
                                     </Row>
@@ -104,15 +133,15 @@ export default function Enrolment() {
                         {checkSearch(units).map((unit) => (
                             <Card
                                 key={unit.code}
-                                style={{ marginTop: "0.5%" }}
+                                style={{ marginBottom: "0.5%" }}
                             >
                                 <Card.Body>
                                     <Card.Title>
                                         {unit.code}: {unit.title}
                                     </Card.Title>
                                     <Form.Check
-                                        checked={() => isEnrolled(unit)}
-                                        onChange={() => removeEnrolled(unit)}
+                                        checked={isEnrolled(unit)}
+                                        onChange={() => handleEnrol(unit)}
                                         type="switch"
                                         id={unit.code}
                                     />
