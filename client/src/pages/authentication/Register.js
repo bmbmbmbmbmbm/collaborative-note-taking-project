@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, FloatingLabel, Spinner, Container } from "react-bootstrap";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from "react-bootstrap/Button";
 
 export default function Register({ setToken }) {
@@ -9,8 +9,9 @@ export default function Register({ setToken }) {
     const [confirm, setConfirm] = useState("");
     const [subjects, setSubjects] = useState([{}]);
     const [chosenSubject, setChosen] = useState(0);
-
     const [validated, setValidated] = useState(false);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch("/subject")
@@ -58,17 +59,37 @@ export default function Register({ setToken }) {
             return;
         }
 
-        const token = { email: email, password: password, subject_id: chosenSubject }
+        const body = { 
+            email: email, 
+            password: password, 
+            subject_id: chosenSubject 
+        };
+
+        let success = false;
+
         await fetch('/register/',
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(token)
-            });
-
-        setValidated(true);
+                body: JSON.stringify(body)
+            }).then(
+                response => response.json()
+            ).then(
+                data => {
+                    if(data !== undefined) {
+                        success = true;
+                        setToken(data);
+                    }
+                }
+            );
+        if(success) {
+            sessionStorage.setItem('username', JSON.stringify({ username: email.substring(0, email.indexOf('@'))}));
+            setValidated(true);
+            navigate('/enrolment');
+        }
+        
     }
 
     return (

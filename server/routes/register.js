@@ -22,19 +22,18 @@ router.post('/', async function (req, res) {
                         const id = record[0][0].id;
                         const token = jwt.sign({ id }, "jwtSecret")
                         req.session.user = record[0][0];
-                        res.status(200).json({ auth: true, token: token, username: email.substring(0, email.indexOf('@'))});
+                        res.status(200).json({ auth: true, token: token });
                     }
                 })
-
             } else {
-                res.status(400).json({ message: "Invalid credentials" });
+                res.status(400);
             }
         } else {
-            res.status(400).json({ message: "Invalid credentials" });
+            res.status(400);
         }
     } catch (err) {
         console.log(err);
-        res.status(404).json({ message: "server error" });
+        res.status(404);
     }
 
 })

@@ -22,7 +22,7 @@ router.post("/", async function (req, res) {
                             const id = record[0][0].user_id
                             const token = jwt.sign({ id }, "jwtSecret")
                             req.session.user = record[0][0];
-                            res.status(200).json({ auth: true, token: token, username: record[0][0].username });
+                            res.status(200).json({ auth: true, token: token });
                         } else {
                             res.status(400);
                         }

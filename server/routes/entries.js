@@ -30,21 +30,21 @@ router.get('/public/:id', async function (req, res) {
 
 router.get('/:id/view', async function (req, res) {
   try {
-      const unitCode = req.params.id;
-      if (unitCode) {
-          const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
-          if (record[0].length > 0) {
-              const entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE unit_code='${unitCode}'`);
-              res.status(200).json(entries[0]);
-          } else {
-              res.status(404);
-          }
+    const unitCode = req.params.id;
+    if (unitCode) {
+      const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+      if (record[0].length > 0) {
+        const entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE unit_code='${unitCode}'`);
+        res.status(200).json(entries[0]);
       } else {
-          res.status(400).json({ message: "unit does not exist" });
+        res.status(404);
       }
+    } else {
+      res.status(400).json({ message: "unit does not exist" });
+    }
   } catch (err) {
-      console.log(err);
-      res.status(404);
+    console.log(err);
+    res.status(404);
   }
 });
 
@@ -55,11 +55,15 @@ router.get('/view-all/:id', async function (req, res) {
     const getId = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
     if (getId[0].length > 0) {
       const id = getId[0][0].id;
-      const select = `SELECT entries.id, entries.title, entries.created, entries.updated, units.title 
-                      FROM entries INNER JOIN units ON entries.unit_code=units.code
-                      INNER JOIN enrolments ON units.code=enrolments.unit_code
-                      WHERE enrolments.user_id=${id};`
+      const select = 
+      `SELECT entries.id, entries.title, users.username, entries.created, entries.updated, units.title AS unit_title, units.code, entries.positive, entries.negative
+      FROM entries INNER JOIN units ON entries.unit_code=units.code
+      INNER JOIN enrolments ON units.code=enrolments.unit_code
+      INNER JOIN users ON enrolments.user_id=users.id
+      WHERE enrolments.user_id=${id};`
+
       const result = await db.promise().query(select);
+      console.log(result[0]);
       res.status(200).json(result[0]);
     } else {
       res.status(400).json({ message: 'user does not exist' })

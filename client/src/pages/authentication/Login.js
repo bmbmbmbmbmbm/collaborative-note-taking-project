@@ -21,6 +21,8 @@ export default function Login({ setToken }) {
     async function handleSubmit(event) {
         event.preventDefault();
 
+        let success = false;
+
         let token = {
             email: email,
             password: password
@@ -35,9 +37,18 @@ export default function Login({ setToken }) {
         }).then(
             response => response.json()
         ).then(
-            data => setToken(data)
+            data => {
+                if(data !== undefined) {
+                    setToken(data)
+                    success = true;
+                } 
+            }
         )
-        navigate('/dashboard');
+
+        if(success) {
+            sessionStorage.setItem('username', JSON.stringify({ username: email.substring(0, email.indexOf('@'))}));
+            navigate('/dashboard');
+        } 
     }
 
 

@@ -12,8 +12,9 @@ import {
     Tab,
 } from "react-bootstrap";
 import Prompt from "../../components/Prompt";
+import Post from "../../components/Post";
 
-export default function Dashboard(props) {
+export default function Dashboard({ user }) {
     const [search, setSearch] = useState("");
 
     const [units, setUnits] = useState([]);
@@ -25,11 +26,7 @@ export default function Dashboard(props) {
     const [chooseSort, setChooseSort] = useState(0);
     const sortBy = ["Recent", "Newest", "Oldest"];
 
-    const user = "bm639";
-
     useEffect(() => {
-        let status = 0;
-
         fetch(`/entry/view-all/${user}`)
             .then(
                 response => response.json()
@@ -52,8 +49,12 @@ export default function Dashboard(props) {
             );
     }, []);
 
+    function blep(){
+        console.log(entries);
+    }
+
     return (
-        <div className="dashboard">
+        <div className="dashboard" onClick={blep}>
             <div className="searchAndFilter" style={{ backgroundColor: "white" }}>
                 <Container >
                     <Row>
@@ -90,7 +91,20 @@ export default function Dashboard(props) {
                 <Tab eventKey="My Entries" title="My Entries">
                     <Container>
                         {entries.length > 0 ? (
-                            <div>Stuff</div>
+                            entries.map(entry => 
+                                <Post 
+                                    isEntry={true}
+                                    id={entry.id}
+                                    title={entry.title}
+                                    user={entry.username}
+                                    created={entry.created}
+                                    updated={entry.updated}
+                                    unitTitle={entry.unit_title}
+                                    code={entry.code}
+                                    positive={entry.positive}
+                                    negative={entry.negative}
+                                />    
+                            )
                         ) : (
                             <Prompt
                                 title="Create an entry"

@@ -88,19 +88,10 @@ export default function EntryCreator({ token }) {
 
     if (initialValue) {
         return (
-
             <Form onSubmit={handleSave}>
                 <div className="settings" style={{ backgroundColor: "white", padding: "0.3%" }}>
-                    <Row style={{ paddingBottom: "0.5%" }}>
-                        <Col xs={1}>
-                            <Button type="submit">Save</Button>
-                        </Col>
-                        <Col xs={2}>
-                            <Button>Save and Submit</Button>
-                        </Col>
-                    </Row>
-                    <Row style={{ paddingBottom: "0.5%" }}>
-                        <Col xs={8}>
+                    <Row style={{ paddingBottom: "0.5%", paddingTop: "0.5%" }}>
+                        <Col xs={5}>
                             <Form.Control autoFocus type="text" placeholder="Entry title" onChange={(e) => setTitle(e.target.value)} required />
                         </Col>
                         <Col xs={4}>
@@ -112,6 +103,12 @@ export default function EntryCreator({ token }) {
                                     </option>
                                 ))}
                             </Form.Select>
+                        </Col>
+                        <Col xs={1} className="d-grid gap-2">
+                            <Button type="submit">Save</Button>
+                        </Col>
+                        <Col xs={2} className="d-grid gap-2">
+                            <Button variant="success">Save and Submit</Button>
                         </Col>
                     </Row>
                 </div>

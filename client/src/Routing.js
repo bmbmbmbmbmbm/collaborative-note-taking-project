@@ -1,7 +1,6 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import React from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
-import Footer from "./components/Footer";
 
 import useToken from "./components/useToken";
 
@@ -20,11 +19,19 @@ import Register from "./pages/authentication/Register";
 import Unit from "./pages/unit/Unit";
 
 export default function Routing() {
-  const { token, setToken } = useToken();
+  const { token, clearToken, setToken } = useToken();
+
+  const navigate = useNavigate();
+
+  function logout() {
+    sessionStorage.clear();
+    clearToken();
+    navigate('/')
+  }
 
   if (!token) {
     return (
-      <Router>
+      <>
         <Navbar bg="dark" variant="dark" expand="lg">
           <Container className="navigation">
             <Navbar.Brand
@@ -54,12 +61,15 @@ export default function Routing() {
           <Route path="/register" element={<Register setToken={setToken} />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
-      </Router>
+      </>
     );
   } else {
-    console.log(token);
+    const userString = sessionStorage.getItem('username');
+    const user = JSON.parse(userString);
+
+    console.log(user);
     return (
-      <Router>
+      <>
         <Navbar bg="dark" variant="dark" expand="lg">
           <Container className="navigation">
             <Navbar.Brand
@@ -79,26 +89,26 @@ export default function Routing() {
             <Nav className="me-auto">
               <Nav.Link href="/dashboard">dashboard</Nav.Link>
               <Nav.Link href="/view-entries">entries</Nav.Link>
-              <Nav.Link href={`/profile/${token.username}`}>profile</Nav.Link>
-              <Nav.Link>Logout</Nav.Link>
+              <Nav.Link href={`/profile/${user.username}`}>profile</Nav.Link>
+              <Nav.Link onClick={logout}>Logout</Nav.Link>
             </Nav>
           </Container>
         </Navbar>
 
         <Routes>
-          <Route path="/default-entry" element={<Entry token={token}/>} />
-          <Route path="/default-thread" element={<Thread isRoot={true} token={token}/>} />
-          <Route path="/dashboard" element={<Dashboard token={token}/>} />
-          <Route path="/view-entries" element={<EntryCatalogue token={token}/>} />
-          <Route path="/thread-creator" element={<ThreadCreator token={token}/>} />
-          <Route path="/profile/:username" element={<Profile token={token}/>} />
-          <Route path="/entry-creator" element={<EntryCreator token={token}/>} />
-          <Route path="/enrolment" element={<Enrolment token={token}/>} />
-          <Route path="/:unitId" element={<Unit token={token}/>} />
-          <Route path="/" element={<Home/>} />
-          <Route path="*" element={<ErrorPage/>} />
+          <Route path="/default-entry" element={<Entry token={token} />} />
+          <Route path="/default-thread" element={<Thread isRoot={true} token={token} />} />
+          <Route path="/dashboard" element={<Dashboard user={user.username} />} />
+          <Route path="/view-entries" element={<EntryCatalogue token={token} />} />
+          <Route path="/thread-creator" element={<ThreadCreator token={token} />} />
+          <Route path="/profile/:username" element={<Profile token={token} />} />
+          <Route path="/entry-creator" element={<EntryCreator token={token} />} />
+          <Route path="/enrolment" element={<Enrolment token={token} />} />
+          <Route path="/:unitId" element={<Unit token={token} user={user.username} />} />
+          <Route path="/" element={<Home />} />
+          <Route path="*" element={<ErrorPage />} />
         </Routes>
-      </Router>
+      </>
     );
   }
 }
