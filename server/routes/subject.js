@@ -122,6 +122,25 @@ router.get('/user/:id', async function(req, res) {
     }
 });
 
+router.get('/titleof/:id', async function (req, res) {
+    try {
+        const code = req.params.id;
+        if(code) {
+            const title = await db.promise().query(`SELECT title FROM units WHERE code='${code}'`);
+            if(title[0].length === 1) {
+                res.status(200).json(title[0][0]);
+            } else {
+                res.status(404);
+            }
+        } else {
+            res.status(400);
+        }
+    } catch(err) {
+        console.log(err);
+        res.status(404);
+    }
+});
+
 router.get('/:id', async function (req, res) {
     try {
         const subject = req.params.id.replace('_', ' ');

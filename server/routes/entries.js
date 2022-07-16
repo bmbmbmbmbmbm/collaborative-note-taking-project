@@ -63,7 +63,6 @@ router.get('/view-all/:id', async function (req, res) {
       WHERE enrolments.user_id=${id};`
 
       const result = await db.promise().query(select);
-      console.log(result[0]);
       res.status(200).json(result[0]);
     } else {
       res.status(400).json({ message: 'user does not exist' })
@@ -86,7 +85,32 @@ router.get('/view/:id', async function (req, res) {
   }
 });
 
-router.put('/update/:id', auth.verifyToken, async function (req, res) {
+router.put('/edit/:id', async function(req, res) {
+  try{
+    const { username } = req.body;
+    if(username) {
+      const session = await db.promise().query(`SELECT * FROM session WHERE username='${username}' AND end=NULL`);
+      const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
+      if(session[0].length === 1 && user[0].length === 1) {
+        const entry = await db.promise().query(`SELECT title, entry, unit_code FROM entries WHERE id=${req.params.id} AND user_id=${user[0][0].id}`);
+        if(entry[0].length === 1) {
+          res.status(200).json(entry[0][0]);
+        } else {
+          res.status(400);
+        }
+      } else {
+        res.status(400);
+      }
+    } else {
+      res.status(400);
+    }
+  } catch(err) {
+    console.log(err);
+    res.status(404);
+  }
+})
+
+router.put('/update', auth.verifyToken, async function (req, res) {
   try {
     const { username, entry, entryId } = req.body;
     // Aquire the user_id

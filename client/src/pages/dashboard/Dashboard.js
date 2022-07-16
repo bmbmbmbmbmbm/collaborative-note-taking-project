@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
     Container,
     Row,
@@ -7,12 +7,13 @@ import {
     DropdownButton,
     Dropdown,
     Form,
-    FloatingLabel,
+    Button,
     Tabs,
     Tab,
 } from "react-bootstrap";
 import Prompt from "../../components/Prompt";
 import Post from "../../components/Post";
+import UnitDisplay from "../../components/UnitDisplay";
 
 export default function Dashboard({ user }) {
     const [search, setSearch] = useState("");
@@ -25,6 +26,8 @@ export default function Dashboard({ user }) {
 
     const [chooseSort, setChooseSort] = useState(0);
     const sortBy = ["Recent", "Newest", "Oldest"];
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch(`/entry/view-all/${user}`)
@@ -49,12 +52,8 @@ export default function Dashboard({ user }) {
             );
     }, []);
 
-    function blep(){
-        console.log(entries);
-    }
-
     return (
-        <div className="dashboard" onClick={blep}>
+        <div className="dashboard">
             <div className="searchAndFilter" style={{ backgroundColor: "white" }}>
                 <Container >
                     <Row>
@@ -91,20 +90,28 @@ export default function Dashboard({ user }) {
                 <Tab eventKey="My Entries" title="My Entries">
                     <Container>
                         {entries.length > 0 ? (
-                            entries.map(entry => 
-                                <Post 
-                                    isEntry={true}
-                                    id={entry.id}
-                                    title={entry.title}
-                                    user={entry.username}
-                                    created={entry.created}
-                                    updated={entry.updated}
-                                    unitTitle={entry.unit_title}
-                                    code={entry.code}
-                                    positive={entry.positive}
-                                    negative={entry.negative}
-                                />    
-                            )
+                            <div className="entries">
+                                <div className="newEntryPrompt" style={{ borderBottom: "1px solid lightgrey", paddingBottom: "2%", marginBottom: "1%", textAlign: "center" }}>
+                                    <h4>Want to make a new entry?</h4>
+                                    <Button onClick={() => navigate('/entry-creator')}>Get started</Button>
+                                </div>
+
+                                {entries.map(entry =>
+                                    <Post
+                                        isEntry={true}
+                                        id={entry.id}
+                                        title={entry.title}
+                                        user={entry.username}
+                                        created={entry.created}
+                                        updated={entry.updated}
+                                        unitTitle={entry.unit_title}
+                                        code={entry.code}
+                                        positive={entry.positive}
+                                        negative={entry.negative}
+                                    />
+                                )}
+                            </div>
+
                         ) : (
                             <Prompt
                                 title="Create an entry"
@@ -119,7 +126,27 @@ export default function Dashboard({ user }) {
                 <Tab eventKey="My Threads" title="My Threads">
                     <Container>
                         {threads.length > 0 ? (
-                            <div>Stuff</div>
+                            <div className="threads">
+                                <div className="newEntryPrompt" style={{ borderBottom: "1px solid lightgrey", paddingBottom: "2%", marginBottom: "1%", textAlign: "center" }}>
+                                    <h4>Want to make a new entry?</h4>
+                                    <Button>Get started</Button>
+                                </div>
+                                {threads.map(entry =>
+                                    <Post
+                                        isEntry={false}
+                                        id={entry.id}
+                                        title={entry.title}
+                                        user={entry.username}
+                                        created={entry.created}
+                                        updated={entry.last_reply}
+                                        unitTitle={entry.unit_title}
+                                        code={entry.code}
+                                        positive={entry.positive}
+                                        negative={entry.negative}
+                                    />
+                                )}
+                            </div>
+
                         ) : (
                             <Prompt
                                 title="Create a thread"
@@ -134,7 +161,16 @@ export default function Dashboard({ user }) {
                 <Tab eventKey="My Units" title="My Units">
                     <Container>
                         {units.length > 0 ? (
-                            <div>Stuff</div>
+                            <div className="units">
+                                {units.map(unit =>
+                                    <UnitDisplay unitCode={unit.code} title={unit.title} />
+                                )}
+                                <div className="missingUnit" style={{ textAlign: "center" }}>
+                                    <h4>Missing a unit?</h4>
+                                    <Link to='/enrolment'>Head to enrolment</Link>
+                                </div>
+                            </div>
+
                         ) : (
                             <Prompt
                                 title="Enrol in some units"
@@ -153,8 +189,7 @@ export default function Dashboard({ user }) {
                         ) : (
                             <div className="noPosts" style={{ textAlign: "center" }}>
                                 <h4>There's nothing here...</h4>
-                                <Link to="/entry-creator">Why not make an entry?</Link>
-                                <Link to="/entry-creator">or a thread?</Link>
+                                <p>Your pinned entries will appear here when you pin them</p>
                             </div>
                         )}
                     </Container>
@@ -167,8 +202,7 @@ export default function Dashboard({ user }) {
                         ) : (
                             <div className="noPosts" style={{ textAlign: "center" }}>
                                 <h4>There's nothing here...</h4>
-                                <Link to="/entry-creator">Why not make an entry?</Link>
-                                <Link to="/entry-creator">or a thread?</Link>
+                                <p>Your pinned threads will appear here when you pin them</p>
                             </div>
                         )}
                     </Container>

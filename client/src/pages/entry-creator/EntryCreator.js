@@ -1,15 +1,21 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { createEditor, Transforms, Editor, Element as SlateElement } from 'slate';
 import { Slate, Editable, withReact, useSlate } from 'slate-react';
-import { Tabs, Tab, Form, Container, Button, Col, Row, ButtonGroup, ToggleButton } from 'react-bootstrap';
+import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
 
-export default function EntryCreator({ token }) {
+export default function EntryCreator({ token, user }) {
     const [title, setTitle] = useState("");
     const [units, setUnits] = useState([]);
     const [chosen, setChosen] = useState(0);
     const [entryId, setEntryId] = useState();
+    const [isPublic, setIsPublic] = useState(false);
 
-    const user = "bm639"
+    const [editor, setEditor] = useState(() => withReact(createEditor()));
+
+    const params = useParams();
+
+    const time = 600;
 
     useEffect(() => {
         fetch(`/subject/units/user/${user}`)
@@ -18,9 +24,47 @@ export default function EntryCreator({ token }) {
             ).then(
                 data => setUnits(data)
             );
+
+        if (entryId === undefined && params.entryId !== undefined) {
+            setEntryId(useParams.entryId);
+            fetch(`/entry/view/${params.entryId}`)
+                .then(
+                    response => response.json()
+                ).then(
+                    data => {
+                        
+                    }
+                )
+        }
+
+        const interval = setInterval(function() {
+            setTimeout(function() {
+                if (entryId !== undefined) {
+                    let body = {
+                        username: user,
+                        title: title,
+                        entry: initialValue,
+                        unitCode: units[chosen].code,
+                        private: isPublic,
+                        entryId: entryId
+                    }
+    
+                    fetch('/entry/update', {
+                        method: "PUT",
+                        headers: {
+                            "x-access-token": token,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(body)
+                    })
+                }
+            })
+        }, time);
+
+        return () => clearInterval(interval);
     }, [])
 
-    const editor = useMemo(() => withReact(createEditor()), [])
+
 
     const renderElement = useCallback(props => <Element {...props} />, [])
     const renderLeaf = useCallback(props => <Leaf {...props} />, [])
@@ -48,7 +92,7 @@ export default function EntryCreator({ token }) {
                 title: title,
                 entry: initialValue,
                 unitCode: units[chosen].code,
-                private: true
+                private: isPublic
             }
             fetch('/entry/create', {
                 method: "POST",
@@ -68,7 +112,7 @@ export default function EntryCreator({ token }) {
                 title: title,
                 entry: initialValue,
                 unitCode: units[chosen].code,
-                private: true,
+                private: isPublic,
                 entryId: entryId
             }
             fetch('/entry/create', {
@@ -78,11 +122,7 @@ export default function EntryCreator({ token }) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(body)
-            }).then(
-                response => response.json()
-            ).then(
-                data => setEntryId(data.id)
-            )
+            })
         }
     }
 
@@ -91,10 +131,10 @@ export default function EntryCreator({ token }) {
             <Form onSubmit={handleSave}>
                 <div className="settings" style={{ backgroundColor: "white", padding: "0.3%" }}>
                     <Row style={{ paddingBottom: "0.5%", paddingTop: "0.5%" }}>
-                        <Col xs={5}>
+                        <Col xs={7}>
                             <Form.Control autoFocus type="text" placeholder="Entry title" onChange={(e) => setTitle(e.target.value)} required />
                         </Col>
-                        <Col xs={4}>
+                        <Col xs={3}>
                             <Form.Select onChange={(e) => setChosen(e.target.value)} required>
                                 <option value={0}>What unit are you writing about?</option>
                                 {units.map((unit, index) => (
@@ -107,8 +147,8 @@ export default function EntryCreator({ token }) {
                         <Col xs={1} className="d-grid gap-2">
                             <Button type="submit">Save</Button>
                         </Col>
-                        <Col xs={2} className="d-grid gap-2">
-                            <Button variant="success">Save and Submit</Button>
+                        <Col xs={1} className="d-grid gap-2">
+                            <Button variant={isPublic ? "warning" : "success"} onClick={() => setIsPublic(!isPublic)}>{isPublic ? "Make Private" : "Make Public"}</Button>
                         </Col>
                     </Row>
                 </div>
@@ -141,7 +181,21 @@ export default function EntryCreator({ token }) {
                             </Tab>
                         </Tabs>
                     </div>
-                    <Container style={{ backgroundColor: "white", minHeight: '100vh', marginTop: "3%", padding: "7.5%", boxShadow: "0 0 3px black" }}>
+                    <style type="text/css">
+                        {`
+                            .page {
+                                background-color: white;
+                                min-height: 100vh;
+                                margin-top: 3%;
+                                padding: 7.5%;
+                                border: 1px solid lightgrey;
+                            }
+                            .page:hover {
+                                box-shadow: 0px 0px 5px 0px lightgrey;
+                            }
+                        `}
+                    </style>
+                    <Container className='page'>
                         <Editable renderElement={renderElement} renderLeaf={renderLeaf} onKeyDown={event => onKeyDown(event, editor)} />
                     </Container>
                 </Slate>
@@ -188,6 +242,11 @@ function onKeyDown(event, editor) {
             toggleMark(editor, 'superscript');
             break;
 
+        case 'u':
+            event.preventDefault();
+            toggleMark(editor, 'underline');
+            break;
+            
         case 'i':
             event.preventDefault();
             toggleMark(editor, 'italic');
@@ -417,6 +476,9 @@ function MarkButton({ type, name }) {
                     .btn-plain {
                         background-color: white;
                         color: grey;
+                    }
+                    .btn-plain:hover {
+                        background-color: lightgrey
                     }
                 `}
             </style>
