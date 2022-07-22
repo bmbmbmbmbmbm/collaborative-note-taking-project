@@ -1,6 +1,9 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { createEditor, Transforms, Editor, Element as SlateElement } from 'slate';
-import { Slate, Editable, withReact, useSlate } from 'slate-react';
+import { Slate, Editable, useSlate, useSlateStatic, ReactEditor, useSelected, useFocused, withReact } from 'slate-react';
+import imageExtensions from 'image-extensions';
+import isUrl from 'is-url';
+import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
@@ -11,7 +14,7 @@ export default function EntryCreator({ token, user }) {
     const [entryId, setEntryId] = useState();
     const [isPublic, setIsPublic] = useState(false);
 
-    const [editor, setEditor] = useState(() => withReact(createEditor()));
+    const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
 
     const params = useParams();
 
@@ -32,13 +35,13 @@ export default function EntryCreator({ token, user }) {
                     response => response.json()
                 ).then(
                     data => {
-                        
+
                     }
                 )
         }
 
-        const interval = setInterval(function() {
-            setTimeout(function() {
+        const interval = setInterval(function () {
+            setTimeout(function () {
                 if (entryId !== undefined) {
                     let body = {
                         username: user,
@@ -48,7 +51,7 @@ export default function EntryCreator({ token, user }) {
                         private: isPublic,
                         entryId: entryId
                     }
-    
+
                     fetch('/entry/update', {
                         method: "PUT",
                         headers: {
@@ -161,13 +164,11 @@ export default function EntryCreator({ token, user }) {
                                     <MarkButton type="bold" name="Bold" />
                                     <MarkButton type="italic" name="Italic" />
                                     <MarkButton type="underline" name="Underline" />
-
+                                    <InsertImageButton />
+                                    <MarkButton type="code" name="Code" />
                                     <BlockButton type="block-quote" name="Block Quote" />
                                     <BlockButton type="numbered-list" name="Numbered List" />
                                     <BlockButton type="bulleted-list" name="Bulleted List" />
-                                    <MarkButton type="image" name="Image" />
-
-                                    <MarkButton type="code" name="Code" />
                                 </div>
                             </Tab>
                             <Tab eventKey="headings" title="Headings">
@@ -206,6 +207,139 @@ export default function EntryCreator({ token, user }) {
 
     return (<></>)
 }
+
+// Start of handling images
+
+function withImages(editor) {
+    const { insertData, isVoid } = editor
+
+    editor.isVoid = element => {
+        return element.type === 'image' ? true : isVoid(element)
+    }
+
+    editor.insertData = data => {
+        const text = data.getData('text/plain')
+        const { files } = data
+
+        if (files && files.length > 0) {
+            for (const file of files) {
+                const reader = new FileReader()
+                const [mime] = file.type.split('/')
+
+                if (mime === 'image') {
+                    reader.addEventListener('load', () => {
+                        const url = reader.result
+                        insertImage(editor, url)
+                    })
+
+                    reader.readAsDataURL(file)
+                }
+            }
+        } else if (isImageUrl(text)) {
+            insertImage(editor, text)
+        } else {
+            insertData(data)
+        }
+    }
+
+    return editor
+}
+
+function insertImage(editor, url) {
+    const text = { text: '' };
+    const image = { type: 'image', url, children: [text] };
+    Transforms.insertNodes(editor, image);
+}
+
+function Image({ attributes, children, element }) {
+    const editor = useSlateStatic()
+    const path = ReactEditor.findPath(editor, element)
+
+    const selected = useSelected()
+    const focused = useFocused()
+    return (
+        <div {...attributes}>
+            {children}
+            <div
+                contentEditable={false}
+            >
+                <style type="text/css">
+                    {`
+                        .userImage {
+                            display: block;
+                            max-width: 100%;
+                            max-height: 20em;
+                            box-shadow: ${selected && focused ? '0 0 0 3px #B4D5FF' : 'none'};
+                        }
+                        .inlineButton {
+                            display: ${selected && focused ? 'inline' : 'none'};
+                            position: absolute;
+                            top: 0.5em;
+                            left: 0.5em;
+                            background-color: white;
+                        }
+                        .inlineButton:hover {
+                            background-color: blue;
+                        }
+                    `}
+                </style>
+                <img
+                    className='userImage'
+                    src={element.url}
+                />
+                <Button
+                    onClick={() => Transforms.removeNodes(editor, { at: path })}
+                    variant="inlineButton"
+                >
+                    Delete
+                </Button>
+            </div>
+        </div>
+    )
+}
+
+function InsertImageButton() {
+    const editor = useSlateStatic()
+    return (
+        <>
+            <style type="text/css">
+                {`
+                    .btn-plain {
+                        background-color: white;
+                        color: grey;
+                    }
+                    .btn-plain:hover {
+                        background-color: lightgrey
+                    }
+                `}
+            </style>
+            <Button
+                onMouseDown={event => {
+                    event.preventDefault()
+                    const url = window.prompt('Enter an image url')
+                    if (url && !isImageUrl(url)) {
+                        alert('URL is not an image')
+                        return
+                    } else if (url) {
+                        insertImage(editor, url)
+                    }
+                }}
+                variant='plain'
+            >
+                image
+            </Button>
+        </>
+    )
+}
+
+function isImageUrl(url) {
+    if (!url) return false
+    if (!isUrl(url)) return false
+    const ext = new URL(url).pathname.split('.').pop()
+    return imageExtensions.includes(ext)
+}
+
+// End of handling Images
 
 function onChange(value, editor) {
     const isAstChange = editor.operations.some(op => 'set_selection' !== op.type);
@@ -246,7 +380,7 @@ function onKeyDown(event, editor) {
             event.preventDefault();
             toggleMark(editor, 'underline');
             break;
-            
+
         case 'i':
             event.preventDefault();
             toggleMark(editor, 'italic');
@@ -275,11 +409,6 @@ function onKeyDown(event, editor) {
         case '5':
             event.preventDefault();
             toggleBlock(editor, 'heading-five');
-            break;
-
-        case 'p':
-            event.preventDefault();
-            toggleMark(editor, 'image');
             break;
 
         default:
@@ -344,9 +473,9 @@ function Element({ attributes, children, element }) {
                 </ol>
             )
         case 'image':
-            return (
-                <img alt="" src={children} />
-            )
+            var props = { attributes, children, element };
+            return <Image {...props} />
+
         default:
             return (
                 <p  {...attributes}>
@@ -355,6 +484,8 @@ function Element({ attributes, children, element }) {
             )
     }
 }
+
+
 
 function Leaf({ attributes, children, leaf }) {
     if (leaf.bold) {
@@ -381,7 +512,7 @@ function Leaf({ attributes, children, leaf }) {
         children = <sup>{children}</sup>
     }
 
-    if (leaf.img) {
+    if (leaf.image) {
         console.log("Poop")
         children = <img alt="" src={children} />
     }
@@ -517,3 +648,4 @@ function hasIcon(type, name) {
             return <span>{name}</span>
     }
 }
+

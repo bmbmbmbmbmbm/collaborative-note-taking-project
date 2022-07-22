@@ -25,6 +25,7 @@ p, li, ul, code {
 
 .code {
     background-color:lightgray;
+    padding-bottom: 0;
 }
 
 .container {
