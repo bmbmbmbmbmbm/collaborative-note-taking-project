@@ -285,6 +285,7 @@ function Image({ attributes, children, element }) {
                 </style>
                 <img
                     className='userImage'
+                    alt="Figure"
                     src={element.url}
                 />
                 <Button
