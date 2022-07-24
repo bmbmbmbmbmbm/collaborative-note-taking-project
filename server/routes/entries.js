@@ -1,3 +1,4 @@
+const { json } = require('body-parser');
 const e = require('express');
 const express = require('express');
 const db = require('../database');
@@ -5,33 +6,43 @@ const auth = require('../verify');
 
 const router = express.Router();
 
-function filterSpecial(text) {
-  let filtered = "";
-  filtered = text.replace(/\0/g, "\\\0");
-  filtered = text.replace(/'|\'/g, "\\\'");
-  filtered = text.replace(/\"|"/g, "\\\"");
-  filtered = text.replace(/\b/g, "\\\b");
-  filtered = text.replace(/\n/g, "\\\n");
-  filtered = text.replace(/\r/g, "\\\r");
-  filtered = text.replace(/\t/g, "\\\t");
-  filtered = text.replace(/\Z/g, "\\\Z");
-  filtered = text.replace(/\%|%/g, "\\\%");
-  filtered = text.replace(/\_|_/g, "\\\_");
-  return filtered;
+function replaceWithTag (str) {
+  return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+      switch (char) {
+          case "\0":
+              return "<aaa>";
+          case "\x08":
+            return "<bbb>";
+          case "\x09":
+            return "<ccc>";
+          case "\x1a":
+            return "<ddd>";
+          case "\n":
+            return "<eee>";
+          case "\r":
+            return "<fff>";
+          case "\"":
+            return "<ggg>";
+          case "'":
+            return "<hhh>";
+          case "\\":
+            return "<iii>";
+          case "%":
+            return "<jjj>";
+      }
+  });
 }
 
 function filterEntry(entry) {
   console.log(entry);
   for(var i = 0; i < entry.length; ++i) {
     if(entry[i].type !== undefined) {
-      console.log("beep")
-      filterEntry(entry[i].children);
+      entry.children = filterEntry(entry[i].children);
     } else if(entry[i].text !== undefined) {
-      console.log("boop")
-      entry[i].text = filterSpecial(entry[i].text);
-      console.log(entry[i].text);
+      entry[i].text = replaceWithTag(entry[i].text);
     }
   }
+  return entry;
 }
 
 const val = [
@@ -42,7 +53,7 @@ const val = [
         "type": "",
         "children": [
           {
-            "text": "\n\0\'\"\b\n\r\t\z\\\%\_",
+            "text": "\n\0\'\"\b\n\r\t\\\%\_",
           },
         ]
       },
@@ -61,12 +72,13 @@ const val = [
   }
 ]
 
-
-
 router.get('/public/:id', async function (req, res) {
   try {
+    let temp = filterEntry(val);
+    console.log(JSON.stringify(temp));
+    console.log(JSON.stringify(val));
     const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
-                        VALUES ('title', '${JSON.stringify(filterEntry(val))}', NOW(), NOW(), 1, 'GENERAL', TRUE, 0 , 0);`;
+                        VALUES ('title', '${JSON.stringify(val)}', NOW(), NOW(), 1, 'GENERAL', TRUE, 0 , 0);`;
     db.promise().query(insert);
     
     const username = req.params.id;
