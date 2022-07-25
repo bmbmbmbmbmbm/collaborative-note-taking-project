@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { createEditor, Transforms, Editor, Element as SlateElement } from 'slate';
+import { createEditor, Transforms, Editor } from 'slate';
 import { Slate, Editable, useSlate, useSlateStatic, ReactEditor, useSelected, useFocused, withReact } from 'slate-react';
 import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
@@ -418,6 +418,7 @@ function onKeyDown(event, editor) {
 }
 
 function Element({ attributes, children, element }) {
+    console.log(attributes, children, element);
     switch (element.type) {
         case 'block-quote':
             return (
@@ -494,7 +495,7 @@ function Leaf({ attributes, children, leaf }) {
     }
 
     if (leaf.code) {
-        children = <div className="code"><code>{children}</code></div>
+        children = <code>{children}</code>
     }
 
     if (leaf.italic) {
@@ -511,11 +512,6 @@ function Leaf({ attributes, children, leaf }) {
 
     if (leaf.superscript) {
         children = <sup>{children}</sup>
-    }
-
-    if (leaf.image) {
-        console.log("Poop")
-        children = <img alt="" src={children} />
     }
 
     return <span {...attributes}>{children}</span>
@@ -542,8 +538,7 @@ function toggleBlock(editor, type) {
     });
 
     const isList = LIST_TYPES.includes(type);
-    let newProperties = <SlateElement />;
-    newProperties = {
+    let newProperties = {
         type: isActive ? 'paragraph' : isList ? 'list-item' : type,
     }
 
