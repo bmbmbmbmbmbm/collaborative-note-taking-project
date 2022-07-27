@@ -1,5 +1,3 @@
-const { json } = require('body-parser');
-const e = require('express');
 const express = require('express');
 const db = require('../database');
 const auth = require('../verify');
@@ -33,54 +31,49 @@ function replaceWithTag (str) {
   });
 }
 
-function filterEntry(entry) {
+function replaceTag (str) {
+  return str.replace(/<aaa>|<bbb>|<ccc>|<ddd>|<eee>|<fff>|<ggg>|<hhh>|<iii>|<jjj>/g, function (sub) {
+    switch(sub) {
+      case "<aaa>":
+        return "\0";
+      case "<bbb>":
+        return "\x08";
+      case "<ccc>":
+        return "\x09";
+      case "<ddd>":
+        return "\x1a";
+      case "<eee>":
+        return "\n";
+      case "<fff>":
+        return "\r";
+      case "<ggg>":
+        return "\"";
+      case "<hhh>":
+        return "'";
+      case "<iii>":
+        return "\\";
+      case "<jjj>":
+        return "%";
+    }
+  })
+}
+
+function filterEntry(entry, removeTags) {
   console.log(entry);
   for(var i = 0; i < entry.length; ++i) {
     if(entry[i].type !== undefined) {
-      entry.children = filterEntry(entry[i].children);
+      entry.children = filterEntry(entry[i].children, removeTags);
     } else if(entry[i].text !== undefined) {
-      entry[i].text = replaceWithTag(entry[i].text);
+      entry[i].text = removeTags ? replaceTag(entry[i].text) : replaceWithTag(entry[i].text);
     }
   }
   return entry;
 }
 
-const val = [
-  {
-    "type": "",
-    "children": [
-      { 
-        "type": "",
-        "children": [
-          {
-            "text": "\n\0\'\"\b\n\r\t\\\%\_",
-          },
-        ]
-      },
-    ]
-  },
-  {
-    "type": "",
-    "children": [
-      { 
-        "text": "\'"
-      },
-      {
-        "text": "\""
-      }
-    ]
-  }
-]
+
 
 router.get('/public/:id', async function (req, res) {
   try {
-    let temp = filterEntry(val);
-    console.log(JSON.stringify(temp));
-    console.log(JSON.stringify(val));
-    const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
-                        VALUES ('title', '${JSON.stringify(val)}', NOW(), NOW(), 1, 'GENERAL', TRUE, 0 , 0);`;
-    db.promise().query(insert);
-    
     const username = req.params.id;
     if (username) {
       const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
@@ -120,7 +113,6 @@ router.get('/:id/view', async function (req, res) {
 router.get('/view-all/:id', async function (req, res) {
   try {
     const username = req.params.id;
-    console.log(username);
     const getId = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
     if (getId[0].length > 0) {
       const id = getId[0][0].id;

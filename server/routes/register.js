@@ -20,7 +20,8 @@ router.post('/', async function (req, res) {
                         await db.promise().query(`INSERT INTO users(username, email, password, moderator, admin, subject_id) VALUES('${email.substring(0, email.indexOf('@'))}', '${email}', '${hash}', FALSE, FALSE, ${subject_id})`)
                         const record = await db.promise().query(`SELECT * FROM users WHERE username='${email.substring(0, email.indexOf('@'))}'`);
                         const id = record[0][0].id;
-                        const token = jwt.sign({ id }, "jwtSecret")
+                        const username = record[0][0].username;
+                        const token = jwt.sign({ id, username }, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF")
                         req.session.user = record[0][0];
                         res.status(200).json({ auth: true, token: token });
                     }

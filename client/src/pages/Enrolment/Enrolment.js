@@ -2,22 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Card, Button, Spinner, Container, Form, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-export default function Enrolment() {
+export default function Enrolment({token, user}) {
     const [units, setUnits] = useState([{}]);
     const [enrolled, setEnrolled] = useState([])
     const [search, setSearch] = useState("");
 
     const navigate = useNavigate();
-    const username = "bm639"
 
     useEffect(() => {
-        fetch(`/subject/Computer_Science`)
+        fetch(`/subject/${user}`)
             .then((response) => response.json())
             .then((value) => {
                 setUnits(value);
             });
 
-        fetch(`/subject/units/user/${username}`).then(
+        fetch(`/subject/get-units/${user}`).then(
             response => response.json()
         ).then(
             value => {
@@ -64,17 +63,18 @@ export default function Enrolment() {
     function enrolUnits(event) {
         event.preventDefault();
         
-        let token = {
-            username: username,
+        let body = {
+            username: user,
             units: enrolled
         };
 
         fetch('/subject/enrol', {
             method: "POST",
             headers: {
+                "x-access-token": token,
                 "Content-Type" : "application/json"
             },
-            body: JSON.stringify(token)
+            body: JSON.stringify(body)
         }).then(
             response => {
                 if(response.status === 200) {

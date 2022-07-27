@@ -19,13 +19,13 @@ import Unit from "./pages/unit/Unit";
 import Account from "./pages/account/Account";
 
 export default function Routing() {
-  const { token, clearToken, setToken } = useToken();
+  const { token, setToken, username, setUsername, clearSession } = useToken();
 
   const navigate = useNavigate();
 
   function logout() {
     sessionStorage.clear();
-    clearToken();
+    clearSession();
     navigate('/')
   }
 
@@ -57,17 +57,13 @@ export default function Routing() {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login setToken={setToken} />} />
-          <Route path="/register" element={<Register setToken={setToken} />} />
+          <Route path="/login" element={<Login setToken={setToken} setUsername={setUsername}/>} />
+          <Route path="/register" element={<Register setToken={setToken} setUsername={setUsername}/>} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </>
     );
   } else {
-    const userString = sessionStorage.getItem('username');
-    const user = JSON.parse(userString);
-
-    console.log(user);
     return (
       <>
         <Navbar bg="dark" variant="dark" expand="lg">
@@ -88,7 +84,7 @@ export default function Routing() {
 
             <Nav className="me-auto">
               <Nav.Link href="/dashboard">dashboard</Nav.Link>
-              <Nav.Link href={`/profile/${user.username}`}>profile</Nav.Link>
+              <Nav.Link href={`/profile/${username}`}>profile</Nav.Link>
               <Nav.Link href="/account">Account</Nav.Link>
               <Nav.Link onClick={logout}>Logout</Nav.Link>
             </Nav>
@@ -98,15 +94,15 @@ export default function Routing() {
         <Routes>
           <Route path="/default-entry" element={<Entry token={token} />} />
           <Route path="/default-thread" element={<Thread isRoot={true} token={token} />} />
-          <Route path="/dashboard" element={<Dashboard user={user.username} />} />
-          <Route path="/thread-creator" element={<ThreadCreator token={token} user={user.username} />} />
+          <Route path="/dashboard" element={<Dashboard user={username} />} />
+          <Route path="/thread-creator" element={<ThreadCreator token={token} user={username}/>} />
           <Route path="/profile/:username" element={<Profile token={token} />} />
-          <Route path="/entry-creator" element={<EntryCreator token={token} user={user.username}/>}>
-            <Route path="/entry-creator/:entryId" element={<EntryCreator token={token} user={user.username}/>}/>
+          <Route path="/entry-creator" element={<EntryCreator token={token} user={username}/>}>
+            <Route path="/entry-creator/:entryId" element={<EntryCreator token={token} user={username}/>}/>
           </Route>
-          <Route path="/account" element={<Account token={token} user={user.username} />}/>
-          <Route path="/enrolment" element={<Enrolment token={token} />} />
-          <Route path="/:unitId" element={<Unit token={token} user={user.username} />} />
+          <Route path="/account" element={<Account token={token}/>}/>
+          <Route path="/enrolment" element={<Enrolment token={token} user={username} />} />
+          <Route path="/:unitId" element={<Unit token={token}/>} />
           <Route path="/" element={<Home />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>

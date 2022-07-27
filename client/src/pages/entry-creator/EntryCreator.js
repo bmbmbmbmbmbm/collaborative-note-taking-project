@@ -21,7 +21,7 @@ export default function EntryCreator({ token, user }) {
     const time = 600;
 
     useEffect(() => {
-        fetch(`/subject/units/user/${user}`)
+        fetch(`/subject/get-units/${user}`)
             .then(
                 response => response.json()
             ).then(
@@ -210,6 +210,9 @@ export default function EntryCreator({ token, user }) {
 
 // Start of handling images
 
+// Code adapted from: Slate; 2022; Available from: https://github.com/ianstormtaylor/slate/blob/main/site/examples/images.tsx; [22/07/2022]
+// Originally written in TypeScript, was adapted for JavaScript usage
+
 function withImages(editor) {
     const { insertData, isVoid } = editor
 
@@ -268,14 +271,14 @@ function Image({ attributes, children, element }) {
                         .userImage {
                             display: block;
                             max-width: 100%;
-                            max-height: 20em;
+                            margin-left: auto;
+                            margin-right: auto;
                             box-shadow: ${selected && focused ? '0 0 0 3px #B4D5FF' : 'none'};
                         }
                         .inlineButton {
-                            display: ${selected && focused ? 'inline' : 'none'};
                             position: absolute;
-                            top: 0.5em;
-                            left: 0.5em;
+                            bottom: 0;
+                            left: 0;
                             background-color: white;
                         }
                         .inlineButton:hover {

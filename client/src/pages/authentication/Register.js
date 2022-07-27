@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Form, FloatingLabel, Spinner, Container } from "react-bootstrap";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 
-export default function Register({ setToken }) {
+export default function Register({ setToken, setUsername }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
@@ -22,7 +22,8 @@ export default function Register({ setToken }) {
     }, []);
 
     function validatePasswords() {
-        const conditions = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;
+        const conditions =
+            /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;
         if (password === confirm && conditions.test(password)) {
             return true;
         }
@@ -59,37 +60,37 @@ export default function Register({ setToken }) {
             return;
         }
 
-        const body = { 
-            email: email, 
-            password: password, 
-            subject_id: chosenSubject 
+        const body = {
+            email: email,
+            password: password,
+            subject_id: chosenSubject,
         };
 
         let success = false;
 
-        await fetch('/register/',
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-            }).then(
-                response => response.json()
-            ).then(
-                data => {
-                    if(data !== undefined) {
-                        success = true;
-                        setToken(data);
-                    }
+        await fetch("/register/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data !== undefined) {
+                    success = true;
+                    setToken(data);
+                    setUsername(email.substring(0, email.indexOf("@")));
                 }
+            });
+        if (success) {
+            sessionStorage.setItem(
+                "username",
+                JSON.stringify({ username: email.substring(0, email.indexOf("@")) })
             );
-        if(success) {
-            sessionStorage.setItem('username', JSON.stringify({ username: email.substring(0, email.indexOf('@'))}));
             setValidated(true);
-            navigate('/enrolment');
+            navigate("/enrolment");
         }
-        
     }
 
     return (
@@ -129,7 +130,10 @@ export default function Register({ setToken }) {
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="formBasicPassword1">
                                 <Form.Label>Password</Form.Label>
-                                <FloatingLabel controlId="floatingInput" label="Choose a password">
+                                <FloatingLabel
+                                    controlId="floatingInput"
+                                    label="Choose a password"
+                                >
                                     <Form.Control
                                         type="password"
                                         placeholder="password"
@@ -143,7 +147,10 @@ export default function Register({ setToken }) {
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="formBasicPassword2">
                                 <Form.Label>Confirm password</Form.Label>
-                                <FloatingLabel controlId="floatingInput" label="Confirm password">
+                                <FloatingLabel
+                                    controlId="floatingInput"
+                                    label="Confirm password"
+                                >
                                     <Form.Control
                                         type="password"
                                         placeholder="password"
@@ -158,8 +165,14 @@ export default function Register({ setToken }) {
 
                             <Form.Group className="mb-3" controlId="formSubject">
                                 <Form.Label>What subject do you take?</Form.Label>
-                                <FloatingLabel controlId="floatingInput" label="Choose a subject">
-                                    <Form.Select onChange={(e) => setChosen(e.target.value)} required>
+                                <FloatingLabel
+                                    controlId="floatingInput"
+                                    label="Choose a subject"
+                                >
+                                    <Form.Select
+                                        onChange={(e) => setChosen(e.target.value)}
+                                        required
+                                    >
                                         <option value={0}></option>
                                         {subjects.map((subject) => (
                                             <option key={subject.id} value={subject.id}>
@@ -173,9 +186,13 @@ export default function Register({ setToken }) {
                                 </Form.Control.Feedback>
                             </Form.Group>
 
-                            <Button type="submit" disabled={!validateForm()}>Register</Button>
+                            <Button type="submit" disabled={!validateForm()}>
+                                Register
+                            </Button>
                         </Form>
-                        <label style={{marginTop: "0.5%"}}>Got an account? Login <Link to="/login">here</Link>.</label>
+                        <label style={{ marginTop: "0.5%" }}>
+                            Got an account? Login <Link to="/login">here</Link>.
+                        </label>
                     </Container>
                 </div>
             )}

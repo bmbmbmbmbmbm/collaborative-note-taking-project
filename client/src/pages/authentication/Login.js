@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import PropTypes from 'prop-types';
 
-export default function Login({ setToken }) {
+export default function Login({ setToken, setUsername }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -39,8 +39,9 @@ export default function Login({ setToken }) {
         ).then(
             data => {
                 if(data !== undefined) {
-                    setToken(data)
                     success = true;
+                    setToken(data);
+                    setUsername(email.substring(0, email.indexOf('@')));
                 } 
             }
         )

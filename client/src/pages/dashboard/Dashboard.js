@@ -44,7 +44,7 @@ export default function Dashboard({ user }) {
                 data => setThreads(data)
             );
 
-        fetch(`/subject/units/user/${user}`)
+        fetch(`/subject/get-units/${user}`)
             .then(
                 response => response.json()
             ).then(
@@ -131,18 +131,18 @@ export default function Dashboard({ user }) {
                                     <h4>Want to make a new entry?</h4>
                                     <Button>Get started</Button>
                                 </div>
-                                {threads.map(entry =>
+                                {threads.map(thread =>
                                     <Post
                                         isEntry={false}
-                                        id={entry.id}
-                                        title={entry.title}
-                                        user={entry.username}
-                                        created={entry.created}
-                                        updated={entry.last_reply}
-                                        unitTitle={entry.unit_title}
-                                        code={entry.code}
-                                        positive={entry.positive}
-                                        negative={entry.negative}
+                                        id={thread.id}
+                                        title={thread.title}
+                                        user={thread.username}
+                                        created={thread.created}
+                                        updated={thread.last_reply}
+                                        unitTitle={thread.unit_title}
+                                        code={thread.code}
+                                        positive={thread.positive}
+                                        negative={thread.negative}
                                     />
                                 )}
                             </div>
@@ -163,7 +163,7 @@ export default function Dashboard({ user }) {
                         {units.length > 0 ? (
                             <div className="units">
                                 {units.map(unit =>
-                                    <UnitDisplay unitCode={unit.code} title={unit.title} />
+                                    <UnitDisplay unitCode={unit.code} title={unit.title} key={unit.code + unit.title}/>
                                 )}
                                 <div className="missingUnit" style={{ textAlign: "center" }}>
                                     <h4>Missing a unit?</h4>

@@ -11,14 +11,14 @@ export default function Profile() {
     const [units, setUnits] = useState()
 
     useEffect(() => {
-        fetch(`/subject/user/${params.username}`)
+        fetch(`/subject/get-subject/${params.username}`)
             .then(
                 response => response.json()
             ).then(
                 data => setSubject(data)
             );
 
-        fetch(`/subject/units/user/${params.username}`)
+        fetch(`/subject/get-units/${params.username}`)
             .then(
                 response => response.json()
             ).then(

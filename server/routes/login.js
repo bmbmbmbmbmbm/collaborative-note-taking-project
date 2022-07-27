@@ -20,10 +20,12 @@ router.post("/", async function (req, res) {
                         res.status(404);
                     } else {
                         if (result === true) {
-                            const id = record[0][0].user_id
-                            const token = jwt.sign({ id }, "jwtSecret")
+                            const id = record[0][0].user_id;
+                            const username = record[0][0].username;
+                            const token = jwt.sign({ id, username }, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF")
                             req.session.user = record[0][0];
                             await db.promise().query(`INSERT INTO session(user_id, start) VALUES (${record[0][0].id}, NOW())`);
+                            console.log(token);
                             res.status(200).json({ auth: true, token: token });
                         } else {
                             res.status(400);

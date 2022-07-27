@@ -1,12 +1,96 @@
 const express = require('express');
 const db = require('../database');
+const auth = require('../verify');
 
 const router = express.Router();
 
-function filterSpecial(entry) {
-    filtered = JSON.stringify(entry).replace(/'/g, "\\" + "\'");
-    return filtered;
+function replaceWithTag(str) {
+    return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+        switch (char) {
+            case "\0":
+                return "<aaa>";
+            case "\x08":
+                return "<bbb>";
+            case "\x09":
+                return "<ccc>";
+            case "\x1a":
+                return "<ddd>";
+            case "\n":
+                return "<eee>";
+            case "\r":
+                return "<fff>";
+            case "\"":
+                return "<ggg>";
+            case "'":
+                return "<hhh>";
+            case "\\":
+                return "<iii>";
+            case "%":
+                return "<jjj>";
+        }
+    });
 }
+
+function replaceTag(str) {
+    return str.replace(/<aaa>|<bbb>|<ccc>|<ddd>|<eee>|<fff>|<ggg>|<hhh>|<iii>|<jjj>/g, function (sub) {
+        switch (sub) {
+            case "<aaa>":
+                return "\0";
+            case "<bbb>":
+                return "\x08";
+            case "<ccc>":
+                return "\x09";
+            case "<ddd>":
+                return "\x1a";
+            case "<eee>":
+                return "\n";
+            case "<fff>":
+                return "\r";
+            case "<ggg>":
+                return "\"";
+            case "<hhh>":
+                return "'";
+            case "<iii>":
+                return "\\";
+            case "<jjj>":
+                return "%";
+        }
+    })
+}
+
+function filterThread(entry, removeTags) {
+    console.log(entry);
+    for (var i = 0; i < entry.length; ++i) {
+        if (entry[i].type !== undefined) {
+            entry.children = filterEntry(entry[i].children, removeTags);
+        } else if (entry[i].text !== undefined) {
+            entry[i].text = removeTags ? replaceTag(entry[i].text) : replaceWithTag(entry[i].text);
+        }
+    }
+    return entry;
+}
+
+router.post('create', auth.verifyToken, async function (req, res) {
+    try{
+        const { username, title, unitCode, content } = req.body;
+        if(username && username.length > 0 && title && title.length >= 6 && title.length <= 64 && unitCode && content && content.split(" ").length <= 1000) {
+            const record = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
+            if(record[0].length === 1) {
+                const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
+                                VALUES ('${title}', '${content}', NOW(), NOW(), ${record[0][0].id}, '${unitCode}', 0 , 0)`;
+                await db.promise().query(insert);
+                res.status(200);
+            } else {
+                res.status(400);
+            }
+        } else {
+            res.status(400);
+        }
+    } catch(err) {
+        console.log(err);
+        res.status(500);
+    }
+})
 
 router.get('/view-all/:id', async function (req, res) {
     try {

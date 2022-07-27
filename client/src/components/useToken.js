@@ -7,14 +7,26 @@ export default function useToken() {
     return userToken?.token
   }
 
+  function getUser() {
+    const userString = sessionStorage.getItem('user');
+    const user = JSON.parse(userString);
+    return user?.username;
+  }
+
   const [token, setToken] = useState(getToken());
+  const [username, setUsername] = useState(getUser());
 
   function saveToken(userToken) {
     sessionStorage.setItem('token', JSON.stringify(userToken));
     setToken(userToken);
   }
 
-  function clearToken() {
+  function saveUsername(user) {
+    sessionStorage.setItem('user', JSON.stringify({username: user}));
+    setUsername(user);
+  }
+
+  function clearSession() {
     sessionStorage.clear()
     setToken();
   }
@@ -22,6 +34,8 @@ export default function useToken() {
   return {
     token,
     setToken: saveToken,
-    clearToken: clearToken,
+    username,
+    setUsername: saveUsername,
+    clearSession: clearSession,
   }
 }

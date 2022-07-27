@@ -1,11 +1,14 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { Container, ButtonGroup, Button, Tabs, Tab } from 'react-bootstrap';
-import { Slate, Editable, withReact } from 'slate-react';
-import { createEditor } from 'slate';
+import { createEditor, Transforms } from 'slate';
+import { Slate, Editable, useSlateStatic, ReactEditor, useSelected, useFocused, withReact } from 'slate-react';
+import imageExtensions from 'image-extensions';
+import isUrl from 'is-url';
+import { withHistory } from 'slate-history';
+import { Tabs, Tab, Container, Button, ButtonGroup} from 'react-bootstrap';
 import ThreadCreator from '../thread-creator/ThreadCreator.js';
 
 export default function Entry() {
-    const editor = useMemo(() => withReact(createEditor()), [])
+    const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
     const [entry, setEntry] = useState([{}]);
 
     useEffect(() => {
@@ -85,6 +88,96 @@ export default function Entry() {
             </Container>
         </div>
     );
+}
+
+function withImages(editor) {
+    const { insertData, isVoid } = editor
+
+    editor.isVoid = element => {
+        return element.type === 'image' ? true : isVoid(element)
+    }
+
+    editor.insertData = data => {
+        const text = data.getData('text/plain')
+        const { files } = data
+
+        if (files && files.length > 0) {
+            for (const file of files) {
+                const reader = new FileReader()
+                const [mime] = file.type.split('/')
+
+                if (mime === 'image') {
+                    reader.addEventListener('load', () => {
+                        const url = reader.result
+                        insertImage(editor, url)
+                    })
+
+                    reader.readAsDataURL(file)
+                }
+            }
+        } else if (isImageUrl(text)) {
+            insertImage(editor, text)
+        } else {
+            insertData(data)
+        }
+    }
+
+    return editor
+}
+
+function insertImage(editor, url) {
+    const text = { text: '' };
+    const image = { type: 'image', url, children: [text] };
+    Transforms.insertNodes(editor, image);
+}
+
+function Image({ attributes, children, element }) {
+    const editor = useSlateStatic()
+    const path = ReactEditor.findPath(editor, element)
+
+    const selected = useSelected()
+    const focused = useFocused()
+    return (
+        <div {...attributes}>
+            {children}
+            <div
+                contentEditable={false}
+            >
+                <style type="text/css">
+                    {`
+                        .userImage {
+                            display: block;
+                            max-width: 100%;
+                            margin-left: auto;
+                            margin-right: auto;
+                            box-shadow: ${selected && focused ? '0 0 0 3px #B4D5FF' : 'none'};
+                        }
+                        .inlineButton {
+                            position: absolute;
+                            bottom: 0;
+                            left: 0;
+                            background-color: white;
+                        }
+                        .inlineButton:hover {
+                            background-color: blue;
+                        }
+                    `}
+                </style>
+                <img
+                    className='userImage'
+                    alt="Figure"
+                    src={element.url}
+                />
+            </div>
+        </div>
+    )
+}
+
+function isImageUrl(url) {
+    if (!url) return false
+    if (!isUrl(url)) return false
+    const ext = new URL(url).pathname.split('.').pop()
+    return imageExtensions.includes(ext)
 }
 
 function Element({attributes, children, element}) {
