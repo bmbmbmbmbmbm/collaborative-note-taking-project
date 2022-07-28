@@ -2,14 +2,14 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-export default function EntryPrompt(props) {
+export default function EntryPrompt({title, desc, link, img}) {
     const navigate = useNavigate();
 
     return (
         <div className="prompt" style={{ textAlign: "center" }}>
             <img
                 alt=""
-                src={props.img}
+                src={img}
                 style={{
                     objectFit: "scale-down",
                     width: "70%",
@@ -17,9 +17,9 @@ export default function EntryPrompt(props) {
                     marginRight: "auto",
                 }}
             />
-            <h2>{props.title}</h2>
-            <p style={{ paddingLeft: "3%", paddingRight: "3%" }}>{props.desc}</p>
-            <Button onClick={() => navigate(props.link)}>Get started</Button>
+            <h2>{title}</h2>
+            <p style={{ paddingLeft: "3%", paddingRight: "3%" }}>{desc}</p>
+            <Button onClick={() => navigate(link)}>Get started</Button>
         </div>
     );
 }

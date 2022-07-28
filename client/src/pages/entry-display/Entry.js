@@ -4,10 +4,11 @@ import { Slate, Editable, useSlateStatic, ReactEditor, useSelected, useFocused, 
 import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
-import { Tabs, Tab, Container, Button, ButtonGroup, Row, Col } from 'react-bootstrap';
+import { Tabs, Tab, Container, Row, Col, Card } from 'react-bootstrap';
 import Reply from '../thread-display/Reply.js';
 import Comment from '../thread-display/Comment.js';
 import { useParams, Link } from 'react-router-dom';
+import Prompt from '../../components/Prompt.js';
 
 export default function Entry({ token, user }) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
@@ -16,10 +17,9 @@ export default function Entry({ token, user }) {
     const [username, setUsername] = useState("");
     const [created, setCreated] = useState("");
     const [updated, setUpdated] = useState("");
-    const [positive, setPositive] = useState(0);
-    const [negative, setNegative] = useState(0);
     const [unit, setUnit] = useState("");
     const [interactions, setInteractions] = useState({ comments: [], replies: [] })
+    const [userEdits, setUserEdits] = useState([])
 
     const params = useParams();
 
@@ -33,8 +33,6 @@ export default function Entry({ token, user }) {
                 setUsername(data.username);
                 setCreated(data.created);
                 setUpdated(data.updated);
-                setPositive(data.positive);
-                setNegative(data.negative);
                 setUnit(data.unit_code);
             }
         )
@@ -43,6 +41,12 @@ export default function Entry({ token, user }) {
             response => response.json()
         ).then(
             data => setInteractions(data)
+        )
+
+        fetch(`/entry/edit-suggestions/${params.entryId}`).then(
+            response => response.json()
+        ).then(
+            data => setUserEdits(data)
         )
     }, [])
 
@@ -119,43 +123,80 @@ export default function Entry({ token, user }) {
                     <Tabs defaultActiveKey="document" className="tabs">
                         <Tab eventKey="document" title="Entry">
                             <Container style={{ backgroundColor: "white" }}>
-
+                                <div className='contents' style={{ borderBottom: "1px solid lightgrey", paddingBottom: "1%", marginBottom: "1%" }}>
+                                    <style type="text/css">
+                                        {`
+                                            .head-1 {
+                                                display: block;
+                                                margin-left: 0px;
+                                            }
+                                            .head-2 {
+                                                display: block;
+                                                margin-left: 20px;
+                                            }
+                                            .head-3 {
+                                                display: block;
+                                                margin-left: 40px;
+                                            }
+                                            .head-4 {
+                                                display: block;
+                                                margin-left: 60px;
+                                            }
+                                            .head-5 {
+                                                display: block;
+                                                margin-left: 80px;
+                                            }
+                                        `}
+                                    </style>
+                                    <h5>Contents</h5>
+                                    {createContents().map(heading =>
+                                        <a key={heading.substring(1)} className={`head-${heading.charAt(0)}`} href={`#${heading.substring(1)}`}>{heading.substring(1, 50)}</a>
+                                    )}
+                                </div>
                                 <Slate editor={editor} value={entry}>
                                     <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} placeholder='Some text' />
                                 </Slate>
 
                             </Container>
                         </Tab>
-                        <Tab eventKey="contents" title="Contents">
-                            <Container style={{ backgroundColor: "white" }}>
-                                <ButtonGroup>
-                                    {createContents().map(heading =>
-                                        <Button key={heading.substring(1)} className={`head-${heading.charAt(0)}`}>{heading.substring(1)}</Button>
-                                    )}
-                                </ButtonGroup>
-                            </Container>
-                        </Tab>
                         <Tab eventKey="Discussion" title="Discussion">
                             <Container>
-                                <div className="reply" style={{marginBottom: "2%"}}>
-                                <Reply Id={params.entryId} token={token} depth={0} isThread={false} />
+                                <div className="reply" style={{ marginBottom: "2%" }}>
+                                    <Reply Id={params.entryId} token={token} depth={0} isThread={false} />
                                 </div>
-                                
+
                                 {interactions.comments.map(comment =>
                                     <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} token={token} depth={0} />
                                 )}
                             </Container>
                         </Tab>
-                        <Tab eventKey="User Edits" title="Edit Suggestions">
-                            <Container style={{ backgroundColor: "white" }}>
+                        <Tab eventKey="Suggested Edits" title="Suggested Edits">
+                            <Container>
+                                <Prompt title="Why not make an edit?" desc="Others, including the author, may find it useful" link={`/${params.unitId}/entry/${params.entryId}/edit`} />
+                                {userEdits.map(theEdit =>
+                                    <Card key={theEdit.username} style={{marginTop: "2%"}}>
+                                        <Card.Header>
+                                            <Row>
+                                                <Col>
+                                                    edit made by {theEdit.username}
+                                                </Col>
+                                                <Col>
+                                                    <label style={{ float: "right" }}>{theEdit.created}</label>
+                                                </Col>
+                                            </Row>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            <Slate editor={editor} value={theEdit.edit}>
+                                                <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} placeholder='Some text' />
+                                            </Slate>
+                                        </Card.Body>
+                                    </Card>
+                                )}
                             </Container>
                         </Tab>
                     </Tabs>
                 </>
-
             }
-
-
         </div >
     );
 }
@@ -241,6 +282,14 @@ function isImageUrl(url) {
     return imageExtensions.includes(ext)
 }
 
+function listToString(children) {
+    var str = "";
+    for (var i = 0; i < children.length; ++i) {
+        str += children[i].props.text.text;
+    }
+    return str;
+}
+
 function Element({ attributes, children, element }) {
     switch (element.type) {
         case 'block-quote':
@@ -257,32 +306,34 @@ function Element({ attributes, children, element }) {
             )
         case 'heading-one':
             return (
-                <h1  {...attributes} className={children[0].props.text.text}>
-                    {children}
+                <h1  {...attributes} id={`${listToString(children)}`}>
+                    <a href={`${listToString(children)}`}>{children}</a>
+
                 </h1>
             )
         case 'heading-two':
 
             return (
-                <h2  {...attributes} className={children[0].props.text.text}>
-                    {children}
+                <h2  {...attributes} id={`${listToString(children)}`}>
+                    <a href={`${listToString(children)}`}>{children}</a>
                 </h2>
             )
         case 'heading-three':
             return (
-                <h3 {...attributes} className={children[0].props.text.text}>
-                    {children}
+                <h3 {...attributes} id={`${listToString(children)}`}>
+                    <a href={`${listToString(children)}`}>{children}</a>
                 </h3>
             )
         case 'heading-four':
             return (
-                <h4 {...attributes} className={children[0].props.text.text}>
-                    {children}
+                <h4 {...attributes} id={`${listToString(children)}`}>
+                    <a href={`${listToString(children)}`}>{children}</a>
                 </h4>
             )
         case 'heading-five':
             return (
-                <h5 {...attributes} className={children[0].props.text.text}>
+                <h5 {...attributes} id={`${listToString(children)}`}>
+                    <a href={`${listToString(children)}`}>{children}</a>
                     {children}
                 </h5>
             )

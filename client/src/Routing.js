@@ -17,6 +17,7 @@ import Login from "./pages/authentication/Login";
 import Register from "./pages/authentication/Register";
 import Unit from "./pages/unit/Unit";
 import Account from "./pages/account/Account";
+import EntryEditor from "./pages/entry-creator/EntryEditor";
 
 export default function Routing() {
   const { token, setToken, username, setUsername, clearSession } = useToken();
@@ -103,6 +104,7 @@ export default function Routing() {
           <Route path="/:unitId" element={<Unit token={token} />} />
           <Route path="/:unitId/entry/:entryId" element={<Entry token={token} user={username}/>} />
           <Route path="/:unitId/thread/:threadId" element={<Thread token={token} user={username}/>} />
+          <Route path="/:unitId/entry/:entryId/edit" element={<EntryEditor token={token} user={username}/>}/>
           <Route path="/" element={<Home />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
