@@ -57,8 +57,8 @@ export default function Routing() {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login setToken={setToken} setUsername={setUsername}/>} />
-          <Route path="/register" element={<Register setToken={setToken} setUsername={setUsername}/>} />
+          <Route path="/login" element={<Login setToken={setToken} setUsername={setUsername} />} />
+          <Route path="/register" element={<Register setToken={setToken} setUsername={setUsername} />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </>
@@ -92,17 +92,17 @@ export default function Routing() {
         </Navbar>
 
         <Routes>
-          <Route path="/default-entry" element={<Entry token={token} />} />
-          <Route path="/default-thread" element={<Thread isRoot={true} token={token} />} />
           <Route path="/dashboard" element={<Dashboard user={username} />} />
-          <Route path="/thread-creator" element={<ThreadCreator token={token} user={username}/>} />
+          <Route path="/thread-creator" element={<ThreadCreator token={token} user={username} />} />
           <Route path="/profile/:username" element={<Profile token={token} />} />
-          <Route path="/entry-creator" element={<EntryCreator token={token} user={username}/>}>
-            <Route path="/entry-creator/:entryId" element={<EntryCreator token={token} user={username}/>}/>
+          <Route path="/entry-creator" element={<EntryCreator token={token} user={username} />}>
+            <Route path="/entry-creator/:entryId" element={<EntryCreator token={token} user={username} />} />
           </Route>
-          <Route path="/account" element={<Account token={token}/>}/>
+          <Route path="/account" element={<Account token={token} />} />
           <Route path="/enrolment" element={<Enrolment token={token} user={username} />} />
-          <Route path="/:unitId" element={<Unit token={token}/>} />
+          <Route path="/:unitId" element={<Unit token={token} />} />
+          <Route path="/:unitId/entry/:entryId" element={<Entry token={token} user={username}/>} />
+          <Route path="/:unitId/thread/:threadId" element={<Thread token={token} user={username}/>} />
           <Route path="/" element={<Home />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>

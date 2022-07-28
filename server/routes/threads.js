@@ -58,39 +58,55 @@ function replaceTag(str) {
     })
 }
 
-function filterThread(entry, removeTags) {
-    console.log(entry);
-    for (var i = 0; i < entry.length; ++i) {
-        if (entry[i].type !== undefined) {
-            entry.children = filterEntry(entry[i].children, removeTags);
-        } else if (entry[i].text !== undefined) {
-            entry[i].text = removeTags ? replaceTag(entry[i].text) : replaceWithTag(entry[i].text);
-        }
-    }
-    return entry;
-}
+router.post('/create', auth.verifyToken, async function (req, res) {
+    try {
+        const { title, unitCode, content } = req.body;
+        const userId = req.userId;
+        if (userId && title && title.length >= 6 && title.length <= 64 && unitCode && content && content.split(" ").length <= 1000) {
+            const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
+                                VALUES ('${title}', '${JSON.stringify({ "content": replaceWithTag(content) })}', NOW(), NOW(), ${userId}, '${unitCode}', 0 , 0)`;
+            await db.promise().query(insert);
+            res.status(200);
 
-router.post('create', auth.verifyToken, async function (req, res) {
-    try{
-        const { username, title, unitCode, content } = req.body;
-        if(username && username.length > 0 && title && title.length >= 6 && title.length <= 64 && unitCode && content && content.split(" ").length <= 1000) {
-            const record = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
-            if(record[0].length === 1) {
-                const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
-                                VALUES ('${title}', '${content}', NOW(), NOW(), ${record[0][0].id}, '${unitCode}', 0 , 0)`;
-                await db.promise().query(insert);
-                res.status(200);
-            } else {
-                res.status(400);
-            }
         } else {
             res.status(400);
         }
-    } catch(err) {
+    } catch (err) {
         console.log(err);
         res.status(500);
     }
 })
+
+router.post('/add-reply', auth.verifyToken, async function (req, res) {
+    try {
+        const { content, threadId, commentId } = req.body;
+        const userId = req.userId;
+        if (content.length > 0 && content.split(" ").length <= 1000 && Number.isInteger(+threadId)) {
+            const select = `SELECT id FROM threads WHERE id=${threadId}`;
+            const thread = await db.promise().query(select);
+            if (Number.isInteger(+commentId)) {
+                const select2 = `SELECT id, thread_id FROM replies WHERE id=${commentId}`;
+                const comment = await db.promise().query(select2);
+                if (comment[0].length === 1 && thread[0].length === 1) {
+                    const insert = `INSERT INTO replies(reply, replyTo, user_id, thread_id, created) VALUES ('${JSON.stringify({ "content": content })}', ${commentId}, ${userId}, ${threadId}, NOW());`
+                    await db.promise().query(insert);
+                    res.status(200);
+                } else {
+                    res.status(400);
+                }
+            } else {
+                const insert = `INSERT INTO replies(reply, user_id, thread_id, created) VALUES ('${JSON.stringify({ "content": content })}', ${userId}, ${threadId}, NOW());`
+                await db.promise().query(insert);
+                res.status(200);
+            }
+        } else {
+            res.status(400);
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(404);
+    }
+});
 
 router.get('/view-all/:id', async function (req, res) {
     try {
@@ -98,7 +114,8 @@ router.get('/view-all/:id', async function (req, res) {
         if (user) {
             const userRecord = await db.promise().query(`SELECT * FROM users WHERE username='${user}'`)
             if (userRecord[0].length !== 0) {
-                const query = `SELECT threads.id, threads.title, threads.created, threads.last_reply, units.title FROM threads INNER JOIN units ON units.code=threads.unit_code WHERE user_id=${userRecord[0][0].id}`
+                const query = `SELECT threads.id, threads.title, threads.created, threads.last_reply, threads.positive, threads.negative, units.title AS unit_title, units.code FROM threads INNER JOIN units 
+                               ON units.code=threads.unit_code WHERE user_id=${userRecord[0][0].id}`
                 const threads = await db.promise().query(query);
                 res.status(200).json(threads[0]);
             } else {
@@ -135,8 +152,37 @@ router.get('/:id/view', async function (req, res) {
 });
 
 router.get('/view/:id', async function (req, res) {
-
+    try {
+        if (Number.isInteger(+req.params.id)) {
+            const select = `SELECT threads.title, threads.thread, threads.created, threads.last_reply, threads.unit_code, users.username FROM threads INNER JOIN users ON threads.user_id=users.id WHERE threads.id=${req.params.id};`;
+            var record = await db.promise().query(select);
+            record[0][0].content = replaceTag(record[0][0].thread.content);
+            res.status(200).json(record[0][0]);
+        } else {
+            res.status(400);
+        }
+    } catch(err) {
+        console.log(err);
+        res.status(404);
+    }
 });
+
+router.get('/view/:id/replies', async function (req, res) {
+    try {
+        const threadId = req.params.id;
+        if(Number.isInteger(+threadId)) {
+            const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NULL`;
+            const comments = await db.promise().query(select1);
+            const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NOT NULL`;
+            const replies = await db.promise().query(select2);
+            res.status(200).json({comments: comments[0], replies: replies[0]});
+        } else {
+            res.status(400);
+        }
+    } catch(err) {
+        console.log(err);
+    }
+})
 
 
 module.exports = router;

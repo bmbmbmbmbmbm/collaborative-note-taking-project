@@ -41,7 +41,6 @@ router.post('/', async function (req, res) {
 
 router.get('/', async function (req, res) {
     const results = await db.promise().query('SELECT * FROM USERS');
-    console.log(results);
     res.status(200).send(results[0]);
 })
 

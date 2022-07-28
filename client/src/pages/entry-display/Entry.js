@@ -4,20 +4,45 @@ import { Slate, Editable, useSlateStatic, ReactEditor, useSelected, useFocused, 
 import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
-import { Tabs, Tab, Container, Button, ButtonGroup} from 'react-bootstrap';
-import ThreadCreator from '../thread-creator/ThreadCreator.js';
+import { Tabs, Tab, Container, Button, ButtonGroup, Row, Col } from 'react-bootstrap';
+import Reply from '../thread-display/Reply.js';
+import Comment from '../thread-display/Comment.js';
+import { useParams, Link } from 'react-router-dom';
 
-export default function Entry() {
+export default function Entry({ token, user }) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
     const [entry, setEntry] = useState([{}]);
+    const [title, setTitle] = useState("");
+    const [username, setUsername] = useState("");
+    const [created, setCreated] = useState("");
+    const [updated, setUpdated] = useState("");
+    const [positive, setPositive] = useState(0);
+    const [negative, setNegative] = useState(0);
+    const [unit, setUnit] = useState("");
+    const [interactions, setInteractions] = useState({ comments: [], replies: [] })
+
+    const params = useParams();
 
     useEffect(() => {
-        fetch("/entry/view/1").then(
+        fetch(`/entry/view/${params.entryId}`).then(
             response => response.json()
         ).then(
             data => {
-                setEntry(data)
+                setTitle(data.title);
+                setEntry(data.entry);
+                setUsername(data.username);
+                setCreated(data.created);
+                setUpdated(data.updated);
+                setPositive(data.positive);
+                setNegative(data.negative);
+                setUnit(data.unit_code);
             }
+        )
+
+        fetch(`/entry/view/${params.entryId}/replies`).then(
+            response => response.json()
+        ).then(
+            data => setInteractions(data)
         )
     }, [])
 
@@ -28,8 +53,8 @@ export default function Entry() {
         return element.type.includes("heading")
     }
 
-    function headingType(type){
-        switch(type) {
+    function headingType(type) {
+        switch (type) {
             case "heading-one":
                 return "1";
             case "heading-two":
@@ -48,11 +73,11 @@ export default function Entry() {
     function createContents() {
         const messyContents = entry.filter(isHeading);
         var refinedContents = [""];
-        for(let i = 0; i < messyContents.length; ++i) {
-            for(let j = 0; j < messyContents[i].children.length; ++j) {
+        for (let i = 0; i < messyContents.length; ++i) {
+            for (let j = 0; j < messyContents[i].children.length; ++j) {
                 refinedContents[i] = refinedContents[i] + messyContents[i].children[j].text;
             }
-            if(refinedContents[i].includes("undefined")){
+            if (refinedContents[i].includes("undefined")) {
                 refinedContents[i] = refinedContents[i].substring(9);
             }
             refinedContents[i] = headingType(messyContents[i].type) + refinedContents[i];
@@ -62,31 +87,76 @@ export default function Entry() {
 
     return (
         <div className='entry'>
-            <Container style={{backgroundColor: "white"}}>
-                {(typeof entry[0].type === 'undefined') ? 
-                    (<p>Loading</p>) 
-                : 
-                    <Tabs defaultActiveKey="document" className="mb-3">
+
+            {(typeof entry[0].type === 'undefined') ?
+                <p>Loading</p>
+                :
+                <>
+                    <div className="header" style={{ backgroundColor: "white" }}>
+                        <Container>
+                            <h1>{title}</h1>
+                            <Row>
+                                <Col>
+                                    <h4>By <Link to={`/profile/${username}`}>{username}</Link></h4>
+                                </Col>
+                                <Col>
+                                    <h4 style={{ "float": "right" }}>Submitted to <Link to={`/${unit}`}>{unit}</Link></h4>
+                                </Col>
+                            </Row>
+                            <label>Created: {created} - {updated.length > 0 && <>Updated: {updated}</>}</label>
+
+                        </Container>
+                    </div>
+                    <style type="text/css">
+                        {`
+                            .tabs {
+                                background-color: white;
+                                justify-content: center;
+                            }
+                            
+                        `}
+                    </style>
+                    <Tabs defaultActiveKey="document" className="tabs">
                         <Tab eventKey="document" title="Entry">
-                            <Slate editor={editor} value={entry}>
-                                <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} placeholder='Some text' />
-                            </Slate>
+                            <Container style={{ backgroundColor: "white" }}>
+
+                                <Slate editor={editor} value={entry}>
+                                    <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} placeholder='Some text' />
+                                </Slate>
+
+                            </Container>
                         </Tab>
                         <Tab eventKey="contents" title="Contents">
-                            <ButtonGroup>
-                                {createContents().map(heading => 
-                                    <Button key={heading.substring(1)} className={`head-${heading.charAt(0)}`}>{heading.substring(1)}</Button>    
-                                )}
-                            </ButtonGroup>
+                            <Container style={{ backgroundColor: "white" }}>
+                                <ButtonGroup>
+                                    {createContents().map(heading =>
+                                        <Button key={heading.substring(1)} className={`head-${heading.charAt(0)}`}>{heading.substring(1)}</Button>
+                                    )}
+                                </ButtonGroup>
+                            </Container>
                         </Tab>
                         <Tab eventKey="Discussion" title="Discussion">
-                            <ThreadCreator isLoggedIn={true}/>
+                            <Container>
+                                <div className="reply" style={{marginBottom: "2%"}}>
+                                <Reply Id={params.entryId} token={token} depth={0} isThread={false} />
+                                </div>
+                                
+                                {interactions.comments.map(comment =>
+                                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} token={token} depth={0} />
+                                )}
+                            </Container>
+                        </Tab>
+                        <Tab eventKey="User Edits" title="Edit Suggestions">
+                            <Container style={{ backgroundColor: "white" }}>
+                            </Container>
                         </Tab>
                     </Tabs>
-                }
-                
-            </Container>
-        </div>
+                </>
+
+            }
+
+
+        </div >
     );
 }
 
@@ -152,15 +222,6 @@ function Image({ attributes, children, element }) {
                             margin-right: auto;
                             box-shadow: ${selected && focused ? '0 0 0 3px #B4D5FF' : 'none'};
                         }
-                        .inlineButton {
-                            position: absolute;
-                            bottom: 0;
-                            left: 0;
-                            background-color: white;
-                        }
-                        .inlineButton:hover {
-                            background-color: blue;
-                        }
                     `}
                 </style>
                 <img
@@ -180,8 +241,8 @@ function isImageUrl(url) {
     return imageExtensions.includes(ext)
 }
 
-function Element({attributes, children, element}) {
-    switch(element.type) {
+function Element({ attributes, children, element }) {
+    switch (element.type) {
         case 'block-quote':
             return (
                 <blockquote {...attributes}>
@@ -196,31 +257,32 @@ function Element({attributes, children, element}) {
             )
         case 'heading-one':
             return (
-                <h1  {...attributes}>
+                <h1  {...attributes} className={children[0].props.text.text}>
                     {children}
                 </h1>
             )
         case 'heading-two':
+
             return (
-                <h2  {...attributes}>
+                <h2  {...attributes} className={children[0].props.text.text}>
                     {children}
                 </h2>
             )
         case 'heading-three':
             return (
-                <h3 {...attributes}>
+                <h3 {...attributes} className={children[0].props.text.text}>
                     {children}
                 </h3>
             )
         case 'heading-four':
             return (
-                <h4 {...attributes}>
+                <h4 {...attributes} className={children[0].props.text.text}>
                     {children}
                 </h4>
             )
         case 'heading-five':
             return (
-                <h5>
+                <h5 {...attributes} className={children[0].props.text.text}>
                     {children}
                 </h5>
             )
@@ -237,9 +299,9 @@ function Element({attributes, children, element}) {
                 </ol>
             )
         case 'image':
-            return (
-                <img alt="" src={children} />
-            )
+            var props = { attributes, children, element };
+            return <Image {...props} />
+
         default:
             return (
                 <p  {...attributes}>
@@ -249,13 +311,15 @@ function Element({attributes, children, element}) {
     }
 }
 
-function Leaf({attributes, children, leaf}) {
+
+
+function Leaf({ attributes, children, leaf }) {
     if (leaf.bold) {
         children = <strong>{children}</strong>
     }
 
     if (leaf.code) {
-        children = <div className="code"><code>{children}</code></div>
+        children = <code>{children}</code>
     }
 
     if (leaf.italic) {

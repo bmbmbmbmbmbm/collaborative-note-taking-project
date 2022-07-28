@@ -1,107 +1,80 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Card, Tabs, Tab } from 'react-bootstrap';
+import { Container, Card, Row, Col } from 'react-bootstrap';
+import { Link, useParams } from 'react-router-dom';
 import Reply from './Reply';
+import Comment from './Comment';
 
-export default function Thread(props) {
-    const [threadData, setThreadData] = useState();
-    const [showReply, setShowReply] = useState(false);
+export default function Thread({ user, token }) {
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+    const [author, setAuthor] = useState("");
+    const [created, setCreated] = useState("");
+    const [lastReply, setLastReply] = useState("");
+    const [unitCode, setUnitCode] = useState("");
+    const [interactions, setInteractions] = useState({ comments: [], replies: [] });
+
+    const params = useParams();
 
     useEffect(() => {
-        if(props.isRoot) {
-            fetch("/threads/view/1").then(
-                response => response.json()
-            ).then(
-                data => {
-                    setThreadData(data);
-                }
-            )
-        }
+        fetch(`/threads/view/${params.threadId}`).then(
+            response => response.json()
+        ).then(
+            data => {
+                setTitle(data.title);
+                setContent(data.thread.content);
+                setAuthor(data.username);
+                setCreated(data.created);
+                setLastReply(data.last_reply)
+                setUnitCode(data.unit_code)
+            }
+        )
+
+        fetch(`/threads/view/${params.threadId}/replies`).then(
+            response => response.json()
+        ).then(
+            data => {
+                setInteractions(data);
+            }
+        )
+
     }, []);
 
-    return ( 
+    return (
         <>
-            {props.isRoot ? 
-                (typeof threadData === 'undefined'?
-                    <Container>
-                        <h1>Loading...</h1>
-                    </Container>
+            <div className="header" style={{ backgroundColor: "white" }}>
+                <Container>
+                    <h1>{title}</h1>
+                    <Row>
+                        <Col>
+                            <h4>by <Link to={`/profile/${author}`}>{author}</Link></h4>
+                        </Col>
+                        <Col>
+                            <h4 style={{ float: "right" }}>Submitted to <Link to={`/${unitCode}`}>{unitCode}</Link></h4>
+                        </Col>
+                    </Row>
 
-                :
-                    <Container>
-                        <div className="thread" style={{paddingTop:'1%'}}>
-                            <Card>
-                                <Card.Body>
-                                    <Card.Title>
-                                        {threadData.title}
-                                    </Card.Title>
-                                    <Card.Subtitle>
-                                        {threadData.user}
-                                    </Card.Subtitle>
-                                    <Card.Text>
-                                        {threadData.content}
-                                    </Card.Text>
-                                    <Card.Link>Pin</Card.Link>
-                                    <Card.Link>Report</Card.Link>
-                                </Card.Body>
-                            </Card>
-                            
-                            <Reply 
-                                comments={threadData.comments}
-                                parentId={threadData.id}    
-                            />
-
-                            {threadData.comments.map(comment => 
-                                <Thread
-                                    key={comment.user + comment.content}
-                                    isRoot={false}
-                                    comment={comment}
-                                />    
-                            )}
-                            
-                        </div>
-                    </Container>
-                )
-            : 
-                <div className="comment" style={{paddingTop: "1%"}}>
-                    <Card bg={((props.comment.id.replace(/[^:]/g, "").length) % 2 === 0) ? "light" : ""}>
-                        <Tabs defaultActiveKey="show">
-                            <Tab eventKey="show" title="Show">
-                                <Card.Body>
-                                    <Card.Subtitle>
-                                        {props.comment.user}
-                                    </Card.Subtitle>
-                                    <Card.Text>
-                                        {props.comment.content}
-                                    </Card.Text>
-                                    <Card.Link onClick={() => setShowReply(!showReply)}>Reply</Card.Link>
-                                    <Card.Link>Report</Card.Link>
-                                    {showReply && 
-                                        <Reply 
-                                            comments={props.comment.comments} 
-                                            parentId={props.comment.id}
-                                        />
-                                    }
-                                    {props.comment.comments.map(comment => 
-                                        <Thread
-                                            key={comment.content + comment.user}
-                                            isRoot={false}
-                                            comment={comment}
-                                        />      
-                                    )}
-                                </Card.Body>
-                            </Tab>
-                            <Tab eventKey="hide" title="Hide">
-                                <Card.Body>
-                                    <Card.Text>
-                                        Hidden comment by {props.comment.user}
-                                    </Card.Text>
-                                </Card.Body>
-                            </Tab>
-                        </Tabs>              
-                    </Card>
+                    <label>Created: {created} {lastReply.length > 0 ? `- Last Reply: ${lastReply}` : ""}</label>
+                </Container>
+            </div>
+            <Container>
+                <div className="content" style={{ borderBottom: "1px solid lightgrey", paddingBottom: "1%", marginBottom: "1%" }}>
+                    <h5>
+                        {content}
+                    </h5>
                 </div>
-            }
+                <div className="options">
+                    <label>report</label> <label>pin</label>
+                </div>
+                <div className="threadResponse" style={{paddingBottom: "2%"}}>
+                    <Reply threadId={params.threadId} token={token} depth={1} isThread={true}/>
+                </div>
+
+                {interactions.comments.map(comment =>
+                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} token={token} depth={0} />
+                )}
+            </Container>
+
         </>
-     );
+    );
 }
 

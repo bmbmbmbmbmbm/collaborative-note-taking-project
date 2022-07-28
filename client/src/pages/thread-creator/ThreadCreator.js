@@ -28,24 +28,23 @@ export default function ThreadCreator({ token, user }) {
 
     function handleSubmit(event) {
         event.preventDefault();
-        console.log(units, chosen - 1, units[chosen - 1]);
         if(!invalidated()) {
+
             let body = {
-                username: user,
                 title: title,
                 unitCode: units[chosen - 1].code,
-                content: {
-                    "content" : content
-                }
+                content: content
             }
+
             fetch('/threads/create', {
                 method: 'POST',
                 headers: {
                     "x-access-token": token,
                     "Content-Type": "application/json"
                 },
-                body: body
+                body: JSON.stringify(body)
             })
+
         } else {
             alert(`${chosen === 0 ? "No unit chosen\n": ""}
                 ${title.length < 6 ? "Title is less than 6 characters\n" : (title.length > 64 ? "Title longer than 64 characters" : "")}

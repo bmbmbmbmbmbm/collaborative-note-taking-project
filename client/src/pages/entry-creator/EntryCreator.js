@@ -14,11 +14,11 @@ export default function EntryCreator({ token, user }) {
     const [entryId, setEntryId] = useState();
     const [isPublic, setIsPublic] = useState(false);
 
+    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || [{ type: 'paragraph', children: [{ text: 'A line of text in a paragraph.' }],}] || [], []);
+
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
 
     const params = useParams();
-
-    const time = 600;
 
     useEffect(() => {
         fetch(`/subject/get-units/${user}`)
@@ -28,60 +28,31 @@ export default function EntryCreator({ token, user }) {
                 data => setUnits(data)
             );
 
+
         if (entryId === undefined && params.entryId !== undefined) {
-            setEntryId(useParams.entryId);
-            fetch(`/entry/view/${params.entryId}`)
+            setEntryId(params.entryId);
+            fetch(`/entry/edit/${params.entryId}`, {
+                method: "PUT",
+                headers: {
+                    "x-access-token": token,
+                    "Content-Type": "application/json"
+                }
+            })
                 .then(
                     response => response.json()
                 ).then(
                     data => {
-
+                        setTitle(data.title);
+                        setChosen(units.indexOf({title: data.unitTitle, code: data.unit_code}) + 1);
+                        localStorage.setItem('content', JSON.stringify(data.entry));
                     }
                 )
-        }
-
-        const interval = setInterval(function () {
-            setTimeout(function () {
-                if (entryId !== undefined) {
-                    let body = {
-                        username: user,
-                        title: title,
-                        entry: initialValue,
-                        unitCode: units[chosen].code,
-                        private: isPublic,
-                        entryId: entryId
-                    }
-
-                    fetch('/entry/update', {
-                        method: "PUT",
-                        headers: {
-                            "x-access-token": token,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(body)
-                    })
-                }
-            })
-        }, time);
-
-        return () => clearInterval(interval);
+        } 
+        
     }, [])
-
-
 
     const renderElement = useCallback(props => <Element {...props} />, [])
     const renderLeaf = useCallback(props => <Leaf {...props} />, [])
-
-    const initialValue = useMemo(
-        () =>
-            JSON.parse(localStorage.getItem('content')) || [
-                {
-                    type: 'paragraph',
-                    children: [{ text: 'A line of text in a paragraph.' }],
-                },
-            ],
-        []
-    )
 
 
     function handleSave(event) {
@@ -89,12 +60,11 @@ export default function EntryCreator({ token, user }) {
 
         if (chosen === 0) {
             alert("Choose a valid unit")
-        } else if (entryId !== undefined) {
+        } else if (entryId === undefined) {
             let body = {
-                username: user,
                 title: title,
                 entry: initialValue,
-                unitCode: units[chosen].code,
+                unitCode: units[chosen - 1].code,
                 private: isPublic
             }
             fetch('/entry/create', {
@@ -111,14 +81,13 @@ export default function EntryCreator({ token, user }) {
             )
         } else {
             let body = {
-                username: user,
                 title: title,
                 entry: initialValue,
-                unitCode: units[chosen].code,
+                unitCode: units[chosen - 1].code,
                 private: isPublic,
                 entryId: entryId
             }
-            fetch('/entry/create', {
+            fetch('/entry/update', {
                 method: "PUT",
                 headers: {
                     "x-access-token": token,
@@ -207,6 +176,7 @@ export default function EntryCreator({ token, user }) {
 
     return (<></>)
 }
+  
 
 // Start of handling images
 
@@ -346,8 +316,8 @@ function isImageUrl(url) {
 // End of handling Images
 
 function onChange(value, editor) {
-    const isAstChange = editor.operations.some(op => 'set_selection' !== op.type);
-    if (isAstChange) {
+    const isAChange = editor.operations.some(op => 'set_selection' !== op.type);
+    if (isAChange) {
         const content = JSON.stringify(value);
         localStorage.setItem('content', content);
     }
@@ -421,7 +391,6 @@ function onKeyDown(event, editor) {
 }
 
 function Element({ attributes, children, element }) {
-    console.log(attributes, children, element);
     switch (element.type) {
         case 'block-quote':
             return (

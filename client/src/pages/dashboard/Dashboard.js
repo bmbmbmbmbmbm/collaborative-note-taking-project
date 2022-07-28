@@ -41,7 +41,10 @@ export default function Dashboard({ user }) {
             .then(
                 response => response.json()
             ).then(
-                data => setThreads(data)
+                data => {
+                    console.log(data);
+                    setThreads(data)
+                }
             );
 
         fetch(`/subject/get-units/${user}`)
@@ -101,7 +104,7 @@ export default function Dashboard({ user }) {
                                         isEntry={true}
                                         id={entry.id}
                                         title={entry.title}
-                                        user={entry.username}
+                                        user={user}
                                         created={entry.created}
                                         updated={entry.updated}
                                         unitTitle={entry.unit_title}
@@ -136,7 +139,7 @@ export default function Dashboard({ user }) {
                                         isEntry={false}
                                         id={thread.id}
                                         title={thread.title}
-                                        user={thread.username}
+                                        user={user}
                                         created={thread.created}
                                         updated={thread.last_reply}
                                         unitTitle={thread.unit_title}
