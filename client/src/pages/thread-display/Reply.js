@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
+import v from '../../components/validation';
 
 function Reply({ Id, commentId, token, depth, isThread }) {
     const [reply, setReply] = useState("");
     const myDepth = depth;
 
-    function invalidated() {
-        return !(reply.split(" ").length < 1000 && reply.length > 1);
+    function validated() {
+        return v.validContent(reply);
     }
 
     function addReply(event) {
@@ -75,7 +76,7 @@ function Reply({ Id, commentId, token, depth, isThread }) {
                             Ensure your comment follows site etiquete
                         </Form.Text>
                         <div className="submission" style={{ paddingTop: "1%" }}>
-                            <Button type="submit" disabled={invalidated()}>
+                            <Button type="submit" disabled={!validated()}>
                                 Reply
                             </Button>
                         </div>

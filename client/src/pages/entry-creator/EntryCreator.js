@@ -6,6 +6,7 @@ import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import v from '../../components/validation';
 
 export default function EntryCreator({ token, user }) {
     const [title, setTitle] = useState("");
@@ -61,6 +62,7 @@ export default function EntryCreator({ token, user }) {
         if (chosen === 0) {
             alert("Choose a valid unit")
         } else if (entryId === undefined) {
+
             let body = {
                 title: title,
                 entry: JSON.parse(localStorage.getItem('content')),
@@ -98,6 +100,10 @@ export default function EntryCreator({ token, user }) {
         }
     }
 
+    function validation() {
+        return v.validTitle(title) && chosen > 0;
+    }
+
     if (initialValue) {
         return (
             <Form onSubmit={handleSave}>
@@ -117,7 +123,7 @@ export default function EntryCreator({ token, user }) {
                             </Form.Select>
                         </Col>
                         <Col xs={1} className="d-grid gap-2">
-                            <Button type="submit">Save</Button>
+                            <Button type="submit" disabled={validation()}>Save</Button>
                         </Col>
                         <Col xs={1} className="d-grid gap-2">
                             <Button variant={isPublic ? "warning" : "success"} onClick={() => setIsPublic(!isPublic)}>{isPublic ? "Make Private" : "Make Public"}</Button>
@@ -169,7 +175,6 @@ export default function EntryCreator({ token, user }) {
                         <Editable renderElement={renderElement} renderLeaf={renderLeaf} onKeyDown={event => onKeyDown(event, editor)} />
                     </Container>
                 </Slate>
-
             </Form>
         )
     }

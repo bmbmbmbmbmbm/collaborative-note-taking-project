@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Form, FloatingLabel, Spinner, Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
+import v from "../../components/validation"
 
 export default function Register({ setToken, setUsername }) {
     const [email, setEmail] = useState("");
@@ -22,20 +23,7 @@ export default function Register({ setToken, setUsername }) {
     }, []);
 
     function validatePasswords() {
-        const conditions = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;
-        if (password === confirm && conditions.test(password)) {
-            return true;
-        }
-        return false;
-    }
-
-    function validateEmail() {
-        // Don't know the max length of a username, but assumed it would not be greater than 8 characters in length based on my own.
-        if (email.length > 11 && email.length < 19) {
-            const domainName = email.substring(email.indexOf("@"));
-            return domainName === "@bath.ac.uk";
-        }
-        return false;
+        return password === confirm && v.validPassword(password) && v.validPassword(confirm);
     }
 
     function validateSubject() {
@@ -44,7 +32,7 @@ export default function Register({ setToken, setUsername }) {
 
     function validateForm() {
         // Are all their credentials valid?
-        return validateEmail() && validatePasswords() && validateSubject();
+        return v.validEmail(email, "@bath.ac.uk") && validatePasswords() && validateSubject();
     }
 
     async function handleSubmit(event) {

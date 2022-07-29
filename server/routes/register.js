@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/', async function (req, res) {
     try {
         const { email, password, subject_id } = req.body;
-        if (v.validEmail(email) && v.validPassword(password) && v.validId(subject_id)) {
+        if (v.validEmail(email, "@bath.ac.uk") && v.validPassword(password) && v.validId(subject_id)) {
             const subject = await db.promise().query(`SELECT id FROM subjects WHERE id=${subject_id}`)
             if(subject[0].length === 1) {
                 bcrypt.hash(password, 10, async function (err, hash) {

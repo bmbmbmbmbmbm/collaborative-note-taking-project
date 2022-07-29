@@ -3,6 +3,7 @@ import { Form, FloatingLabel, Row, Col, Container } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import PropTypes from 'prop-types';
+import v from '../../components/validation';
 
 export default function Login({ setToken, setUsername }) {
     const [email, setEmail] = useState("");
@@ -11,11 +12,8 @@ export default function Login({ setToken, setUsername }) {
     const navigate = useNavigate();
 
     function validateForm() {
-        if (email.length > 0) {
-            const domainName = email.substring(email.indexOf('@'));
-            return domainName === "@bath.ac.uk" && password.length > 6;
-        }
-        return email.length > 0 && password.length > 6;
+        console.log(v.validEmail(email, "@bath.ac.uk"), v.validPassword(password));
+        return v.validEmail(email, "@bath.ac.uk") && v.validPassword(password);
     }
 
     async function handleSubmit(event) {

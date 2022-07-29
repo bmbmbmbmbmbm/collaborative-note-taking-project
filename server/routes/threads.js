@@ -10,8 +10,9 @@ router.post('/create', auth.verifyToken, async function (req, res) {
         const { title, unitCode, content } = req.body;
         const userId = req.userId;
         if (v.validTitle(title) && v.validUnitCode(unitCode) && v.validContent(content)) {
+            const newTitle = v.addTags(title);
             const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
-                                VALUES ('${title}', '${JSON.stringify({ "content": v.addTags(content) })}', NOW(), NOW(), ${userId}, '${unitCode}', 0 , 0)`;
+                            VALUES ('${newTitle}', '${JSON.stringify({ "content": v.addTags(content) })}', NOW(), NOW(), ${userId}, '${unitCode}', 0 , 0)`;
             await db.promise().query(insert);
             res.status(200);
         } else {
@@ -62,7 +63,8 @@ router.get('/view-all/:id', async function (req, res) {
             if (userRecord[0].length !== 0) {
                 const query = `SELECT threads.id, threads.title, threads.created, threads.last_reply, threads.positive, threads.negative, units.title AS unit_title, units.code FROM threads INNER JOIN units 
                                ON units.code=threads.unit_code WHERE user_id=${userRecord[0][0].id}`
-                const threads = await db.promise().query(query);
+                var threads = await db.promise().query(query);
+                v.removeTagsFromTitles(threads);
                 res.status(200).json(threads[0]);
             } else {
                 res.status(400).json({ message: 'user does not exist' });
@@ -103,6 +105,7 @@ router.get('/view/:id', async function (req, res) {
             const select = `SELECT threads.title, threads.thread, threads.created, threads.last_reply, threads.unit_code, users.username FROM threads INNER JOIN users ON threads.user_id=users.id WHERE threads.id=${req.params.id};`;
             var record = await db.promise().query(select);
             record[0][0].thread.content = v.removeTags(record[0][0].thread.content);
+            v.removeTags(record[0][0].title)
             res.status(200).json(record[0][0]);
         } else {
             res.status(400);

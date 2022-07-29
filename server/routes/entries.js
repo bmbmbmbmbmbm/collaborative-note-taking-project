@@ -22,7 +22,8 @@ router.get('/public/:id', async function (req, res) {
     if (v.validUsername(username)) {
       const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
       if (user[0].length > 0) {
-        const publicEntries = await db.promise().query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
+        var publicEntries = await db.promise().query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
+        v.removeTagsFromTitles(publicEntries)
         res.status(200).json(publicEntries[0]);
       } else {
         res.status(400).json({ message: "invalid credentials" });
@@ -42,7 +43,8 @@ router.get('/:id/view', async function (req, res) {
     if (v.validUnitCode(unitCode)) {
       const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
       if (record[0].length > 0) {
-        const entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE unit_code='${unitCode}'`);
+        var entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE unit_code='${unitCode}'`);
+        v.removeTagsFromTitles(entries);
         res.status(200).json(entries[0]);
       } else {
         res.status(404);
@@ -70,7 +72,8 @@ router.get('/view-all/:id', async function (req, res) {
            INNER JOIN users ON enrolments.user_id=users.id
            WHERE enrolments.user_id=${id};`
 
-        const result = await db.promise().query(select);
+        var result = await db.promise().query(select);
+        v.removeTagsFromTitles(result);
         res.status(200).json(result[0]);
       } else {
         res.status(400).json({ message: 'user does not exist' })
@@ -94,6 +97,7 @@ router.get('/view/:id', async function (req, res) {
         res.status(400);
       } else {
         record[0][0].entry = filterEntry(record[0][0].entry, true);
+        v.removeTagsFromTitles(record);
         res.status(200).json(record[0][0]);
       }
     } else {
@@ -112,8 +116,10 @@ router.put('/edit/:id', auth.verifyToken, async function (req, res) {
     if (v.validId(entryId)) {
       const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle FROM entries INNER JOIN units ON entries.unit_code=units.code 
                       WHERE id=${entryId} AND user_id=${userId}`
-      const record = await db.promise().query(select);
+      var record = await db.promise().query(select);
       if (record[0].length === 1) {
+        v.removeTagsFromTitles(record);
+        record[0][0].entry = filterEntry(record[0][0].entry, true);
         res.status(200).json(record[0][0]);
       } else {
         res.status(400);
@@ -133,8 +139,10 @@ router.put('/edit-diff/:id', auth.verifyToken, async function (req, res) {
     if (v.validId(entryId)) {
       const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle, users.username FROM users INNER JOIN entries ON users.id=entries.user_id INNER JOIN units ON entries.unit_code=units.code 
                       WHERE entries.id=${entryId}`
-      const record = await db.promise().query(select);
+      var record = await db.promise().query(select);
       if (record[0].length === 1) {
+        v.removeTagsFromTitles(record);
+        record[0][0].entry = filterEntry(record[0][0].entry, true);
         res.status(200).json(record[0][0]);
       } else {
         res.status(400);
@@ -173,8 +181,6 @@ router.put('/update', auth.verifyToken, async function (req, res) {
       const stringEntry = JSON.stringify(filterEntry(entry));
       const update = `UPDATE entries SET entry='${stringEntry}', updated=NOW() WHERE user_id=${userId} AND id=${entryId}`;
       await db.promise().query(update);
-      const record = await db.promise().query(`SELECT entry FROM entries WHERE id=${entryId}`);
-      console.log(record[0][0].entry, 'do the hustle');
       res.status(200);
     } else {
       res.status(400);
@@ -191,10 +197,11 @@ router.post('/create', auth.verifyToken, async function (req, res) {
     const userId = req.userId;
     const stringEntry = JSON.stringify(filterEntry(entry));
     if (v.validTitle(title) && v.validUnitCode(unitCode)) {
+      const newTitle = v.addTags(title);
       const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
-                      VALUES ('${title}', '${stringEntry}', NOW(), NOW(), ${userId}, '${unitCode}', ${private}, 0 , 0);`;
+                      VALUES ('${newTitle}', '${stringEntry}', NOW(), NOW(), ${userId}, '${unitCode}', ${private}, 0 , 0);`;
       await db.promise().query(insert);
-      const select = `SELECT id FROM entries WHERE title='${title}' AND user_id=${userId} AND unit_code='${unitCode}';`;
+      const select = `SELECT id FROM entries WHERE title='${newTitle}' AND user_id=${userId} AND unit_code='${unitCode}';`;
       const entryRecord = await db.promise().query(select);
       res.status(200).json({ id: entryRecord[0][0].id });
     } else {

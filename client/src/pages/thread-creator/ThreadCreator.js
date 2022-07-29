@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, InputGroup, FloatingLabel, Button, Row, Col, Container } from 'react-bootstrap';
+import v from '../../components/validation';
 
 export default function ThreadCreator({ token, user }) {
     const [title, setTitle] = useState("");
@@ -22,13 +23,13 @@ export default function ThreadCreator({ token, user }) {
         setWordCount(text.split(" ").length);
     }
 
-    function invalidated() {
-        return title.length < 6 || title.length > 64 || chosen === 0 || content.split(" ").length > 1000;
+    function valdiated() {
+        return v.validTitle(title) && v.validContent(content) && chosen > 0;
     }
 
     function handleSubmit(event) {
         event.preventDefault();
-        if(!invalidated()) {
+        if(valdiated()) {
 
             let body = {
                 title: title,
@@ -96,7 +97,7 @@ export default function ThreadCreator({ token, user }) {
                         </Form.Label>
                     </Form.Group>
 
-                    <Button md="auto" disabled={invalidated()} type="submit">Submit Entry</Button>
+                    <Button md="auto" disabled={!valdiated()} type="submit">Submit Entry</Button>
 
                 </Form>
             </Container>

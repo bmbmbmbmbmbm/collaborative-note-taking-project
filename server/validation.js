@@ -52,13 +52,19 @@ function removeTags(str) {
   })
 }
 
+function removeTagsFromTitles(record) {
+  for(var i = 0; i < record[0].length; ++i) {
+    record[0][i].title = removeTags(record[0][i].title);
+  }
+}
+
 function containsSpecial(string) {
   const special = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/
   return special.test(string)
 }
 
 function containsAlphanumeric(string) {
-  const alphanumeric = /^[a-z0-9]*$/
+  const alphanumeric = /[a-z0-9]/
   return alphanumeric.test(string)
 }
 
@@ -84,7 +90,7 @@ function validUsername(string) {
 }
 
 function validTitle(string) {
-  return string && string.length < 64 && string.length > 0 && containsAlphanumeric(string);
+  return string && string.length < 51 && string.length > 0 && containsAlphanumeric(string);
 }
 
 function validId(value) {
@@ -111,4 +117,5 @@ module.exports = {
   validId,
   validContent,
   validUnitCode,
+  removeTagsFromTitles,
 }

@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/", async function (req, res) {
     try {
         const { email, password } = req.body;
-        if (v.validEmail(email) && v.validPassword(password)) {
+        if (v.validEmail(email, "@bath.ac.uk") && v.validPassword(password)) {
             const select = `SELECT * FROM users WHERE email='${email}'`
             const record = await db.promise().query(select);
             if (record[0].length === 1) {

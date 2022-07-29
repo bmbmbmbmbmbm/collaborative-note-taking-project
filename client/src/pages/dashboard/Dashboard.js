@@ -27,8 +27,6 @@ export default function Dashboard({ user }) {
     const [chooseSort, setChooseSort] = useState(0);
     const sortBy = ["Recent", "Newest", "Oldest"];
 
-    const navigate = useNavigate();
-
     useEffect(() => {
         fetch(`/entry/view-all/${user}`)
             .then(

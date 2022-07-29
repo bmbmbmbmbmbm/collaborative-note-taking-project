@@ -9,7 +9,7 @@ const router = express.Router();
 router.put("/change-password", auth.verifyToken, async function (req, res) {
     try {
         const { email, oldPassword, newPassword, confirmPassword } = req.body;
-        if (v.validEmail(email) && v.validPassword(oldPassword) && v.validPassword(newPassword) && v.validPassword(confirmPassword)) {
+        if (v.validEmail(email, "@bath.ac.uk") && v.validPassword(oldPassword) && v.validPassword(newPassword) && v.validPassword(confirmPassword)) {
             const record = await db.promise().query(`SELECT * FROM users WHERE email='${email}'`)
             if (record[0].length === 1) {
                 const session = await db.promise().query(`SELECT * FROM session WHERE user_id=${record[0][0].id} AND end=NULL`);
