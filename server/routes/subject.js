@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../database');
 const auth = require('../verify');
+const v = require('../validation');
 
 const router = express.Router();
 
@@ -34,27 +35,27 @@ function exclusiveTo(A, B) {
 
 router.post('/enrol', auth.verifyToken, async function (req, res) {
     try {
-        const { username, userId, units } = req.body;
-        if (username && userId && units) {
+        const { units } = req.body;
+        const userId = req.userId;
+        if (units) {
             const select = `SELECT units.code, units.title FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code WHERE enrolments.user_id=${userId}`;
             const currentUnits = await db.promise().query(select)
             const toAdd = exclusiveTo(units, currentUnits[0]);
             const toRemove = exclusiveTo(currentUnits[0], units);
-
             if (toAdd.length > 0) {
                 let insert = `INSERT INTO enrolments(unit_code, user_id) VALUES `;
                 for (var i = 0; i < toAdd.length; ++i) {
                     if (i === toAdd.length - 1) {
-                        insert += ` ('${toAdd[i].code}', ${user[0][0].id});`;
+                        insert += ` ('${toAdd[i].code}', ${userId});`;
                     } else {
-                        insert += ` ('${toAdd[i].code}', ${user[0][0].id}),`;
+                        insert += ` ('${toAdd[i].code}', ${userId}),`;
                     }
                 }
                 await db.promise().query(insert);
             }
 
             if (toRemove.length > 0) {
-                let del = `DELETE FROM enrolments WHERE user_id=${user[0][0].id} AND (`;
+                let del = `DELETE FROM enrolments WHERE user_id=${userId} AND (`;
                 for (var i = 0; i < toRemove.length; ++i) {
                     if (i === toRemove.length - 1) {
                         del += ` unit_code='${toRemove[i].code}');`
@@ -64,7 +65,7 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
                 }
                 await db.promise().query(del);
             }
-            
+
             res.status(200).json({ message: 'handled enrolment' });
         } else {
             res.status(400).json({ message: 'User does not exist' });
@@ -78,7 +79,7 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
 router.get('/get-units/:id', async function (req, res) {
     try {
         const username = req.params.id;
-        if (username) {
+        if (v.validUsername(username)) {
             const user = await db.promise().query(`SELECT * FROM users WHERE username='${username}'`);
             if (user[0].length > 0) {
                 const select = `SELECT units.code, units.title FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code
@@ -101,7 +102,7 @@ router.get('/get-units/:id', async function (req, res) {
 router.get('/get-subject/:id', async function (req, res) {
     try {
         const username = req.params.id;
-        if (username) {
+        if (v.validUsername(username)) {
             const user = await db.promise().query(`SELECT subject_id FROM users WHERE username='${username}'`);
             if (user[0].length > 0) {
                 const record = await db.promise().query(`SELECT title FROM subjects WHERE id=${user[0][0].subject_id}`)
@@ -121,7 +122,7 @@ router.get('/get-subject/:id', async function (req, res) {
 router.get('/titleof/:id', async function (req, res) {
     try {
         const code = req.params.id;
-        if (code) {
+        if (v.validUnitCode(code)) {
             const title = await db.promise().query(`SELECT title FROM units WHERE code='${code}'`);
             if (title[0].length === 1) {
                 res.status(200).json(title[0][0]);
@@ -140,14 +141,18 @@ router.get('/titleof/:id', async function (req, res) {
 router.get('/:id', async function (req, res) {
     try {
         const user = req.params.id;
-        const select1 = `SELECT subjects.title FROM subjects INNER JOIN users ON users.subject_id=subjects.id WHERE users.username='${user}'`;
-        const subject = await db.promise().query(select1);
-        const select2 = `SELECT units.code, units.title FROM units INNER JOIN subject_unit 
+        if (v.validUsername(user)) {
+            const select1 = `SELECT subjects.title FROM subjects INNER JOIN users ON users.subject_id=subjects.id WHERE users.username='${user}'`;
+            const subject = await db.promise().query(select1);
+            const select2 = `SELECT units.code, units.title FROM units INNER JOIN subject_unit 
                         ON units.code=subject_unit.unit_code 
                         INNER JOIN subjects ON subject_unit.subject_id=subjects.id 
                         WHERE subjects.title='${subject[0][0].title}';`
-        const results = await db.promise().query(select2);
-        res.status(201).json(results[0]);
+            const results = await db.promise().query(select2);
+            res.status(200).json(results[0]);
+        } else {
+            res.status(400);
+        }
     } catch (err) {
         console.log(err);
         res.status(404);

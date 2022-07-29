@@ -9,7 +9,7 @@ function Commment({ id, postId, isThread, content, user, created, replies, token
     const [hideAddReply, setHideAddReply] = useState(true);
 
     return (
-        <Card bg={myDepth % 2 == 0 ? "" : "light"} style={{ marginBottom: "2%" }}>
+        <Card bg={myDepth % 2 === 0 ? "" : "light"} style={{ marginBottom: "2%" }}>
             <Card.Header>
                 <Row>
                     <Col>

@@ -22,8 +22,7 @@ export default function Register({ setToken, setUsername }) {
     }, []);
 
     function validatePasswords() {
-        const conditions =
-            /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;
+        const conditions = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;
         if (password === confirm && conditions.test(password)) {
             return true;
         }

@@ -2,13 +2,14 @@ const express = require('express');
 const auth = require("../verify");
 const bcrypt = require("bcrypt");
 const db = require("../database");
+const text = require("../validation");
 
 const router = express.Router();
 
 router.put("/change-password", auth.verifyToken, async function (req, res) {
     try {
         const { email, oldPassword, newPassword, confirmPassword } = req.body;
-        if (email && oldPassword && newPassword && confirmPassword && newPassword === confirmPassword) {
+        if (text.validEmail(email) && text.validPassword(oldPassword) && text.validPassword(newPassword) && text.validPassword(confirmPassword)) {
             const record = await db.promise().query(`SELECT * FROM users WHERE email='${email}'`)
             if (record[0].length === 1) {
                 const session = await db.promise().query(`SELECT * FROM session WHERE user_id=${record[0][0].id} AND end=NULL`);
