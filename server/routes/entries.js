@@ -1,7 +1,7 @@
 const express = require('express');
 const db = require('../database');
 const auth = require('../verify');
-const text = require('../validation.js');
+const v = require('../validation.js');
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ function filterEntry(entry, removeTags) {
     if (entry[i].type !== undefined) {
       entry.children = filterEntry(entry[i].children, removeTags);
     } else if (entry[i].text !== undefined) {
-      entry[i].text = removeTags ? text.removeTags(entry[i].text) : text.addTags(entry[i].text);
+      entry[i].text = removeTags ? v.removeTags(entry[i].text) : v.addTags(entry[i].text);
     }
   }
   return entry;
@@ -19,7 +19,7 @@ function filterEntry(entry, removeTags) {
 router.get('/public/:id', async function (req, res) {
   try {
     const username = req.params.id;
-    if (text.validUsername(username)) {
+    if (v.validUsername(username)) {
       const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
       if (user[0].length > 0) {
         const publicEntries = await db.promise().query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
@@ -39,7 +39,7 @@ router.get('/public/:id', async function (req, res) {
 router.get('/:id/view', async function (req, res) {
   try {
     const unitCode = req.params.id;
-    if (text.validUnitCode(unitCode)) {
+    if (v.validUnitCode(unitCode)) {
       const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
       if (record[0].length > 0) {
         const entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE unit_code='${unitCode}'`);
@@ -59,7 +59,7 @@ router.get('/:id/view', async function (req, res) {
 router.get('/view-all/:id', async function (req, res) {
   try {
     const username = req.params.id;
-    if (text.validUsername(username)) {
+    if (v.validUsername(username)) {
       const getId = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
       if (getId[0].length > 0) {
         const id = getId[0][0].id;
@@ -86,7 +86,7 @@ router.get('/view-all/:id', async function (req, res) {
 
 router.get('/view/:id', async function (req, res) {
   try {
-    if (text.validId(req.params.id)) {
+    if (v.validId(req.params.id)) {
       const select = `SELECT entries.title, entries.entry, entries.created, entries.updated, entries.unit_code, entries.positive, entries.negative, entries.private, users.username 
                       FROM entries INNER JOIN users ON users.id=entries.user_id WHERE entries.id=${req.params.id};`;
       var record = await db.promise().query(select);
@@ -109,7 +109,7 @@ router.put('/edit/:id', auth.verifyToken, async function (req, res) {
   try {
     const userId = req.userId;
     const entryId = req.params.id;
-    if (text.validId(entryId)) {
+    if (v.validId(entryId)) {
       const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle FROM entries INNER JOIN units ON entries.unit_code=units.code 
                       WHERE id=${entryId} AND user_id=${userId}`
       const record = await db.promise().query(select);
@@ -130,7 +130,7 @@ router.put('/edit/:id', auth.verifyToken, async function (req, res) {
 router.put('/edit-diff/:id', auth.verifyToken, async function (req, res) {
   try {
     const entryId = req.params.id;
-    if (text.validId(entryId)) {
+    if (v.validId(entryId)) {
       const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle, users.username FROM users INNER JOIN entries ON users.id=entries.user_id INNER JOIN units ON entries.unit_code=units.code 
                       WHERE entries.id=${entryId}`
       const record = await db.promise().query(select);
@@ -151,7 +151,7 @@ router.put('/edit-diff/:id', auth.verifyToken, async function (req, res) {
 router.get('/edit-suggestions/:id', async function (req, res) {
   try {
     const entryId = req.params.id;
-    if (text.validId(entryId)) {
+    if (v.validId(entryId)) {
       const select = `SELECT user_edits.edit, user_edits.created, users.username FROM user_edits INNER JOIN users ON users.id=user_edits.user_id WHERE entry_id=${entryId}`;
       const records = await db.promise().query(select);
       res.status(200).json(records[0]);
@@ -169,7 +169,7 @@ router.put('/update', auth.verifyToken, async function (req, res) {
     const { entry, entryId } = req.body;
     const username = req.username;
     const userId = req.userId;
-    if (entry && text.validId(entryId)) {
+    if (entry && v.validId(entryId)) {
       const stringEntry = JSON.stringify(filterEntry(entry));
       const update = `UPDATE entries SET entry='${stringEntry}', updated=NOW() WHERE user_id=${userId} AND id=${entryId}`;
       await db.promise().query(update);
@@ -190,7 +190,7 @@ router.post('/create', auth.verifyToken, async function (req, res) {
     const { title, entry, unitCode, private } = req.body;
     const userId = req.userId;
     const stringEntry = JSON.stringify(filterEntry(entry));
-    if (text.validTitle(title) && text.validUnitCode(unitCode)) {
+    if (v.validTitle(title) && v.validUnitCode(unitCode)) {
       const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
                       VALUES ('${title}', '${stringEntry}', NOW(), NOW(), ${userId}, '${unitCode}', ${private}, 0 , 0);`;
       await db.promise().query(insert);
@@ -210,7 +210,7 @@ router.post('/create-edit', auth.verifyToken, async function (req, res) {
   try {
     const { entry, entryId } = req.body;
     const userId = req.userId;
-    if (text.validId(entryId) && entry) {
+    if (v.validId(entryId) && entry) {
       const stringEntry = JSON.stringify(filterEntry(entry));
       const insert = `INSERT INTO user_edits(user_id, entry_id, edit, created) VALUES (${userId}, ${entryId}, '${stringEntry}', NOW())`
       await db.promise().query(insert);
@@ -228,10 +228,10 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
   try {
     const { content, entryId, commentId } = req.body;
     const userId = req.userId;
-    if (text.validContent(content) && text.validId(entryId)) {
+    if (v.validContent(content) && v.validId(entryId)) {
       const select = `SELECT id FROM threads WHERE id=${entryId}`;
       const thread = await db.promise().query(select);
-      if (text.validId(commentId)) {
+      if (v.validId(commentId)) {
         const select2 = `SELECT id, entry_id FROM replies WHERE id=${commentId}`;
         const comment = await db.promise().query(select2);
         if (comment[0].length === 1 && thread[0].length === 1) {
@@ -258,7 +258,7 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
 router.get('/view/:id/replies', async function (req, res) {
   try {
     const entryId = req.params.id;
-    if (text.validId(entryId)) {
+    if (v.validId(entryId)) {
       const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NULL`;
       const comments = await db.promise().query(select1);
       const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NOT NULL`;

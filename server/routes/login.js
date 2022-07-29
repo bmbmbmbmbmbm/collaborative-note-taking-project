@@ -3,14 +3,14 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const db = require("../database");
 const auth = require("../verify");
-const text = require("../validation")
+const v = require("../validation")
 
 const router = express.Router();
 
 router.post("/", async function (req, res) {
     try {
         const { email, password } = req.body;
-        if (text.validEmail(email) && text.validPassword(password)) {
+        if (v.validEmail(email) && v.validPassword(password)) {
             const select = `SELECT * FROM users WHERE email='${email}'`
             const record = await db.promise().query(select);
             if (record[0].length === 1) {

@@ -2,14 +2,14 @@ const express = require('express');
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const db = require('../database');
-const text = require('../validation');
+const v = require('../validation');
 
 const router = express.Router();
 
 router.post('/', async function (req, res) {
     try {
         const { email, password, subject_id } = req.body;
-        if (text.validEmail(email) && text.validPassword(password) && text.validId(subject_id)) {
+        if (v.validEmail(email) && v.validPassword(password) && v.validId(subject_id)) {
             const subject = await db.promise().query(`SELECT id FROM subjects WHERE id=${subject_id}`)
             if(subject[0].length === 1) {
                 bcrypt.hash(password, 10, async function (err, hash) {
