@@ -35,7 +35,7 @@ export default function EntryCreator({ token, user }) {
             fetch(`/entry/edit/${params.entryId}`, {
                 method: "PUT",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 }
             })
@@ -72,7 +72,7 @@ export default function EntryCreator({ token, user }) {
             fetch('/entry/create', {
                 method: "POST",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(body)
@@ -92,7 +92,7 @@ export default function EntryCreator({ token, user }) {
             fetch('/entry/update', {
                 method: "PUT",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(body)
@@ -123,7 +123,7 @@ export default function EntryCreator({ token, user }) {
                             </Form.Select>
                         </Col>
                         <Col xs={1} className="d-grid gap-2">
-                            <Button type="submit" disabled={validation()}>Save</Button>
+                            <Button type="submit" disabled={!validation()}>Save</Button>
                         </Col>
                         <Col xs={1} className="d-grid gap-2">
                             <Button variant={isPublic ? "warning" : "success"} onClick={() => setIsPublic(!isPublic)}>{isPublic ? "Make Private" : "Make Public"}</Button>

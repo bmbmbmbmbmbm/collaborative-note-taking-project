@@ -30,7 +30,7 @@ export default function Account({ token, user }) {
             fetch('', {
                 method: "PUT",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 },
                 body: body

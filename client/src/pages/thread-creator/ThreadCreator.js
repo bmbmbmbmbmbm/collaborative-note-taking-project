@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, InputGroup, FloatingLabel, Button, Row, Col, Container } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import v from '../../components/validation';
 
 export default function ThreadCreator({ token, user }) {
@@ -8,6 +9,8 @@ export default function ThreadCreator({ token, user }) {
     const [units, setUnits] = useState([]);
     const [chosen, setChosen] = useState(0);
     const [wordCount, setWordCount] = useState(0);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch(`/subject/get-units/${user}`)
@@ -30,21 +33,34 @@ export default function ThreadCreator({ token, user }) {
     function handleSubmit(event) {
         event.preventDefault();
         if(valdiated()) {
-
+            let status = 0;
             let body = {
                 title: title,
                 unitCode: units[chosen - 1].code,
                 content: content
-            }
+            };
 
+            console.log(token);
+            
             fetch('/threads/create', {
                 method: 'POST',
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(body)
-            })
+            }).then(
+                response => {
+                    status = response.status;
+                    return response.json();
+                }
+            ).then(
+                data => {
+                    if(status===200){
+                        navigate(`/${units[chosen-1].code}/thread/${data.id}`);
+                    }
+                }
+            )
 
         } else {
             alert(`${chosen === 0 ? "No unit chosen\n": ""}

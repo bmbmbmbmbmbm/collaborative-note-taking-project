@@ -12,7 +12,6 @@ export default function Login({ setToken, setUsername }) {
     const navigate = useNavigate();
 
     function validateForm() {
-        console.log(v.validEmail(email, "@bath.ac.uk"), v.validPassword(password));
         return v.validEmail(email, "@bath.ac.uk") && v.validPassword(password);
     }
 
@@ -26,6 +25,9 @@ export default function Login({ setToken, setUsername }) {
             password: password
         };
 
+        sessionStorage.clear()
+        localStorage.clear();
+
         await fetch("/login/", {
             method: "POST",
             headers: {
@@ -38,14 +40,13 @@ export default function Login({ setToken, setUsername }) {
             data => {
                 if(data !== undefined) {
                     success = true;
-                    setToken(data);
+                    setToken(data.token);
                     setUsername(email.substring(0, email.indexOf('@')));
                 } 
             }
         )
 
         if(success) {
-            sessionStorage.setItem('username', JSON.stringify({ username: email.substring(0, email.indexOf('@'))}));
             navigate('/dashboard');
         } 
     }

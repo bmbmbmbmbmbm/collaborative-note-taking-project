@@ -14,7 +14,12 @@ router.post('/create', auth.verifyToken, async function (req, res) {
             const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
                             VALUES ('${newTitle}', '${JSON.stringify({ "content": v.addTags(content) })}', NOW(), NOW(), ${userId}, '${unitCode}', 0 , 0)`;
             await db.promise().query(insert);
-            res.status(200);
+            const id = await db.promise().query(`SELECT id FROM threads WHERE title='${newTitle}' AND user_id=${userId} ORDER BY created DESC`);
+            if (id[0].length > 0) {
+                res.status(200).json({ id: id[0][id[0].length - 1].id });
+            } else {
+                res.status(400);
+            }
         } else {
             res.status(400);
         }
@@ -35,14 +40,20 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
                 const select2 = `SELECT id, thread_id FROM replies WHERE id=${commentId}`;
                 const comment = await db.promise().query(select2);
                 if (comment[0].length === 1 && thread[0].length === 1) {
-                    const insert = `INSERT INTO replies(reply, replyTo, user_id, thread_id, created) VALUES ('${JSON.stringify({ "content": content })}', ${commentId}, ${userId}, ${threadId}, NOW());`
-                    await db.promise().query(insert);
-                    res.status(200);
+                    if (comment[0][0].thread_id === thread[0][0].id) {
+                        const insert = `INSERT INTO replies(reply, replyTo, user_id, thread_id, created) 
+                                        VALUES ('${JSON.stringify({ "content": content })}', ${commentId}, ${userId}, ${threadId}, NOW());`
+                        await db.promise().query(insert);
+                        res.status(200);
+                    } else {
+                        res.status(400).json({message: "comment is not in thread"});
+                    }
                 } else {
-                    res.status(400);
+                    res.status(400).json({message: "comment does not exist"});
                 }
             } else {
-                const insert = `INSERT INTO replies(reply, user_id, thread_id, created) VALUES ('${JSON.stringify({ "content": content })}', ${userId}, ${threadId}, NOW());`
+                const insert = `INSERT INTO replies(reply, user_id, thread_id, created) 
+                                VALUES ('${JSON.stringify({ "content": content })}', ${userId}, ${threadId}, NOW());`
                 await db.promise().query(insert);
                 res.status(200);
             }
@@ -110,7 +121,7 @@ router.get('/view/:id', async function (req, res) {
         } else {
             res.status(400);
         }
-    } catch(err) {
+    } catch (err) {
         console.log(err);
         res.status(404);
     }
@@ -119,16 +130,18 @@ router.get('/view/:id', async function (req, res) {
 router.get('/view/:id/replies', async function (req, res) {
     try {
         const threadId = req.params.id;
-        if(v.validId(+threadId)) {
+        if (v.validId(+threadId)) {
             const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NULL`;
             const comments = await db.promise().query(select1);
+            v.removeTagsFromComments(comments);
             const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NOT NULL`;
             const replies = await db.promise().query(select2);
-            res.status(200).json({comments: comments[0], replies: replies[0]});
+            v.removeTagsFromComments(replies);
+            res.status(200).json({ comments: comments[0], replies: replies[0] });
         } else {
             res.status(400);
         }
-    } catch(err) {
+    } catch (err) {
         console.log(err);
     }
 })

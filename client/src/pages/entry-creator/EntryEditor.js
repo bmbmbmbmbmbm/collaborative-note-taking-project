@@ -22,7 +22,7 @@ export default function EntryCreator({ token, user }) {
             fetch(`/entry/edit-diff/${params.entryId}`, {
                 method: "PUT",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 }
             })

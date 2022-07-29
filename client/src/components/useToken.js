@@ -3,14 +3,12 @@ import { useState } from 'react';
 export default function useToken() {
   function getToken() {
     const tokenString = sessionStorage.getItem('token');
-    const userToken = JSON.parse(tokenString);
-    return userToken?.token
+    return tokenString
   }
 
   function getUser() {
     const userString = sessionStorage.getItem('user');
-    const user = JSON.parse(userString);
-    return user?.username;
+    return userString;
   }
 
   const [token, setToken] = useState(getToken());
@@ -22,7 +20,7 @@ export default function useToken() {
   }
 
   function saveUsername(user) {
-    sessionStorage.setItem('user', JSON.stringify({username: user}));
+    sessionStorage.setItem('user', user);
     setUsername(user);
   }
 

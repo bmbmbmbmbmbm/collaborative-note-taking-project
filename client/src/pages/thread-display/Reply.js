@@ -30,7 +30,7 @@ function Reply({ Id, commentId, token, depth, isThread }) {
             fetch('/threads/add-reply', {
                 method: "POST",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(body),
@@ -52,7 +52,7 @@ function Reply({ Id, commentId, token, depth, isThread }) {
             fetch('/entry/add-reply', {
                 method: "POST",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(body),

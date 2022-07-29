@@ -71,7 +71,7 @@ export default function Enrolment({token, user}) {
         fetch('/subject/enrol', {
             method: "POST",
             headers: {
-                "x-access-token": token,
+                "authorization": token,
                 "Content-Type" : "application/json"
             },
             body: JSON.stringify(body)

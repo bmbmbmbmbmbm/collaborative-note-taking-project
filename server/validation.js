@@ -58,6 +58,12 @@ function removeTagsFromTitles(record) {
   }
 }
 
+function removeTagsFromComments(record) {
+  for(var i = 0; i < record[0].length; ++i) {
+    record[0][i].reply.content = removeTags(record[0][i].reply.content)
+  }
+}
+
 function containsSpecial(string) {
   const special = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/
   return special.test(string)
@@ -65,6 +71,11 @@ function containsSpecial(string) {
 
 function containsAlphanumeric(string) {
   const alphanumeric = /[a-z0-9]/
+  return alphanumeric.test(string)
+}
+
+function containsCapAlphanumeric(string) {
+  const alphanumeric = /[a-zA-Z0-9]/
   return alphanumeric.test(string)
 }
 
@@ -102,7 +113,7 @@ function validContent(text) {
 }
 
 function validUnitCode(text) {
-  return containsAlphanumeric(text) && !containsSpecial(text) && text.length > 6 && text.length < 9;
+  return containsCapAlphanumeric(text) && !containsSpecial(text) && text.length > 6 && text.length < 9;
 }
 
 module.exports = {
@@ -118,4 +129,5 @@ module.exports = {
   validContent,
   validUnitCode,
   removeTagsFromTitles,
+  removeTagsFromComments,
 }

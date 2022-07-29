@@ -23,7 +23,6 @@ function validEmail(string, domainName) {
     if (string.indexOf('@') !== undefined) {
       const domain = string.substring(string.indexOf('@'));
       const username = string.substring(0, string.indexOf('@'));
-      console.log(username, domain);
       return domain === domainName && validUsername(username);
     }
   }

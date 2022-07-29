@@ -10,7 +10,6 @@ export default function Register({ setToken, setUsername }) {
     const [confirm, setConfirm] = useState("");
     const [subjects, setSubjects] = useState([{}]);
     const [chosenSubject, setChosen] = useState(0);
-    const [validated, setValidated] = useState(false);
 
     const navigate = useNavigate();
 
@@ -36,16 +35,7 @@ export default function Register({ setToken, setUsername }) {
     }
 
     async function handleSubmit(event) {
-        const form = event.currentTarget;
-        if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        if (!validateForm()) {
-            setValidated(false);
-            return;
-        }
+        event.preventDefault();
 
         const body = {
             email: email,
@@ -55,27 +45,25 @@ export default function Register({ setToken, setUsername }) {
 
         let success = false;
 
+        sessionStorage.clear()
+        localStorage.clear();
+
         await fetch("/register/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(body),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data !== undefined) {
-                    success = true;
-                    setToken(data);
-                    setUsername(email.substring(0, email.indexOf("@")));
-                }
-            });
+        }).then(
+            response => response.json()
+        ).then((data) => {
+            if (data !== undefined) {
+                success = true;
+                setToken(data.token);
+                setUsername(email.substring(0, email.indexOf("@")));
+            }
+        });
         if (success) {
-            sessionStorage.setItem(
-                "username",
-                JSON.stringify({ username: email.substring(0, email.indexOf("@")) })
-            );
-            setValidated(true);
             navigate("/enrolment");
         }
     }
@@ -98,7 +86,7 @@ export default function Register({ setToken, setUsername }) {
                         </Container>
                     </div>
                     <Container>
-                        <Form noValidate validated={validated} onSubmit={handleSubmit}>
+                        <Form noValidate validated={!validateForm()} onSubmit={handleSubmit}>
                             <Form.Group className="mb-3" controlId="formBasicEmail">
                                 <Form.Label>Email address</Form.Label>
                                 <FloatingLabel
