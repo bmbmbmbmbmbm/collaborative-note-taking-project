@@ -25,7 +25,7 @@ function Reply({ Id, commentId, token, depth, isThread }) {
                     "commentId": commentId,
                 }
             }
-
+            console.log(body);
             fetch('/threads/add-reply', {
                 method: "POST",
                 headers: {

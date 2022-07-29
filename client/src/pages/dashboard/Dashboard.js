@@ -42,7 +42,6 @@ export default function Dashboard({ user }) {
                 response => response.json()
             ).then(
                 data => {
-                    console.log(data);
                     setThreads(data)
                 }
             );
@@ -95,8 +94,7 @@ export default function Dashboard({ user }) {
                         {entries.length > 0 ? (
                             <div className="entries">
                                 <div className="newEntryPrompt" style={{ borderBottom: "1px solid lightgrey", paddingBottom: "2%", marginBottom: "1%", textAlign: "center" }}>
-                                    <h4>Want to make a new entry?</h4>
-                                    <Button onClick={() => navigate('/entry-creator')}>Get started</Button>
+                                    <Prompt title="Want to make a new entry?" desc="" link="/entry-creator" img=""/>
                                 </div>
 
                                 {entries.map(entry =>
@@ -131,8 +129,7 @@ export default function Dashboard({ user }) {
                         {threads.length > 0 ? (
                             <div className="threads">
                                 <div className="newEntryPrompt" style={{ borderBottom: "1px solid lightgrey", paddingBottom: "2%", marginBottom: "1%", textAlign: "center" }}>
-                                    <h4>Want to make a new entry?</h4>
-                                    <Button>Get started</Button>
+                                    <Prompt title="Want to make a new thread?" desc="" link="/thread-creator" img=""/>
                                 </div>
                                 {threads.map(thread =>
                                     <Post

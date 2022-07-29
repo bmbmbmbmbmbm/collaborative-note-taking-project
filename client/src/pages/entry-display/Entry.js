@@ -166,7 +166,7 @@ export default function Entry({ token, user }) {
                                 </div>
 
                                 {interactions.comments.map(comment =>
-                                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} token={token} depth={0} />
+                                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} token={token} depth={0} isThread={false}/>
                                 )}
                             </Container>
                         </Tab>

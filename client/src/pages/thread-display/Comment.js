@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { Card, Row, Col } from 'react-bootstrap';
 import Reply from './Reply';
 
-function Commment({ id, threadId, content, user, created, replies, token, depth }) {
+function Commment({ id, postId, isThread, content, user, created, replies, token, depth }) {
     const myDepth = depth;
     const [hide, setHide] = useState(false);
+    const [hideAddReply, setHideAddReply] = useState(true);
 
     return (
         <Card bg={myDepth % 2 == 0 ? "" : "light"} style={{ marginBottom: "2%" }}>
@@ -30,19 +31,28 @@ function Commment({ id, threadId, content, user, created, replies, token, depth 
                 </Row>
             </Card.Header>
             <Card.Body className={hide ? 'd-none' : ''}>
-                <div className='content'>
+                <div className='content' style={{paddingBottom: "0.5%", marginBottom: "0.5%", borderBottom: "1px solid grey"}}>
                     <h6>{content}</h6>
-
                 </div>
-                <div className="commentResponse" style={{ marginBottom: "2%" }}>
-                    <Reply threadId={threadId} commentId={id} token={token} depth={depth + 1}/>
+                <div className='commentSettings' style={{marginBottom: "1%"}}>
+                    <style type="text/css">
+                        {`
+                            .textButton {
+                                color: blue;
+                            }
+                        `}
+                    </style>
+                    <label className="textButton" onClick={() => setHideAddReply(!hideAddReply)}>{hideAddReply ? "Add reply" : "Hide reply input"}</label>
+                </div>
+                <div className={hideAddReply ? "d-none" : ""} style={{ marginBottom: "2%" }}>
+                    <Reply Id={postId} commentId={id} token={token} depth={depth + 1} isThread={isThread}/>
                 </div>
 
                 <div className='replies'>
                     {replies.filter(function (reply) {
                         return reply.replyTo === id;
                     }).map(reply =>
-                        <Commment key={reply.id} id={reply.id} threadId={threadId} content={reply.reply.content} user={reply.username} created={reply.created} replies={replies} depth={depth + 1} />
+                        <Commment key={reply.id} id={reply.id} postId={postId} content={reply.reply.content} user={reply.username} created={reply.created} replies={replies} depth={depth + 1} isThread={isThread}/>
                     )}
                 </div>
             </Card.Body>

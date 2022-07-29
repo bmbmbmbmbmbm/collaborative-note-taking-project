@@ -81,6 +81,7 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
     try {
         const { content, threadId, commentId } = req.body;
         const userId = req.userId;
+        console.log(content.length, content.split(" ").length, +threadId);
         if (content.length > 0 && content.split(" ").length <= 1000 && Number.isInteger(+threadId)) {
             const select = `SELECT id FROM threads WHERE id=${threadId}`;
             const thread = await db.promise().query(select);
@@ -156,7 +157,7 @@ router.get('/view/:id', async function (req, res) {
         if (Number.isInteger(+req.params.id)) {
             const select = `SELECT threads.title, threads.thread, threads.created, threads.last_reply, threads.unit_code, users.username FROM threads INNER JOIN users ON threads.user_id=users.id WHERE threads.id=${req.params.id};`;
             var record = await db.promise().query(select);
-            record[0][0].content = replaceTag(record[0][0].thread.content);
+            record[0][0].thread.content = replaceTag(record[0][0].thread.content);
             res.status(200).json(record[0][0]);
         } else {
             res.status(400);

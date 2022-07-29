@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post("/", async function (req, res) {
     try {
+        console.log("HELLO")
         const { email, password } = req.body;
         if (email && password) {
             const select = `SELECT * FROM users WHERE email='${email}'`
@@ -25,6 +26,7 @@ router.post("/", async function (req, res) {
                             const token = jwt.sign({ id, username }, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF")
                             req.session.user = record[0][0];
                             await db.promise().query(`INSERT INTO session(user_id, start) VALUES (${record[0][0].id}, NOW())`);
+                            console.log(email, 'logged in');
                             res.status(200).json({ auth: true, token: token });
                         } else {
                             res.status(400);
