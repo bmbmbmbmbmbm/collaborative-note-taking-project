@@ -35,5 +35,5 @@ app.use('/entry', entries);
 app.use('/threads', threads);
 app.use('/subject', subject);
 app.use('/account', account);
-
-app.listen(5000, () => { console.log("localhost:5000") });
+ 
+module.exports = app.listen(5000, () => { console.log("localhost:5000") });

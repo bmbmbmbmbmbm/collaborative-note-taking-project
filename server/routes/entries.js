@@ -90,7 +90,8 @@ router.get('/view-all/:id', async function (req, res) {
 router.get('/view/:id', async function (req, res) {
   try {
     if (v.validId(req.params.id)) {
-      const select = `SELECT entries.title, entries.entry, entries.created, entries.updated, entries.unit_code, entries.positive, entries.negative, entries.private, users.username 
+      const select = `SELECT entries.title, entries.entry, entries.created, entries.updated, entries.unit_code, 
+                      entries.positive, entries.negative, entries.private, users.username 
                       FROM entries INNER JOIN users ON users.id=entries.user_id WHERE entries.id=${req.params.id};`;
       var record = await db.promise().query(select);
       if (record[0][0].private === true) {
@@ -137,7 +138,8 @@ router.put('/edit-diff/:id', auth.verifyToken, async function (req, res) {
   try {
     const entryId = req.params.id;
     if (v.validId(entryId)) {
-      const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle, users.username FROM users INNER JOIN entries ON users.id=entries.user_id INNER JOIN units ON entries.unit_code=units.code 
+      const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle, users.username 
+                      FROM users INNER JOIN entries ON users.id=entries.user_id INNER JOIN units ON entries.unit_code=units.code 
                       WHERE entries.id=${entryId}`
       var record = await db.promise().query(select);
       if (record[0].length === 1) {
@@ -160,8 +162,12 @@ router.get('/edit-suggestions/:id', async function (req, res) {
   try {
     const entryId = req.params.id;
     if (v.validId(entryId)) {
-      const select = `SELECT user_edits.edit, user_edits.created, users.username FROM user_edits INNER JOIN users ON users.id=user_edits.user_id WHERE entry_id=${entryId}`;
-      const records = await db.promise().query(select);
+      const select = `SELECT user_edits.edit, user_edits.created, users.username 
+                      FROM user_edits INNER JOIN users ON users.id=user_edits.user_id WHERE entry_id=${entryId}`;
+      var records = await db.promise().query(select);
+      for(var i = 0; i < records[0].length; ++i) {
+        records[0][i].edit = filterEntry(records[0][i].edit);
+      }
       res.status(200).json(records[0]);
     } else {
       res.status(400);
@@ -175,7 +181,6 @@ router.get('/edit-suggestions/:id', async function (req, res) {
 router.put('/update', auth.verifyToken, async function (req, res) {
   try {
     const { entry, entryId } = req.body;
-    const username = req.username;
     const userId = req.userId;
     if (entry && v.validId(entryId)) {
       const stringEntry = JSON.stringify(filterEntry(entry));
@@ -266,9 +271,11 @@ router.get('/view/:id/replies', async function (req, res) {
   try {
     const entryId = req.params.id;
     if (v.validId(entryId)) {
-      const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NULL`;
+      const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
+                       FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NULL`;
       const comments = await db.promise().query(select1);
-      const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NOT NULL`;
+      const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
+                       FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NOT NULL`;
       const replies = await db.promise().query(select2);
       res.status(200).json({ comments: comments[0], replies: replies[0] });
     } else {

@@ -25,7 +25,7 @@ router.post('/', async function (req, res) {
                         const username = record[0][0].username;
                         const token = jwt.sign({ id, username }, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF")
                         req.session.user = record[0][0];
-                        res.status(200).json({ auth: true, token: token });
+                        res.status(200).json({ token: token });
                     }
                 })
             } else {

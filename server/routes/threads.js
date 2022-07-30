@@ -113,7 +113,8 @@ router.get('/:id/view', async function (req, res) {
 router.get('/view/:id', async function (req, res) {
     try {
         if (v.validId(req.params.id)) {
-            const select = `SELECT threads.title, threads.thread, threads.created, threads.last_reply, threads.unit_code, users.username FROM threads INNER JOIN users ON threads.user_id=users.id WHERE threads.id=${req.params.id};`;
+            const select = `SELECT threads.title, threads.thread, threads.created, threads.last_reply, threads.unit_code, users.username 
+                            FROM threads INNER JOIN users ON threads.user_id=users.id WHERE threads.id=${req.params.id};`;
             var record = await db.promise().query(select);
             record[0][0].thread.content = v.removeTags(record[0][0].thread.content);
             v.removeTags(record[0][0].title)
@@ -145,6 +146,5 @@ router.get('/view/:id/replies', async function (req, res) {
         console.log(err);
     }
 })
-
 
 module.exports = router;
