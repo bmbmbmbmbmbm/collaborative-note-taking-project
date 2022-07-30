@@ -60,27 +60,32 @@ function removeTagsFromTitles(record) {
 
 function removeTagsFromComments(record) {
   for(var i = 0; i < record[0].length; ++i) {
-    record[0][i].reply.content = removeTags(record[0][i].reply.content)
+    record[0][i].reply.content = removeTags(record[0][i].reply.content);
   }
 }
 
 function containsSpecial(string) {
-  const special = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/
-  return special.test(string)
+  const special = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+  return special.test(string);
 }
 
 function containsAlphanumeric(string) {
-  const alphanumeric = /[a-z0-9]/
-  return alphanumeric.test(string)
+  const alphanumeric = /[a-z0-9]/;
+  return alphanumeric.test(string);
 }
 
 function containsCapAlphanumeric(string) {
-  const alphanumeric = /[a-zA-Z0-9]/
-  return alphanumeric.test(string)
+  const alphanumeric = /[a-zA-Z0-9]/;
+  return alphanumeric.test(string);
+}
+
+function containsLetters(string) {
+  const alphabet = /[a-zA-Z]/;
+  return alphabet.test(string);
 }
 
 function validPassword(string) {
-  const conditions = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/
+  const conditions = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;
   return conditions.test(string);
 }
 
@@ -93,7 +98,7 @@ function validEmail(string, domainName) {
       return domain === domainName && validUsername(username);
     }
   }
-  return false
+  return false;
 }
 
 function validUsername(string) {
@@ -101,7 +106,7 @@ function validUsername(string) {
 }
 
 function validTitle(string) {
-  return string && string.length < 51 && string.length > 0 && containsAlphanumeric(string);
+  return string && string.length < 51 && string.length > 0 && containsLetters(string);
 }
 
 function validId(value) {

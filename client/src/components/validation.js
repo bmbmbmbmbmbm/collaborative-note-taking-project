@@ -13,6 +13,11 @@ function containsCapAlphanumeric(string) {
   return alphanumeric.test(string)
 }
 
+function containsLetters(string) {
+  const alphabet = /[a-zA-Z]/;
+  return alphabet.test(string);
+}
+
 function validPassword(string) {
   const conditions = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/
   return conditions.test(string);
@@ -34,7 +39,7 @@ function validUsername(string) {
 }
 
 function validTitle(string) {
-  return string && string.length < 51 && string.length > 0 && containsCapAlphanumeric(string);
+  return string && string.length < 51 && string.length > 0 && containsLetters(string);
 }
 
 function validId(value) {
