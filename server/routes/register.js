@@ -17,7 +17,9 @@ router.post('/', async function (req, res) {
                         console.log(err)
                         res.status(404);
                     } else {
-                        await db.promise().query(`INSERT INTO users(username, email, password, moderator, admin, subject_id) VALUES('${email.substring(0, email.indexOf('@'))}', '${email}', '${hash}', FALSE, FALSE, ${subject_id})`)
+                        const insert = `INSERT INTO users(username, email, password, moderator, admin, subject_id) 
+                                        VALUES('${email.substring(0, email.indexOf('@'))}', '${email}', '${hash}', FALSE, FALSE, ${subject_id})`
+                        await db.promise().query(insert)
                         const record = await db.promise().query(`SELECT * FROM users WHERE username='${email.substring(0, email.indexOf('@'))}'`);
                         const id = record[0][0].id;
                         const username = record[0][0].username;

@@ -97,7 +97,7 @@ function validEmail(string, domainName) {
 }
 
 function validUsername(string) {
-  return string && !containsSpecial(string) && containsAlphanumeric(string);
+  return string && !containsSpecial(string) && containsAlphanumeric(string) && string.length > 4 && string.length < 7;
 }
 
 function validTitle(string) {

@@ -9,7 +9,7 @@ async function verifyToken(req, res, next) {
             function (err, decoded) {
                 if (err) {
                     console.log(err);
-                    res.status(400).json({ message: "Failed authentication" });
+                    res.status(400).json({ message: "Failed authorisation" });
                 } else {
                     console.log("poopies");
                     req.userId = decoded.id;
