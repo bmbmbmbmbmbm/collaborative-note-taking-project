@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Button, Spinner, Container, Form, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-export default function Enrolment({token, user}) {
+export default function Enrolment({user}) {
     const [units, setUnits] = useState([{}]);
     const [enrolled, setEnrolled] = useState([])
     const [search, setSearch] = useState("");
@@ -13,7 +13,7 @@ export default function Enrolment({token, user}) {
         fetch(`/subject/${user}`, {
             method: "GET",
             headers: {
-                "authorization": token
+                "authorization": localStorage.getItem('token')
             }
         })
             .then((response) => response.json())
@@ -24,7 +24,7 @@ export default function Enrolment({token, user}) {
         fetch(`/subject/get-units/${user}`, {
             method: "GET",
             headers: {
-                "authorization": token
+                "authorization": localStorage.getItem('token')
             }
         }).then(
             response => response.json()
@@ -81,7 +81,7 @@ export default function Enrolment({token, user}) {
         fetch('/subject/enrol', {
             method: "POST",
             headers: {
-                "authorization": token,
+                "authorization": localStorage.getItem('token'),
                 "Content-Type" : "application/json"
             },
             body: JSON.stringify(body)

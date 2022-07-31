@@ -7,7 +7,7 @@ import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
-export default function EntryCreator({ token, user }) {
+export default function EntryCreator({ user }) {
     const [title, setTitle] = useState("");
     const [unitCode, setUnitCode] = useState("");
     const [unitTitle, setUnitTitle] = useState("");
@@ -16,6 +16,8 @@ export default function EntryCreator({ token, user }) {
     const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || [{ type: 'paragraph', children: [{ text: 'A line of text in a paragraph.' }],}] || [], []);
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
     const params = useParams();
+
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         if (Number.isInteger(+params.entryId)) {
@@ -56,7 +58,7 @@ export default function EntryCreator({ token, user }) {
             fetch('/entry/create-edit', {
                 method: "POST",
                 headers: {
-                    "x-access-token": token,
+                    "authorization": token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(body)

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, Row, Col } from 'react-bootstrap';
 import Reply from './Reply';
 
-export default function Commment({ id, postId, isThread, content, user, created, replies, token, depth }) {
+export default function Commment({ id, postId, isThread, content, user, created, replies, depth }) {
     const myDepth = depth;
     const [hide, setHide] = useState(false);
     const [hideAddReply, setHideAddReply] = useState(true);
@@ -45,7 +45,7 @@ export default function Commment({ id, postId, isThread, content, user, created,
                     <label className="textButton" onClick={() => setHideAddReply(!hideAddReply)}>{hideAddReply ? "Add reply" : "Hide reply input"}</label>
                 </div>
                 <div className={hideAddReply ? "d-none" : ""} style={{ marginBottom: "2%" }}>
-                    <Reply Id={postId} commentId={id} token={token} depth={depth + 1} isThread={isThread} />
+                    <Reply Id={postId} commentId={id} depth={depth + 1} isThread={isThread} />
                 </div>
 
                 <div className='replies'>

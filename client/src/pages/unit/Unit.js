@@ -4,13 +4,15 @@ import { Container, Row, Col, Form, Dropdown, DropdownButton } from 'react-boots
 import Post from '../../components/Post';
 
 
-export default function Unit({ token }) {
+export default function Unit() {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
 
     const [search, setSearch] = useState("");
     
     const sortBy = ["Recent", "Old", "Top Voted"];
+
+    const token = localStorage.getItem('token')
 
     const params = useParams();
 

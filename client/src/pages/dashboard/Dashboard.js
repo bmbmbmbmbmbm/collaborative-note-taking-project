@@ -15,7 +15,7 @@ import Prompt from "../../components/Prompt";
 import Post from "../../components/Post";
 import UnitDisplay from "../../components/UnitDisplay";
 
-export default function Dashboard({ token, user }) {
+export default function Dashboard({ user }) {
     const [search, setSearch] = useState("");
 
     const [units, setUnits] = useState([]);
@@ -31,7 +31,8 @@ export default function Dashboard({ token, user }) {
         fetch(`/entry/view-all/${user}`, {
             method: "GET",
             headers: {
-                "authorization": token
+                "Content-Type": "application/json",
+                "authorization": localStorage.getItem('token')
             }
         })
             .then(
@@ -43,7 +44,8 @@ export default function Dashboard({ token, user }) {
         fetch(`/threads/view-all/${user}`, {
             method: "GET",
             headers: {
-                "authorization": token
+                "Content-Type": "application/json",
+                "authorization": localStorage.getItem('token')
             }
         })
             .then(
@@ -57,7 +59,8 @@ export default function Dashboard({ token, user }) {
         fetch(`/subject/get-units/${user}`, {
             method: "GET",
             headers: {
-                "authorization": token
+                "Content-Type": "application/json",
+                "authorization": localStorage.getItem('token')
             }
         })
             .then(

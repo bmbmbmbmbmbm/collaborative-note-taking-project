@@ -33,12 +33,24 @@ function exclusiveTo(A, B) {
     return exclusive;
 }
 
+function validateUnits(units) {
+    var valid = true;
+    if(!Array.isArray(units)) return false;
+    units.forEach(function (unit) {
+        if(!unit.hasOwnProperty('title') || !unit.hasOwnProperty('code')) valid = false;
+        else if(!v.validUnitCode(unit)) valid = false;
+    })
+    return valid;
+}
+
 router.post('/enrol', auth.verifyToken, async function (req, res) {
     try {
         const { units } = req.body;
         const userId = req.userId;
-        if (units) {
-            const select = `SELECT units.code, units.title FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code WHERE enrolments.user_id=${userId}`;
+        if (validateUnits(units)) {
+            const select = `SELECT units.code, units.title, users.subject_id 
+                            FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code INNER JOIN users ON enrolments.user_id=users.id 
+                            WHERE enrolments.user_id=${userId}`;
             const currentUnits = await db.promise().query(select)
             const toAdd = exclusiveTo(units, currentUnits[0]);
             const toRemove = exclusiveTo(currentUnits[0], units);
@@ -76,7 +88,7 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
     }
 });
 
-router.get('/get-units/:id', async function (req, res) {
+router.get('/get-units/:id', auth.verifyToken, async function (req, res) {
     try {
         const username = req.params.id;
         if (v.validUsername(username)) {
@@ -99,7 +111,7 @@ router.get('/get-units/:id', async function (req, res) {
     }
 })
 
-router.get('/get-subject/:id', async function (req, res) {
+router.get('/get-subject/:id', auth.verifyToken, async function (req, res) {
     try {
         const username = req.params.id;
         if (v.validUsername(username)) {
@@ -119,7 +131,7 @@ router.get('/get-subject/:id', async function (req, res) {
     }
 });
 
-router.get('/titleof/:id', async function (req, res) {
+router.get('/titleof/:id', auth.verifyToken, async function (req, res) {
     try {
         const code = req.params.id;
         if (v.validUnitCode(code)) {
@@ -138,7 +150,7 @@ router.get('/titleof/:id', async function (req, res) {
     }
 });
 
-router.get('/:id', async function (req, res) {
+router.get('/:id', auth.verifyToken, async function (req, res) {
     try {
         const user = req.params.id;
         if (v.validUsername(user)) {
@@ -159,7 +171,7 @@ router.get('/:id', async function (req, res) {
     }
 })
 
-router.get('/', async function (req, res) {
+router.get('/', auth.verifyToken, async function (req, res) {
     try {
         const results = await db.promise().query(`SELECT * FROM subjects`);
         res.status(201).json(results[0]);

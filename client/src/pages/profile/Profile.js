@@ -10,10 +10,13 @@ export default function Profile() {
     const [threads, setThreads] = useState();
     const [units, setUnits] = useState()
 
+    const token = localStorage.getItem('token')
+
     useEffect(() => {
         fetch(`/subject/get-subject/${params.username}`, {
             method: "GET",
             headers: {
+                "Content-Type": "application/json",
                 "authorization": token
             }
         })
@@ -26,6 +29,7 @@ export default function Profile() {
         fetch(`/subject/get-units/${params.username}`, {
             method: "GET",
             headers: {
+                "Content-Type": "application/json",
                 "authorization": token
             }
         })

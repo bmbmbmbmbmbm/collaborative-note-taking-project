@@ -8,7 +8,7 @@ import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import v from '../../components/validation';
 
-export default function EntryCreator({ token, user }) {
+export default function EntryCreator({ user }) {
     const [title, setTitle] = useState("");
     const [units, setUnits] = useState([]);
     const [chosen, setChosen] = useState(0);
@@ -21,11 +21,14 @@ export default function EntryCreator({ token, user }) {
 
     const params = useParams();
 
+    const token = localStorage.getItem('token');
+
     useEffect(() => {
         fetch(`/subject/get-units/${user}`, {
             method: "GET",
             headers: {
-                "authorization": token
+                "authorization": token,
+                "Content-Type": "application/json"
             }
         })
             .then(
@@ -70,7 +73,7 @@ export default function EntryCreator({ token, user }) {
 
             let body = {
                 title: title,
-                entry: JSON.parse(localStorage.getItem('content')),
+                entry: token,
                 unitCode: units[chosen - 1].code,
                 private: isPublic
             }
@@ -89,7 +92,7 @@ export default function EntryCreator({ token, user }) {
         } else {
             let body = {
                 title: title,
-                entry: JSON.parse(localStorage.getItem('content')),
+                entry: token,
                 unitCode: units[chosen - 1].code,
                 private: isPublic,
                 entryId: entryId

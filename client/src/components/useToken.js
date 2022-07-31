@@ -2,12 +2,12 @@ import { useState } from 'react';
 
 export default function useToken() {
   function getToken() {
-    const tokenString = sessionStorage.getItem('token');
+    const tokenString = localStorage.getItem('token');
     return tokenString
   }
 
   function getUser() {
-    const userString = sessionStorage.getItem('user');
+    const userString = localStorage.getItem('user');
     return userString;
   }
 
@@ -15,17 +15,17 @@ export default function useToken() {
   const [username, setUsername] = useState(getUser());
 
   function saveToken(userToken) {
-    sessionStorage.setItem('token', JSON.stringify(userToken));
+    localStorage.setItem('token', JSON.stringify(userToken));
     setToken(userToken);
   }
 
   function saveUsername(user) {
-    sessionStorage.setItem('user', user);
+    localStorage.setItem('user', user);
     setUsername(user);
   }
 
   function clearSession() {
-    sessionStorage.clear()
+    localStorage.clear()
     setToken();
   }
 

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap'
 
-export default function Account({ token, user }) {
+export default function Account({ user }) {
     const [email, setEmail] = useState("");
     const [dPass, setDPass] = useState("");
     const [oldPass, setOldPass] = useState("");
     const [newPass, setNewPass] = useState("");
     const [confirmPass, setConfirmPass] = useState("");
     const [result, setResult] = useState("");
+
+    const token = localStorage.getItem('token');
 
     function validatePasswords() {
         const conditions = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,12}$/;

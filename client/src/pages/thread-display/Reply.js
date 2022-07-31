@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
 import v from '../../components/validation';
 
-function Reply({ Id, commentId, token, depth, isThread }) {
+function Reply({ Id, commentId, depth, isThread }) {
     const [reply, setReply] = useState("");
     const myDepth = depth;
+
+    const token = localStorage.getItem('token');
 
     function validated() {
         return v.validContent(reply);

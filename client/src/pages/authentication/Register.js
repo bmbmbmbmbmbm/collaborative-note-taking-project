@@ -45,7 +45,7 @@ export default function Register({ setToken, setUsername }) {
 
         let success = false;
 
-        sessionStorage.clear()
+        localStorage.clear()
         localStorage.clear();
 
         await fetch("/register/", {
@@ -59,7 +59,7 @@ export default function Register({ setToken, setUsername }) {
         ).then((data) => {
             if (data !== undefined) {
                 success = true;
-                setToken(data.token);
+                localStorage.setItem('token', data.token)
                 setUsername(email.substring(0, email.indexOf("@")));
             }
         });

@@ -10,7 +10,7 @@ import Comment from '../thread-display/Comment.js';
 import { useParams, Link } from 'react-router-dom';
 import Prompt from '../../components/Prompt.js';
 
-export default function Entry({ token, user }) {
+export default function Entry({ user }) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
     const [entry, setEntry] = useState([{}]);
     const [title, setTitle] = useState("");
@@ -23,11 +23,15 @@ export default function Entry({ token, user }) {
 
     const params = useParams();
 
+    const token = localStorage.getItem('token');
+
     useEffect(() => {
+        console.log(token)
         fetch(`/entry/view/${params.entryId}`, {
             method: "GET",
             headers: {
-                "authorization": token
+                "authorization": token,
+                'Content-Type': 'application/json'
             }
         }).then(
             response => response.json()
@@ -42,13 +46,23 @@ export default function Entry({ token, user }) {
             }
         )
 
-        fetch(`/entry/view/${params.entryId}/replies`).then(
+        fetch(`/entry/view/${params.entryId}/replies`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        }).then(
             response => response.json()
         ).then(
             data => setInteractions(data)
         )
 
-        fetch(`/entry/edit-suggestions/${params.entryId}`).then(
+        fetch(`/entry/edit-suggestions/${params.entryId}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        }).then(
             response => response.json()
         ).then(
             data => setUserEdits(data)
@@ -167,11 +181,11 @@ export default function Entry({ token, user }) {
                         <Tab eventKey="Discussion" title="Discussion">
                             <Container>
                                 <div className="reply" style={{ marginBottom: "2%" }}>
-                                    <Reply Id={params.entryId} token={token} depth={0} isThread={false} />
+                                    <Reply Id={params.entryId} depth={0} isThread={false} />
                                 </div>
 
                                 {interactions.comments.map(comment =>
-                                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} token={token} depth={0} isThread={false}/>
+                                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} depth={0} isThread={false}/>
                                 )}
                             </Container>
                         </Tab>

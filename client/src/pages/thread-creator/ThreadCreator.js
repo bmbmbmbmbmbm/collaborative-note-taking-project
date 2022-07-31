@@ -3,12 +3,14 @@ import { Form, InputGroup, FloatingLabel, Button, Row, Col, Container } from 're
 import { useNavigate } from 'react-router-dom';
 import v from '../../components/validation';
 
-export default function ThreadCreator({ token, user }) {
+export default function ThreadCreator({ user }) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [units, setUnits] = useState([]);
     const [chosen, setChosen] = useState(0);
     const [wordCount, setWordCount] = useState(0);
+
+    const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
 
@@ -44,8 +46,6 @@ export default function ThreadCreator({ token, user }) {
                 unitCode: units[chosen - 1].code,
                 content: content
             };
-
-            console.log(token);
             
             fetch('/threads/create', {
                 method: 'POST',
