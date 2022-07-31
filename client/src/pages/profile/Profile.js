@@ -11,28 +11,48 @@ export default function Profile() {
     const [units, setUnits] = useState()
 
     useEffect(() => {
-        fetch(`/subject/get-subject/${params.username}`)
+        fetch(`/subject/get-subject/${params.username}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
                 data => setSubject(data)
             );
 
-        fetch(`/subject/get-units/${params.username}`)
+        fetch(`/subject/get-units/${params.username}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
                 data => setUnits(data)
             );
 
-        fetch(`/entry/public/${params.username}`)
+        fetch(`/entry/public/${params.username}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
                 data => setPublicEntries(data)
             );
 
-        fetch(`/threads/view-all/${params.username}`)
+        fetch(`/threads/view-all/${params.username}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(

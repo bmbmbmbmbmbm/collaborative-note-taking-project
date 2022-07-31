@@ -15,7 +15,7 @@ import Prompt from "../../components/Prompt";
 import Post from "../../components/Post";
 import UnitDisplay from "../../components/UnitDisplay";
 
-export default function Dashboard({ user }) {
+export default function Dashboard({ token, user }) {
     const [search, setSearch] = useState("");
 
     const [units, setUnits] = useState([]);
@@ -28,14 +28,24 @@ export default function Dashboard({ user }) {
     const sortBy = ["Recent", "Newest", "Oldest"];
 
     useEffect(() => {
-        fetch(`/entry/view-all/${user}`)
+        fetch(`/entry/view-all/${user}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
                 data => setEntries(data)
             );
 
-        fetch(`/threads/view-all/${user}`)
+        fetch(`/threads/view-all/${user}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
@@ -44,7 +54,12 @@ export default function Dashboard({ user }) {
                 }
             );
 
-        fetch(`/subject/get-units/${user}`)
+        fetch(`/subject/get-units/${user}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(

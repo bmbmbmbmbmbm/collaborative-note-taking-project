@@ -16,7 +16,12 @@ export default function Thread({ user, token }) {
     const params = useParams();
 
     useEffect(() => {
-        fetch(`/threads/view/${params.threadId}`).then(
+        fetch(`/threads/view/${params.threadId}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        }).then(
             response => response.json()
         ).then(
             data => {

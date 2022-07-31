@@ -114,7 +114,7 @@ function validUsername(string) {
 function validTitle(string) {
   if(typeof string !== 'string') return false;
   if(string === '') return false;
-  return string && string.length < 51 && string.length > 0 && containsLetters(string);
+  return string.length < 51 && string.length > 0 && containsLetters(string);
 }
 
 function validId(value) {
@@ -123,11 +123,13 @@ function validId(value) {
 }
 
 function validContent(text) {
+  if(typeof text !== 'string') return false;
   return text.split(" ").length < 1000 && text.length > 0;
 }
 
 function validUnitCode(string) {
-  return containsLetters(string) && containsCapAlphanumeric(string) && !containsSpecial(string) && string.length > 6 && string.length < 9;
+  if(string === "GENERAL") return true;
+  return containsCapAlphanumeric(string) && !containsSpecial(string) && string.length > 6 && string.length < 9;
 }
 
 module.exports = {

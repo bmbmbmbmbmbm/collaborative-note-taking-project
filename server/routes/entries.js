@@ -2,139 +2,89 @@ const express = require('express');
 const db = require('../database');
 const auth = require('../verify');
 const v = require('../validation.js');
+const { restart } = require('nodemon');
 
 const router = express.Router();
 
-function filterEntry(entry, removeTags) {
-  for (var i = 0; i < entry.length; ++i) {
-    if (entry[i].type !== undefined) {
-      entry.children = filterEntry(entry[i].children, removeTags);
-    } else if (entry[i].text !== undefined) {
-      entry[i].text = removeTags ? v.removeTags(entry[i].text) : v.addTags(entry[i].text);
-    }
-  }
-  return entry;
-}
+/* 
+  _________________________________________________________________________________________________________________________________________
 
-router.get('/public/:id', async function (req, res) {
+  Edit suggestion routes
+  _________________________________________________________________________________________________________________________________________
+*/
+
+/** 
+  * Handles requests for user entry suggestion creation.
+  * 
+  * @param {string} JWT is required before request is handled
+  * @param {JSON} entry is required for insertion
+  * @param {Number} entryId is required for identifying entry recieving suggestion
+  * 
+*/
+router.post('/create-edit', auth.verifyToken, async function (req, res) {
   try {
-    const username = req.params.id;
-    if (v.validUsername(username)) {
-      const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
-      if (user[0].length > 0) {
-        var publicEntries = await db.promise().query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
-        v.removeTagsFromTitles(publicEntries)
-        res.status(200).json(publicEntries[0]);
-      } else {
-        res.status(400).json({ message: "invalid credentials" });
-      }
-    } else {
-      res.status(400);
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(404);
-  }
-});
-
-router.get('/:id/view', async function (req, res) {
-  try {
-    const unitCode = req.params.id;
-    if (v.validUnitCode(unitCode)) {
-      const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
-      if (record[0].length > 0) {
-        var entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE unit_code='${unitCode}'`);
-        v.removeTagsFromTitles(entries);
-        res.status(200).json(entries[0]);
-      } else {
-        res.status(404);
-      }
-    } else {
-      res.status(400).json({ message: "unit does not exist" });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(404);
-  }
-});
-
-router.get('/view-all/:id', async function (req, res) {
-  try {
-    const username = req.params.id;
-    if (v.validUsername(username)) {
-      const getId = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
-      if (getId[0].length > 0) {
-        const id = getId[0][0].id;
-        const select =
-          `SELECT entries.id, entries.title, users.username, entries.created, entries.updated, units.title AS unit_title, units.code, entries.positive, entries.negative
-           FROM entries INNER JOIN units ON entries.unit_code=units.code
-           INNER JOIN enrolments ON units.code=enrolments.unit_code
-           INNER JOIN users ON enrolments.user_id=users.id
-           WHERE enrolments.user_id=${id};`
-
-        var result = await db.promise().query(select);
-        v.removeTagsFromTitles(result);
-        res.status(200).json(result[0]);
-      } else {
-        res.status(400).json({ message: 'user does not exist' })
-      }
-    } else {
-      res.status(400);
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(404);
-  }
-});
-
-router.get('/view/:id', async function (req, res) {
-  try {
-    if (v.validId(req.params.id)) {
-      const select = `SELECT entries.title, entries.entry, entries.created, entries.updated, entries.unit_code, 
-                      entries.positive, entries.negative, entries.private, users.username 
-                      FROM entries INNER JOIN users ON users.id=entries.user_id WHERE entries.id=${req.params.id};`;
-      var record = await db.promise().query(select);
-      if (record[0][0].private === true) {
-        res.status(400);
-      } else {
-        record[0][0].entry = filterEntry(record[0][0].entry, true);
-        v.removeTagsFromTitles(record);
-        res.status(200).json(record[0][0]);
-      }
-    } else {
-      res.status(400);
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(404);
-  }
-});
-
-router.put('/edit/:id', auth.verifyToken, async function (req, res) {
-  try {
+    const { entry, entryId } = req.body;
     const userId = req.userId;
+    if (v.validId(entryId) && Array.isArray(entry) && isValidEntry(entry)) {
+      const entryRecord = await db.promise().query(`SELECT id FROM entries WHERE id=${entryId}`);
+      if (entryRecord[0].length === 1) {
+        const editRecord = await db.promise().query(`SELECT entry_id, user_id FROM user_edits WHERE user_id=${userId} AND entry_id=${entryId}`)
+        if (editRecord[0].length === 0) {
+          const stringEntry = JSON.stringify(filterEntry(entry));
+          const insert = `INSERT INTO user_edits(user_id, entry_id, edit, created) VALUES (${userId}, ${entryId}, '${stringEntry}', NOW())`
+          await db.promise().query(insert);
+          res.status(200).json({ message: "created edit" });
+        } else {
+          const stringEntry = JSON.stringify(filterEntry(entry));
+          const update = `UPDATE user_edits SET edit='${stringEntry}' WHERE entry_id=${entryId} AND user_id=${userId}`
+          await db.promise().query(update);
+          res.status(200).json({ message: "updated edit" })
+        }
+      } else {
+        res.status(400).json({ message: "entry does not exist" })
+      }
+    } else {
+      res.status(400).json({ message: "invalid entry or entry identifier" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "server error" });
+  }
+});
+
+/** 
+  * Handles requests for retrieving edit suggestions for an entry
+  * 
+  * @param {Number} entryId is required for identifying entry to retrieve suggestions for
+  * 
+*/
+router.get('/edit-suggestions/:id', auth.verifyToken, async function (req, res) {
+  try {
     const entryId = req.params.id;
     if (v.validId(entryId)) {
-      const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle FROM entries INNER JOIN units ON entries.unit_code=units.code 
-                      WHERE id=${entryId} AND user_id=${userId}`
-      var record = await db.promise().query(select);
-      if (record[0].length === 1) {
-        v.removeTagsFromTitles(record);
-        record[0][0].entry = filterEntry(record[0][0].entry, true);
-        res.status(200).json(record[0][0]);
-      } else {
-        res.status(400);
+      const select = `SELECT user_edits.edit, user_edits.created, users.username 
+                      FROM user_edits INNER JOIN users ON users.id=user_edits.user_id WHERE entry_id=${entryId}`;
+      var records = await db.promise().query(select);
+      for (var i = 0; i < records[0].length; ++i) {
+        records[0][i].edit = filterEntry(records[0][i].edit);
       }
+      res.status(200).json(records[0]);
     } else {
-      res.status(400);
+      res.status(400).json({ message: "entry does not exist" });
     }
   } catch (err) {
     console.log(err);
-    res.status(404);
+    res.status(500).json({ message: "server error" });
   }
-})
+});
 
-router.put('/edit-diff/:id', auth.verifyToken, async function (req, res) {
+/** 
+  * Handles retrieving entry for another user to edit and make suggestions
+  * 
+  * @param {Number} entryId is required for identifying entry to retrieve suggestions for
+  * 
+*/
+router.get('/edit-diff/:id', auth.verifyToken, async function (req, res) {
   try {
     const entryId = req.params.id;
     if (v.validId(entryId)) {
@@ -147,127 +97,262 @@ router.put('/edit-diff/:id', auth.verifyToken, async function (req, res) {
         record[0][0].entry = filterEntry(record[0][0].entry, true);
         res.status(200).json(record[0][0]);
       } else {
-        res.status(400);
+        res.status(400).json({ message: "resource does not exist" });
       }
     } else {
-      res.status(400);
+      res.status(400).json({ message: "resource does not exist" });
     }
   } catch (err) {
     console.log(err);
-    res.status(404);
+    res.status(500).json({ message: "server error" });
   }
 })
 
-router.get('/edit-suggestions/:id', async function (req, res) {
-  try {
-    const entryId = req.params.id;
-    if (v.validId(entryId)) {
-      const select = `SELECT user_edits.edit, user_edits.created, users.username 
-                      FROM user_edits INNER JOIN users ON users.id=user_edits.user_id WHERE entry_id=${entryId}`;
-      var records = await db.promise().query(select);
-      for(var i = 0; i < records[0].length; ++i) {
-        records[0][i].edit = filterEntry(records[0][i].edit);
-      }
-      res.status(200).json(records[0]);
-    } else {
-      res.status(400);
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(404);
-  }
-});
 
-router.put('/update', auth.verifyToken, async function (req, res) {
-  try {
-    const { entry, entryId } = req.body;
-    const userId = req.userId;
-    if (entry && v.validId(entryId)) {
-      const stringEntry = JSON.stringify(filterEntry(entry));
-      const update = `UPDATE entries SET entry='${stringEntry}', updated=NOW() WHERE user_id=${userId} AND id=${entryId}`;
-      await db.promise().query(update);
-      res.status(200);
-    } else {
-      res.status(400);
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(404);
-  }
-});
+/* 
+  _________________________________________________________________________________________________________________________________________
 
+  Entry creation and update routes
+  _________________________________________________________________________________________________________________________________________
+*/
+
+/** 
+  * Handles requests for creating entries
+  * 
+  * @param {string} title is required for naming the entry
+  * @param {JSON} entry is required for providing reading material
+  * @param {string} unitCode is required for associating entry with unit
+  * @param {boolean} private is required for knowing whether this should be a private entry
+  * 
+*/
 router.post('/create', auth.verifyToken, async function (req, res) {
   try {
     const { title, entry, unitCode, private } = req.body;
     const userId = req.userId;
-    const stringEntry = JSON.stringify(filterEntry(entry));
-    if (v.validTitle(title) && v.validUnitCode(unitCode)) {
-      const newTitle = v.addTags(title);
-      const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
+    if (v.validTitle(title) && v.validUnitCode(unitCode) && Array.isArray(entry) && isValidEntry(entry) && typeof private === 'boolean') {
+      const unit = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+      if (unit[0].length === 1) {
+        const stringEntry = JSON.stringify(filterEntry(entry));
+        const newTitle = v.addTags(title);
+        const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
                       VALUES ('${newTitle}', '${stringEntry}', NOW(), NOW(), ${userId}, '${unitCode}', ${private}, 0 , 0);`;
-      await db.promise().query(insert);
-      const select = `SELECT id FROM entries WHERE title='${newTitle}' AND user_id=${userId} AND unit_code='${unitCode}';`;
-      const entryRecord = await db.promise().query(select);
-      res.status(200).json({ id: entryRecord[0][0].id });
+        await db.promise().query(insert);
+        const select = `SELECT id FROM entries WHERE title='${newTitle}' AND user_id=${userId} AND unit_code='${unitCode}';`;
+        const entryRecord = await db.promise().query(select);
+        res.status(200).json({ id: entryRecord[0][0].id });
+      } else {
+        res.status(400).json({ message: 'invalid unit' })
+      }
     } else {
-      res.status(400);
+      res.status(400).json({ message: "invalid entry information" });
     }
   } catch (err) {
     console.log(err);
-    res.status(404);
+    res.status(500).json({ message: "server error" });
   }
 });
 
-router.post('/create-edit', auth.verifyToken, async function (req, res) {
+/** 
+  * Handles requests for updating a users entry
+  * 
+  * @param {Number} entryId is required for identifying entry to update
+  * @param {JSON} entry is required for updating value of the original entry
+  * 
+*/
+router.put('/update', auth.verifyToken, async function (req, res) {
   try {
     const { entry, entryId } = req.body;
     const userId = req.userId;
-    if (v.validId(entryId) && entry) {
-      const stringEntry = JSON.stringify(filterEntry(entry));
-      const insert = `INSERT INTO user_edits(user_id, entry_id, edit, created) VALUES (${userId}, ${entryId}, '${stringEntry}', NOW())`
-      await db.promise().query(insert);
-      res.status(200);
+    if (Array.isArray(entry) && isValidEntry(entry) && v.validId(entryId)) {
+      console.log(entry);
+      const entryRecord = await db.promise().query(`SELECT id, user_id FROM entries WHERE id=${entryId}`)
+      if (entryRecord[0].length === 1) {
+        if (entryRecord[0][0].user_id === userId) {
+          const stringEntry = JSON.stringify(filterEntry(entry));
+          const update = `UPDATE entries SET entry='${stringEntry}', updated=NOW() WHERE user_id=${userId} AND id=${entryId}`;
+          await db.promise().query(update);
+          res.status(200).json({ message: "successfully updated entry" });
+        } else {
+          res.status(400).json({ message: 'invalid permissions' })
+        }
+      } else {
+        res.status(400).json({ message: 'invalid entry' })
+      }
     } else {
-      res.status(400);
+      res.status(400).json({ message: "entry identifier or entry does not exist" });
     }
   } catch (err) {
     console.log(err);
-    res.status(404);
+    res.status(500).json({ message: "server error" });
   }
 });
 
+/** 
+  * Handles requests for retrieving a users entry to be edited
+  * 
+  * @param {string} JWT is required before request can be handled
+  * @param {Number} entryId is required for identifying entry to retrieve suggestions for
+  * 
+*/
+router.get('/edit/:id', auth.verifyToken, async function (req, res) {
+  try {
+    const userId = req.userId;
+    const entryId = req.params.id;
+    if (v.validId(entryId)) {
+      const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle FROM entries INNER JOIN units ON entries.unit_code=units.code 
+                      WHERE id=${entryId} AND user_id=${userId}`
+      var record = await db.promise().query(select);
+      if (record[0].length === 1) {
+        v.removeTagsFromTitles(record);
+        record[0][0].entry = filterEntry(record[0][0].entry, true);
+        res.status(200).json(record[0][0]);
+      } else {
+        res.status(400).json({ message: "resource does not exist" });
+      }
+    } else {
+      res.status(400).json({ message: "resource does not exist" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "server error" });
+  }
+})
+
+
+/* 
+  _________________________________________________________________________________________________________________________________________
+
+  Entry viewing routes
+  _________________________________________________________________________________________________________________________________________
+*/
+
+/** 
+  * Handles requests for retrieving list of public entries for a unit
+  * 
+  * @param {string} unitCode is required for identifying which entries to retrieve
+  * 
+*/
+router.get('/:id/view', auth.verifyToken, async function (req, res) {
+  try {
+    const unitCode = req.params.id;
+    if (v.validUnitCode(unitCode)) {
+      const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+      if (record[0].length > 0) {
+        var entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE entries.unit_code='${unitCode}' AND private=FALSE`);
+        v.removeTagsFromTitles(entries);
+        res.status(200).json(entries[0]);
+      } else {
+        res.status(400).json({ message: "unit does not exist or letters in code are not capitalised" });
+      }
+    } else {
+      res.status(400).json({ message: "unit does not exist" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "server error" });
+  }
+});
+
+/** 
+  * Handles requests for retrieving a public entry
+  * 
+  * @param {number} entryId is required for identifying which entries to retrieve
+  * 
+*/
+router.get('/view/:id', auth.verifyToken, async function (req, res) {
+  try {
+    if (v.validId(req.params.id)) {
+      const select = `SELECT entries.title, entries.entry, entries.created, entries.updated, entries.unit_code, 
+                      entries.positive, entries.negative, entries.private, users.username 
+                      FROM entries INNER JOIN users ON users.id=entries.user_id WHERE entries.id=${req.params.id};`;
+      var record = await db.promise().query(select);
+      if (record[0].length === 1) {
+        if (record[0][0].private === 1) {
+          res.status(400).json({ message: "resource does not exist" });
+        } else {
+          record[0][0].entry = filterEntry(record[0][0].entry, true);
+          v.removeTagsFromTitles(record);
+          res.status(200).json(record[0][0]);
+        }
+      } else {
+        res.status(400).json({ message: "resource does not exist" })
+      }
+
+    } else {
+      res.status(400).json({ message: "resource does not exist" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "server error" });
+  }
+});
+
+
+/* 
+  _________________________________________________________________________________________________________________________________________
+
+  Entry commenting routes
+  _________________________________________________________________________________________________________________________________________
+*/
+
+/** 
+  * Handles requests for adding a reply to an entry or comment
+  * 
+  * @param {string} content the content of the reply
+  * @param {number} entryId the entry to add the reply to
+  * @param {number} commentId the comment to add the reply to
+  * 
+*/
 router.post('/add-reply', auth.verifyToken, async function (req, res) {
   try {
     const { content, entryId, commentId } = req.body;
     const userId = req.userId;
     if (v.validContent(content) && v.validId(entryId)) {
-      const select = `SELECT id FROM threads WHERE id=${entryId}`;
-      const thread = await db.promise().query(select);
+      const select = `SELECT id FROM entries WHERE id=${entryId}`;
+      const entry = await db.promise().query(select);
+      const newContent = v.addTags(content);
       if (v.validId(commentId)) {
         const select2 = `SELECT id, entry_id FROM replies WHERE id=${commentId}`;
         const comment = await db.promise().query(select2);
-        if (comment[0].length === 1 && thread[0].length === 1) {
-          const insert = `INSERT INTO replies(reply, replyTo, user_id, entry_id, created) VALUES ('${JSON.stringify({ "content": content })}', ${commentId}, ${userId}, ${entryId}, NOW());`
-          await db.promise().query(insert);
-          res.status(200);
+        if (comment[0].length === 1 && entry[0].length === 1) {
+          if (comment[0][0].entry_id === entry[0][0].id) {
+            console.log("valid ids")
+            const insert = `INSERT INTO replies(reply, replyTo, user_id, entry_id, created) 
+                            VALUES ('${JSON.stringify({ "content": newContent })}', ${commentId}, ${userId}, ${entryId}, NOW());`
+            await db.promise().query(insert);
+            res.status(200).json({ message: "added reply" });
+          } else {
+            res.status(400).json({ message: "entry or comment does not exist" });
+          }
         } else {
-          res.status(400);
+          res.status(400).json({ message: "entry or comment does not exist" });
         }
       } else {
-        const insert = `INSERT INTO replies(reply, user_id, entry_id, created) VALUES ('${JSON.stringify({ "content": content })}', ${userId}, ${entryId}, NOW());`
-        await db.promise().query(insert);
-        res.status(200);
+        if(entry[0].length === 1) {
+          const insert = `INSERT INTO replies(reply, user_id, entry_id, created) 
+                          VALUES ('${JSON.stringify({ "content": newContent })}', ${userId}, ${entryId}, NOW());`
+          await db.promise().query(insert);
+          res.status(200).json({ message: "added reply" });
+        } else {
+          res.status(400).json({ message: "entry does not exist"})
+        }
       }
     } else {
-      res.status(400);
+      res.status(400).json({ message: "entry or comment does not exist" });
     }
   } catch (err) {
     console.log(err);
-    res.status(404);
+    res.status(500).json({ message: "server error" });
   }
 });
 
-router.get('/view/:id/replies', async function (req, res) {
+/** 
+  * Handles requests for retrieving comments for an entry
+  * 
+  * @param {number} entryId the id of the entry to retrieve the comments of
+  * 
+*/
+router.get('/view/:id/replies', auth.verifyToken, async function (req, res) {
   try {
     const entryId = req.params.id;
     if (v.validId(entryId)) {
@@ -279,20 +364,144 @@ router.get('/view/:id/replies', async function (req, res) {
       const replies = await db.promise().query(select2);
       res.status(200).json({ comments: comments[0], replies: replies[0] });
     } else {
-      res.status(400);
+      res.status(400).json({ message: "invalid entry identifier" });
     }
   } catch (err) {
     console.log(err);
+    res.status(500).json({ message: "server error" })
   }
 })
 
+
+/* 
+  _________________________________________________________________________________________________________________________________________
+
+  Misc.
+  _________________________________________________________________________________________________________________________________________
+*/
+
+/** 
+  * Handles requests for retrieving all public entry information of a user
+  * 
+  * @param {string} username the user to retrieve the public entries of
+  * 
+*/
+router.get('/public/:id', auth.verifyToken, async function (req, res) {
+  try {
+    const username = req.params.id;
+    if (v.validUsername(username)) {
+      const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
+      if (user[0].length > 0) {
+        var publicEntries = await db.promise().query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
+        v.removeTagsFromTitles(publicEntries)
+        res.status(200).json(publicEntries[0]);
+      } else {
+        res.status(400).json({ message: "invalid credentials" });
+      }
+    } else {
+      res.status(400).json({ message: "invalid credentials" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "server error" });
+  }
+});
+
+/** 
+  * Handles requests retrieving all of a users entry information
+  * 
+  * @param {string} username the user to retrieve the public entries of
+  * 
+*/
+router.get('/view-all/:id', auth.verifyToken, async function (req, res) {
+  try {
+    const username = req.params.id;
+    const userId = req.userId;
+    if (v.validUsername(username)) {
+      const getId = await db.promise().query(`SELECT id FROM users WHERE username='${username}' AND id=${userId}`);
+      if (getId[0].length > 0) {
+        const select =
+          `SELECT entries.id, entries.title, users.username, entries.created, entries.updated, units.title AS unit_title, units.code, entries.positive, entries.negative
+           FROM entries INNER JOIN units ON entries.unit_code=units.code
+           INNER JOIN enrolments ON units.code=enrolments.unit_code
+           INNER JOIN users ON enrolments.user_id=users.id
+           WHERE enrolments.user_id=${userId};`
+        var result = await db.promise().query(select);
+        v.removeTagsFromTitles(result);
+        res.status(200).json(result[0]);
+      } else {
+        res.status(400).json({ message: 'user does not exist' })
+      }
+    } else {
+      res.status(400).json({ message: "invalid credentials" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "server error" });
+  }
+});
+
+/** 
+  * Not functional
+  * 
+*/
 router.delete('/delete/:id', auth.verifyToken, async function (req, res) {
   try {
 
   } catch (err) {
     console.log(err);
-    res.status(404);
+    res.status(500).json({ message: "server error" });
   }
 });
+
+
+/* 
+  _________________________________________________________________________________________________________________________________________
+
+  Helper functions
+  _________________________________________________________________________________________________________________________________________
+*/
+
+/** 
+  * Handles checking if an entry has valid structure, properties, and data
+  * 
+  * @param {JSON} entry the entry to be validated
+  * 
+*/
+function isValidEntry(entry) {
+  var validChildList = true;
+  for (var i = 0; i < entry.length; ++i) {
+    const hasType = entry[i].hasOwnProperty('type');
+    const hasChildren = entry.hasOwnProperty('children');
+    if (!hasType && !hasChildren) {
+      const isText = entry[i].hasOwnProperty('text');
+      if (!isText) return false;
+      else if (typeof entry[i].text !== 'string') return false;
+    } else {
+      if (Array.isArray(entry[i].children) && typeof entry[i].type === 'string') {
+        validChildList = isValidEntry(entry[i].children);
+      } else return false;
+    }
+  }
+  return true && validChildList;
+}
+
+/** 
+  * Handles filtering the entry of illegal characters
+  * 
+  * @param {JSON} entry the entry to be filtered
+  * 
+*/
+function filterEntry(entry, removeTags) {
+  for (var i = 0; i < entry.length; ++i) {
+    if (entry[i].type !== undefined) {
+      entry[i].type = removeTags ? v.removeTags(entry[i].type) : v.addTags(entry[i].type);
+      entry.children = filterEntry(entry[i].children, removeTags);
+    } else if (entry[i].text !== undefined) {
+      entry[i].text = removeTags ? v.removeTags(entry[i].text) : v.addTags(entry[i].text);
+    }
+  }
+  return entry;
+}
 
 module.exports = router;

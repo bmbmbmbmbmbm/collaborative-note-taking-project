@@ -10,22 +10,27 @@ router.post('/create', auth.verifyToken, async function (req, res) {
         const { title, unitCode, content } = req.body;
         const userId = req.userId;
         if (v.validTitle(title) && v.validUnitCode(unitCode) && v.validContent(content)) {
-            const newTitle = v.addTags(title);
-            const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
-                            VALUES ('${newTitle}', '${JSON.stringify({ "content": v.addTags(content) })}', NOW(), NOW(), ${userId}, '${unitCode}', 0 , 0)`;
-            await db.promise().query(insert);
-            const id = await db.promise().query(`SELECT id FROM threads WHERE title='${newTitle}' AND user_id=${userId} ORDER BY created DESC`);
-            if (id[0].length > 0) {
-                res.status(200).json({ id: id[0][id[0].length - 1].id });
+            const unit = await db.promise().query(`SELECT code FROM units WHERE code='${unitCode}'`);
+            if (unit[0].length === 1) {
+                const newTitle = v.addTags(title);
+                const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
+                                VALUES ('${newTitle}', '${JSON.stringify({ "content": v.addTags(content) })}', NOW(), NOW(), ${userId}, '${unitCode}', 0 , 0)`;
+                await db.promise().query(insert);
+                const id = await db.promise().query(`SELECT id FROM threads WHERE title='${newTitle}' AND user_id=${userId} ORDER BY created DESC`);
+                if (id[0].length > 0) {
+                    res.status(200).json({ id: id[0][id[0].length - 1].id });
+                } else {
+                    res.status(500).json({ message: "failed to create thread" });
+                }
             } else {
-                res.status(400);
+                res.status(400).json({ message: "invalid unit" })
             }
         } else {
-            res.status(400);
+            res.status(400).json({ message: "invalid thread details" });
         }
     } catch (err) {
         console.log(err);
-        res.status(500);
+        res.status(500).json({ message: "server error" });
     }
 })
 
@@ -36,37 +41,42 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
         if (v.validContent(content) && v.validId(threadId)) {
             const select = `SELECT id FROM threads WHERE id=${threadId}`;
             const thread = await db.promise().query(select);
+            const newContent = v.addTags(content);
             if (v.validId(commentId)) {
                 const select2 = `SELECT id, thread_id FROM replies WHERE id=${commentId}`;
                 const comment = await db.promise().query(select2);
                 if (comment[0].length === 1 && thread[0].length === 1) {
                     if (comment[0][0].thread_id === thread[0][0].id) {
                         const insert = `INSERT INTO replies(reply, replyTo, user_id, thread_id, created) 
-                                        VALUES ('${JSON.stringify({ "content": content })}', ${commentId}, ${userId}, ${threadId}, NOW());`
+                                        VALUES ('${JSON.stringify({ "content": newContent })}', ${commentId}, ${userId}, ${threadId}, NOW());`
                         await db.promise().query(insert);
-                        res.status(200);
+                        res.status(200).json({ message: "added reply" });
                     } else {
-                        res.status(400).json({message: "comment is not in thread"});
+                        res.status(400).json({ message: "thread or comment does not exist" });
                     }
                 } else {
-                    res.status(400).json({message: "comment does not exist"});
+                    res.status(400).json({ message: "thread or comment does not exist" });
                 }
             } else {
-                const insert = `INSERT INTO replies(reply, user_id, thread_id, created) 
-                                VALUES ('${JSON.stringify({ "content": content })}', ${userId}, ${threadId}, NOW());`
-                await db.promise().query(insert);
-                res.status(200);
+                if (thread[0].length === 1) {
+                    const insert = `INSERT INTO replies(reply, user_id, thread_id, created) 
+                                    VALUES ('${JSON.stringify({ "content": newContent })}', ${userId}, ${threadId}, NOW());`
+                    await db.promise().query(insert);
+                    res.status(200).json({ message: "added reply" });
+                } else {
+                    res.status(400).json({ message: "thread does not exist" });
+                }
             }
         } else {
-            res.status(400);
+            res.status(400).json({ message: "thread or comment does not exist" });
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 });
 
-router.get('/view-all/:id', async function (req, res) {
+router.get('/view-all/:id', auth.verifyToken, async function (req, res) {
     try {
         const user = req.params.id;
         if (v.validUsername(user)) {
@@ -78,19 +88,18 @@ router.get('/view-all/:id', async function (req, res) {
                 v.removeTagsFromTitles(threads);
                 res.status(200).json(threads[0]);
             } else {
-                res.status(400).json({ message: 'user does not exist' });
+                res.status(400).json({ message: 'invalid credentials' });
             }
         } else {
             res.status(400).json({ message: "invalid credentials" });
         }
-
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 });
 
-router.get('/:id/view', async function (req, res) {
+router.get('/:id/view', auth.verifyToken, async function (req, res) {
     try {
         const unitCode = req.params.id;
         if (v.validUnitCode(unitCode)) {
@@ -99,18 +108,18 @@ router.get('/:id/view', async function (req, res) {
                 const userThreads = await db.promise().query(`SELECT threads.id, threads.title, threads.created, threads.last_reply, threads.positive, threads.negative, users.username FROM threads INNER JOIN users ON threads.user_id=users.id WHERE unit_code='${unitCode}'`);
                 res.status(200).json(userThreads[0]);
             } else {
-                res.status(404);
+                res.status(400).json({ message: "unit does not exist" });
             }
         } else {
             res.status(400).json({ message: "unit does not exist" });
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 });
 
-router.get('/view/:id', async function (req, res) {
+router.get('/view/:id', auth.verifyToken, async function (req, res) {
     try {
         if (v.validId(req.params.id)) {
             const select = `SELECT threads.title, threads.thread, threads.created, threads.last_reply, threads.unit_code, users.username 
@@ -120,15 +129,15 @@ router.get('/view/:id', async function (req, res) {
             v.removeTags(record[0][0].title)
             res.status(200).json(record[0][0]);
         } else {
-            res.status(400);
+            res.status(400).json({ message: "invalid thread identifier" });
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 });
 
-router.get('/view/:id/replies', async function (req, res) {
+router.get('/view/:id/replies', auth.verifyToken, async function (req, res) {
     try {
         const threadId = req.params.id;
         if (v.validId(+threadId)) {
@@ -140,10 +149,11 @@ router.get('/view/:id/replies', async function (req, res) {
             v.removeTagsFromComments(replies);
             res.status(200).json({ comments: comments[0], replies: replies[0] });
         } else {
-            res.status(400);
+            res.status(400).json({ message: "invalid thread identifier" });
         }
     } catch (err) {
         console.log(err);
+        res.status(500).json({ message: "server error" })
     }
 })
 

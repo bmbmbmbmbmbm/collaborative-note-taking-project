@@ -10,7 +10,6 @@ const router = express.Router();
 router.post("/", async function (req, res) {
     try {
         const { email, password } = req.body;
-        console.log(email, password)
         if (v.validEmail(email, "@bath.ac.uk") && v.validPassword(password)) {
             const select = `SELECT * FROM users WHERE email='${email}'`
             const record = await db.promise().query(select);
@@ -18,45 +17,44 @@ router.post("/", async function (req, res) {
                 bcrypt.compare(password, record[0][0].password, async (err, result) => {
                     if (err) {
                         console.log(err)
-                        res.status(404).json({message: "failed"});
+                        res.status(500).json({message: "server error"});
                     } else {
                         if (result === true) {
                             const id = record[0][0].id;
                             const username = record[0][0].username;
                             const token = jwt.sign({ id, username }, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF")
                             await db.promise().query(`INSERT INTO session(user_id, start) VALUES (${record[0][0].id}, NOW())`);
-                            console.log(email, 'logged in');
                             res.status(200).json({ token: token });
                         } else {
-                            res.status(400).json({message: "failed"});
+                            res.status(400).json({message: "invalid credentials"});
                         }
                     }
                 })
             } else {
-                res.status(400).json({message: "failed"});
+                res.status(400).json({message: "invalid credentials"});
             }
         } else {
-            res.status(400).json({message: "failed"});
+            res.status(400).json({message: "invalid credentials"});
         }
     } catch (err) {
         console.log(err);
-        res.status(404).json({message: "failed"});
+        res.status(500).json({message: "server error"});
     }
 });
 
-router.post("/out", auth.verifyToken, async function (req, res) {
+router.get("/out", auth.verifyToken, async function (req, res) {
     try {
         const userId = req.userId;
         const sessionRec = await db.promise().query(`SELECT * FROM session WHERE user_id=${userId} AND end IS NULL`);
         if (sessionRec[0].length === 0) {
             await db.promise().query(`UPDATE session SET end=NOW() WHERE id=${sessionRec[0][0].id}`);
-            res.status(200);
+            res.status(200).json({ message: "successfully logged out"});
         } else {
-            res.status(400);
+            res.status(400).json({message: "session does not exist"});
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error"});
     }
 });
 

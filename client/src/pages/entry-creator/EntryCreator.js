@@ -15,14 +15,19 @@ export default function EntryCreator({ token, user }) {
     const [entryId, setEntryId] = useState();
     const [isPublic, setIsPublic] = useState(false);
 
-    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || [{ type: 'paragraph', children: [{ text: 'A line of text in a paragraph.' }],}] || [], []);
+    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || [{ type: 'paragraph', children: [{ text: 'A line of text in a paragraph.' }], }] || [], []);
 
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
 
     const params = useParams();
 
     useEffect(() => {
-        fetch(`/subject/get-units/${user}`)
+        fetch(`/subject/get-units/${user}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
@@ -33,7 +38,7 @@ export default function EntryCreator({ token, user }) {
         if (entryId === undefined && params.entryId !== undefined) {
             setEntryId(params.entryId);
             fetch(`/entry/edit/${params.entryId}`, {
-                method: "PUT",
+                method: "GET",
                 headers: {
                     "authorization": token,
                     "Content-Type": "application/json"
@@ -44,12 +49,12 @@ export default function EntryCreator({ token, user }) {
                 ).then(
                     data => {
                         setTitle(data.title);
-                        setChosen(units.indexOf({title: data.unitTitle, code: data.unit_code}) + 1);
+                        setChosen(units.indexOf({ title: data.unitTitle, code: data.unit_code }) + 1);
                         localStorage.setItem('content', JSON.stringify(data.entry));
                     }
                 )
-        } 
-        
+        }
+
     }, [])
 
     const renderElement = useCallback(props => <Element {...props} />, [])
@@ -181,7 +186,7 @@ export default function EntryCreator({ token, user }) {
 
     return (<></>)
 }
-  
+
 
 // Start of handling images
 

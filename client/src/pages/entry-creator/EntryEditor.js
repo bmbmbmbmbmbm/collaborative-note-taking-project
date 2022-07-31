@@ -20,7 +20,7 @@ export default function EntryCreator({ token, user }) {
     useEffect(() => {
         if (Number.isInteger(+params.entryId)) {
             fetch(`/entry/edit-diff/${params.entryId}`, {
-                method: "PUT",
+                method: "GET",
                 headers: {
                     "authorization": token,
                     "Content-Type": "application/json"

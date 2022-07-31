@@ -10,12 +10,13 @@ router.post('/', async function (req, res) {
     try {
         const { email, password, subject_id } = req.body;
         if (v.validEmail(email, "@bath.ac.uk") && v.validPassword(password) && v.validId(subject_id)) {
-            const subject = await db.promise().query(`SELECT id FROM subjects WHERE id=${subject_id}`)
-            if(subject[0].length === 1) {
+            const subject = await db.promise().query(`SELECT id FROM subjects WHERE id=${subject_id}`);
+            const user = await db.promise().query(`SELECT email FROM users WHERE email='${email}'`);
+            if(subject[0].length === 1 && user[0].length === 0) {
                 bcrypt.hash(password, 10, async function (err, hash) {
                     if (err) {
                         console.log(err)
-                        res.status(404);
+                        res.status(500).json({message: "server error"});
                     } else {
                         const insert = `INSERT INTO users(username, email, password, moderator, admin, subject_id) 
                                         VALUES('${email.substring(0, email.indexOf('@'))}', '${email}', '${hash}', FALSE, FALSE, ${subject_id})`
@@ -29,14 +30,14 @@ router.post('/', async function (req, res) {
                     }
                 })
             } else {
-                res.status(400);
+                res.status(400).json({ message: "invalid credentials" });
             }
         } else {
-            res.status(400);
+            res.status(400).json({ message: "invalid credentials" });
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 
 })

@@ -93,7 +93,7 @@ export default function Routing() {
         </Navbar>
 
         <Routes>
-          <Route path="/dashboard" element={<Dashboard user={username} />} />
+          <Route path="/dashboard" element={<Dashboard token={token} user={username} />} />
           <Route path="/thread-creator" element={<ThreadCreator token={token} user={username} />} />
           <Route path="/profile/:username" element={<Profile token={token} />} />
           <Route path="/entry-creator" element={<EntryCreator token={token} user={username} />}>

@@ -68,11 +68,11 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
 
             res.status(200).json({ message: 'handled enrolment' });
         } else {
-            res.status(400).json({ message: 'User does not exist' });
+            res.status(400).json({ message: 'provide units' });
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 });
 
@@ -95,7 +95,7 @@ router.get('/get-units/:id', async function (req, res) {
 
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 })
 
@@ -115,7 +115,7 @@ router.get('/get-subject/:id', async function (req, res) {
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 });
 
@@ -127,14 +127,14 @@ router.get('/titleof/:id', async function (req, res) {
             if (title[0].length === 1) {
                 res.status(200).json(title[0][0]);
             } else {
-                res.status(404);
+                res.status(400).json({ message: "unit does not exist" });
             }
         } else {
-            res.status(400);
+            res.status(400).json({ message: "invalid unit code" });
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 });
 
@@ -151,11 +151,11 @@ router.get('/:id', async function (req, res) {
             const results = await db.promise().query(select2);
             res.status(200).json(results[0]);
         } else {
-            res.status(400);
+            res.status(400).json({ message: "invalid credentials" });
         }
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 })
 
@@ -165,7 +165,7 @@ router.get('/', async function (req, res) {
         res.status(201).json(results[0]);
     } catch (err) {
         console.log(err);
-        res.status(404);
+        res.status(500).json({ message: "server error" });
     }
 })
 

@@ -24,7 +24,12 @@ export default function Entry({ token, user }) {
     const params = useParams();
 
     useEffect(() => {
-        fetch(`/entry/view/${params.entryId}`).then(
+        fetch(`/entry/view/${params.entryId}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        }).then(
             response => response.json()
         ).then(
             data => {

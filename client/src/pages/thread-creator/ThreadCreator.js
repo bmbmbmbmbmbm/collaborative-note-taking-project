@@ -13,7 +13,12 @@ export default function ThreadCreator({ token, user }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(`/subject/get-units/${user}`)
+        fetch(`/subject/get-units/${user}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(

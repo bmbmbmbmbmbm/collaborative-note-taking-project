@@ -10,13 +10,23 @@ export default function Enrolment({token, user}) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(`/subject/${user}`)
+        fetch(`/subject/${user}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then((response) => response.json())
             .then((value) => {
                 setUnits(value);
             });
 
-        fetch(`/subject/get-units/${user}`).then(
+        fetch(`/subject/get-units/${user}`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        }).then(
             response => response.json()
         ).then(
             value => {

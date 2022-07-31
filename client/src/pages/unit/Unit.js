@@ -17,7 +17,12 @@ export default function Unit({ token }) {
     useEffect(() => {
         setPosts([]);
 
-        fetch(`/threads/${params.unitId}/view`)
+        fetch(`/threads/${params.unitId}/view`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
@@ -26,7 +31,12 @@ export default function Unit({ token }) {
                 }
             );
 
-        fetch(`/entry/${params.unitId}/view`)
+        fetch(`/entry/${params.unitId}/view`, {
+            method: "GET",
+            headers: {
+                "authorization": token
+            }
+        })
             .then(
                 response => response.json()
             ).then(
