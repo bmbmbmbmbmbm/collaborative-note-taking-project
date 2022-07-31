@@ -26,47 +26,48 @@ export default function Entry({ user }) {
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        console.log(token)
-        fetch(`/entry/view/${params.entryId}`, {
-            method: "GET",
-            headers: {
-                "authorization": token,
-                'Content-Type': 'application/json'
-            }
-        }).then(
-            response => response.json()
-        ).then(
-            data => {
-                setTitle(data.title);
-                setEntry(data.entry);
-                setUsername(data.username);
-                setCreated(data.created);
-                setUpdated(data.updated);
-                setUnit(data.unit_code);
-            }
-        )
-
-        fetch(`/entry/view/${params.entryId}/replies`, {
-            method: "GET",
-            headers: {
-                "authorization": token
-            }
-        }).then(
-            response => response.json()
-        ).then(
-            data => setInteractions(data)
-        )
-
-        fetch(`/entry/edit-suggestions/${params.entryId}`, {
-            method: "GET",
-            headers: {
-                "authorization": token
-            }
-        }).then(
-            response => response.json()
-        ).then(
-            data => setUserEdits(data)
-        )
+        if(token) {
+            fetch(`/entry/view/${params.entryId}`, {
+                method: "GET",
+                headers: {
+                    "authorization": token,
+                    'Content-Type': 'application/json'
+                }
+            }).then(
+                response => response.json()
+            ).then(
+                data => {
+                    setTitle(data.title);
+                    setEntry(data.entry);
+                    setUsername(data.username);
+                    setCreated(data.created);
+                    setUpdated(data.updated);
+                    setUnit(data.unit_code);
+                }
+            )
+    
+            fetch(`/entry/view/${params.entryId}/replies`, {
+                method: "GET",
+                headers: {
+                    "authorization": token
+                }
+            }).then(
+                response => response.json()
+            ).then(
+                data => setInteractions(data)
+            )
+    
+            fetch(`/entry/edit-suggestions/${params.entryId}`, {
+                method: "GET",
+                headers: {
+                    "authorization": token
+                }
+            }).then(
+                response => response.json()
+            ).then(
+                data => setUserEdits(data)
+            )
+        }
     }, [])
 
     const renderElement = useCallback(props => <Element {...props} />, [])

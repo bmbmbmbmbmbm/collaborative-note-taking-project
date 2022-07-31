@@ -8,11 +8,9 @@ import './css/app.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <Router>
-      <Routing/>
-    </Router>
-  </React.StrictMode>
+  <Router>
+    <Routing />
+  </Router>
 );
 
 // If you want to start measuring performance in your app, pass a function

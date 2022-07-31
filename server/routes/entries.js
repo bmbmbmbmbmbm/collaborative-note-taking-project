@@ -129,7 +129,9 @@ router.post('/create', auth.verifyToken, async function (req, res) {
   try {
     const { title, entry, unitCode, private } = req.body;
     const userId = req.userId;
+
     if (v.validTitle(title) && v.validUnitCode(unitCode) && Array.isArray(entry) && isValidEntry(entry) && typeof private === 'boolean') {
+      console.log(title, entry, unitCode, private)
       const unit = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
       if (unit[0].length === 1) {
         const stringEntry = JSON.stringify(filterEntry(entry));

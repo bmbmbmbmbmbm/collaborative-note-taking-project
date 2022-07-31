@@ -73,7 +73,7 @@ export default function EntryCreator({ user }) {
 
             let body = {
                 title: title,
-                entry: token,
+                entry: JSON.parse(localStorage.getItem('content')),
                 unitCode: units[chosen - 1].code,
                 private: isPublic
             }
@@ -92,7 +92,7 @@ export default function EntryCreator({ user }) {
         } else {
             let body = {
                 title: title,
-                entry: token,
+                entry: JSON.parse(localStorage.getItem('content')),
                 unitCode: units[chosen - 1].code,
                 private: isPublic,
                 entryId: entryId
