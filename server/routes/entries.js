@@ -131,7 +131,6 @@ router.post('/create', auth.verifyToken, async function (req, res) {
     const userId = req.userId;
 
     if (v.validTitle(title) && v.validUnitCode(unitCode) && Array.isArray(entry) && isValidEntry(entry) && typeof private === 'boolean') {
-      console.log(title, entry, unitCode, private)
       const unit = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
       if (unit[0].length === 1) {
         const stringEntry = JSON.stringify(filterEntry(entry));
@@ -166,7 +165,6 @@ router.put('/update', auth.verifyToken, async function (req, res) {
     const { entry, entryId } = req.body;
     const userId = req.userId;
     if (Array.isArray(entry) && isValidEntry(entry) && v.validId(entryId)) {
-      console.log(entry);
       const entryRecord = await db.promise().query(`SELECT id, user_id FROM entries WHERE id=${entryId}`)
       if (entryRecord[0].length === 1) {
         if (entryRecord[0][0].user_id === userId) {
@@ -318,7 +316,6 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
         const comment = await db.promise().query(select2);
         if (comment[0].length === 1 && entry[0].length === 1) {
           if (comment[0][0].entry_id === entry[0][0].id) {
-            console.log("valid ids")
             const insert = `INSERT INTO replies(reply, replyTo, user_id, entry_id, created) 
                             VALUES ('${JSON.stringify({ "content": newContent })}', ${commentId}, ${userId}, ${entryId}, NOW());`
             await db.promise().query(insert);

@@ -35,10 +35,11 @@ function exclusiveTo(A, B) {
 
 function validateUnits(units) {
     var valid = true;
-    if(!Array.isArray(units)) return false;
+    if (!Array.isArray(units)) return false;
     units.forEach(function (unit) {
-        if(!unit.hasOwnProperty('title') || !unit.hasOwnProperty('code')) valid = false;
-        else if(!v.validUnitCode(unit)) valid = false;
+        if (!unit.hasOwnProperty('title') || !unit.hasOwnProperty('code')) valid = false;
+        else if (typeof unit.title !== 'string' || typeof unit.code !== 'string') valid = false;
+        else if (!v.validUnitCode(unit.code))  valid = false;
     })
     return valid;
 }
@@ -52,35 +53,52 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
                             FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code INNER JOIN users ON enrolments.user_id=users.id 
                             WHERE enrolments.user_id=${userId}`;
             const currentUnits = await db.promise().query(select)
-            const toAdd = exclusiveTo(units, currentUnits[0]);
-            const toRemove = exclusiveTo(currentUnits[0], units);
-            if (toAdd.length > 0) {
-                let insert = `INSERT INTO enrolments(unit_code, user_id) VALUES `;
-                for (var i = 0; i < toAdd.length; ++i) {
-                    if (i === toAdd.length - 1) {
-                        insert += ` ('${toAdd[i].code}', ${userId});`;
-                    } else {
-                        insert += ` ('${toAdd[i].code}', ${userId}),`;
-                    }
-                }
-                await db.promise().query(insert);
-            }
 
-            if (toRemove.length > 0) {
-                let del = `DELETE FROM enrolments WHERE user_id=${userId} AND (`;
-                for (var i = 0; i < toRemove.length; ++i) {
-                    if (i === toRemove.length - 1) {
-                        del += ` unit_code='${toRemove[i].code}');`
-                    } else {
-                        del += `unit_code='${toRemove[i].code}' OR`
-                    }
+            // Do all units exist?
+            var select2 = `SELECT code FROM units WHERE `
+            for (var i = 0; i < units.length; ++i) {
+                if (i === units.length - 1) {
+                    select2 += `code='${units[i].code}'`
+                } else {
+                    select2 += `code='${units[i].code}' OR `
                 }
-                await db.promise().query(del);
             }
+            const unitList = await db.promise().query(select2);
 
-            res.status(200).json({ message: 'handled enrolment' });
+            // If so, the list should be the same length;
+            if (unitList[0].length === units.length) {
+                const toAdd = exclusiveTo(units, currentUnits[0]);
+                const toRemove = exclusiveTo(currentUnits[0], units);
+                if (toAdd.length > 0) {
+                    let insert = `INSERT INTO enrolments(unit_code, user_id) VALUES `;
+                    for (var i = 0; i < toAdd.length; ++i) {
+                        if (i === toAdd.length - 1) {
+                            insert += ` ('${toAdd[i].code}', ${userId});`;
+                        } else {
+                            insert += ` ('${toAdd[i].code}', ${userId}),`;
+                        }
+                    }
+                    await db.promise().query(insert);
+                }
+
+                if (toRemove.length > 0) {
+                    let del = `DELETE FROM enrolments WHERE user_id=${userId} AND (`;
+                    for (var i = 0; i < toRemove.length; ++i) {
+                        if (i === toRemove.length - 1) {
+                            del += ` unit_code='${toRemove[i].code}');`
+                        } else {
+                            del += `unit_code='${toRemove[i].code}' OR `
+                        }
+                    }
+                    await db.promise().query(del);
+                }
+
+                res.status(200).json({ message: 'enrolled' });
+            } else {
+                res.status(400).json({ message: 'invalid unit selection' })
+            }
         } else {
-            res.status(400).json({ message: 'provide units' });
+            res.status(400).json({ message: 'provide valid units' });
         }
     } catch (err) {
         console.log(err);
@@ -95,7 +113,7 @@ router.get('/get-units/:id', auth.verifyToken, async function (req, res) {
             const user = await db.promise().query(`SELECT * FROM users WHERE username='${username}'`);
             if (user[0].length > 0) {
                 const select = `SELECT units.code, units.title FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code
-                        INNER JOIN users ON users.id=enrolments.user_id WHERE users.username='${username}';`;
+                                INNER JOIN users ON users.id=enrolments.user_id WHERE users.username='${username}';`;
                 const result = await db.promise().query(select);
                 res.status(200).json(result[0]);
             } else {
@@ -174,7 +192,7 @@ router.get('/:id', auth.verifyToken, async function (req, res) {
 router.get('/', auth.verifyToken, async function (req, res) {
     try {
         const results = await db.promise().query(`SELECT * FROM subjects`);
-        res.status(201).json(results[0]);
+        res.status(200).json(results[0]);
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "server error" });

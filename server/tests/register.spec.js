@@ -7,7 +7,7 @@ chai.use(chaiHttp);
 describe('Register API Tests:', function() {
     it('should respond with 200 with valid credentials and if the user is new', function (done) {
         // For testing registering a new user, change the details in the .send() or remove the test user from the database.
-        chai.request(server).post('/register').set('Content-Type', 'application/json').send({ email: "ad245@bath.ac.uk", password: "p4$$Word", subject_id: 1 }).end(function (req, res) {
+        chai.request(server).post('/register').set('Content-Type', 'application/json').send({ email: "zz709@bath.ac.uk", password: "p4$$Word", subject_id: 1 }).end(function (req, res) {
             chai.expect(res.status).to.be.eq(200);
             chai.expect(res.body).to.have.property('token');
             done();
