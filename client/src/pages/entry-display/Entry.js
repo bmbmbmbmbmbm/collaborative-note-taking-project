@@ -4,11 +4,12 @@ import { Slate, Editable, useSlateStatic, ReactEditor, useSelected, useFocused, 
 import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
-import { Tabs, Tab, Container, Row, Col, Card } from 'react-bootstrap';
+import { Tabs, Tab, Container, Row, Col } from 'react-bootstrap';
 import Reply from '../thread-display/Reply.js';
 import Comment from '../thread-display/Comment.js';
 import { useParams, Link } from 'react-router-dom';
 import Prompt from '../../components/Prompt.js';
+import Edit from './Edit';
 
 export default function Entry({ user }) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
@@ -194,23 +195,7 @@ export default function Entry({ user }) {
                             <Container>
                                 <Prompt title="Why not make an edit?" desc="Others, including the author, may find it useful" link={`/${params.unitId}/entry/${params.entryId}/edit`} />
                                 {userEdits.map(theEdit =>
-                                    <Card key={theEdit.username} style={{marginTop: "2%"}}>
-                                        <Card.Header>
-                                            <Row>
-                                                <Col>
-                                                    edit made by {theEdit.username}
-                                                </Col>
-                                                <Col>
-                                                    <label style={{ float: "right" }}>{theEdit.created}</label>
-                                                </Col>
-                                            </Row>
-                                        </Card.Header>
-                                        <Card.Body>
-                                            <Slate editor={editor} value={theEdit.edit}>
-                                                <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} placeholder='Some text' />
-                                            </Slate>
-                                        </Card.Body>
-                                    </Card>
+                                    <Edit key={theEdit.username} user={theEdit.username} created={theEdit.created} suggestion={theEdit.edit} />
                                 )}
                             </Container>
                         </Tab>

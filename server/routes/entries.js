@@ -234,14 +234,29 @@ router.get('/edit/:id', auth.verifyToken, async function (req, res) {
 router.get('/:id/view', auth.verifyToken, async function (req, res) {
   try {
     const unitCode = req.params.id;
+    const userId = req.userId;
     if (v.validUnitCode(unitCode)) {
-      const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
-      if (record[0].length > 0) {
-        var entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE entries.unit_code='${unitCode}' AND private=FALSE`);
-        v.removeTagsFromTitles(entries);
-        res.status(200).json(entries[0]);
-      } else {
-        res.status(400).json({ message: "unit does not exist or letters in code are not capitalised" });
+      const enrolments = await db.promise().query(`SELECT unit_code FROM enrolments WHERE user_id=${userId}`);
+      if (enrolments[0].length > 0) {
+        var hasEnrolled = false;
+        for (var i = 0; i < enrolments[0].length; ++i) {
+          if (enrolments[0][i].unit_code === unitCode) {
+            hasEnrolled = true;
+            break;
+          }
+        }
+        if (hasEnrolled) {
+          const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+          if (record[0].length > 0) {
+            var entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE entries.unit_code='${unitCode}' AND private=FALSE`);
+            v.removeTagsFromTitles(entries);
+            res.status(200).json(entries[0]);
+          } else {
+            res.status(400).json({ message: "unit does not exist or letters in code are not capitalised" });
+          }
+        } else {
+          res.status(400).json({ message: "not enrolled in unit" })
+        }
       }
     } else {
       res.status(400).json({ message: "unit does not exist" });
@@ -260,13 +275,15 @@ router.get('/:id/view', auth.verifyToken, async function (req, res) {
 */
 router.get('/view/:id', auth.verifyToken, async function (req, res) {
   try {
+    const userId = req.userId;
     if (v.validId(req.params.id)) {
       const select = `SELECT entries.title, entries.entry, entries.created, entries.updated, entries.unit_code, 
                       entries.positive, entries.negative, entries.private, users.username 
                       FROM entries INNER JOIN users ON users.id=entries.user_id WHERE entries.id=${req.params.id};`;
       var record = await db.promise().query(select);
       if (record[0].length === 1) {
-        if (record[0][0].private === 1) {
+        const userRecord = await db.promise().query(`SELECT id FROM users WHERE username='${record[0][0].username}'`)
+        if (record[0][0].private === 1 && userRecord[0][0].id !== userId) {
           res.status(400).json({ message: "resource does not exist" });
         } else {
           record[0][0].entry = filterEntry(record[0][0].entry, true);
@@ -326,13 +343,13 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
           res.status(400).json({ message: "entry or comment does not exist" });
         }
       } else {
-        if(entry[0].length === 1) {
+        if (entry[0].length === 1) {
           const insert = `INSERT INTO replies(reply, user_id, entry_id, created) 
                           VALUES ('${JSON.stringify({ "content": newContent })}', ${userId}, ${entryId}, NOW());`
           await db.promise().query(insert);
           res.status(200).json({ message: "added reply" });
         } else {
-          res.status(400).json({ message: "entry does not exist"})
+          res.status(400).json({ message: "entry does not exist" })
         }
       }
     } else {
