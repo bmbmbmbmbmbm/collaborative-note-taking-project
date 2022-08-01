@@ -370,14 +370,25 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
 router.get('/view/:id/replies', auth.verifyToken, async function (req, res) {
   try {
     const entryId = req.params.id;
-    if (v.validId(entryId)) {
-      const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
-                       FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NULL`;
-      const comments = await db.promise().query(select1);
-      const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
-                       FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NOT NULL`;
-      const replies = await db.promise().query(select2);
-      res.status(200).json({ comments: comments[0], replies: replies[0] });
+    const userId = req.userId;
+    if (v.validId(+entryId)) {
+      const entry = await db.promise().query(`SELECT unit_code FROM entries WHERE id=${entryId}`);
+      if (entry[0].length === 1) {
+        const enrolled = await db.promise().query(`SELECT * FROM enrolments WHERE user_id=${userId} AND unit_code='${entry[0][0].unit_code}'`)
+        if (enrolled[0].length === 1) {
+          const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
+                           FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NULL`;
+          const comments = await db.promise().query(select1);
+          const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
+                           FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NOT NULL`;
+          const replies = await db.promise().query(select2);
+          res.status(200).json({ comments: comments[0], replies: replies[0] });
+        } else {
+          res.status(400).json({message: "not enrolled in unit"});
+        }
+      } else {
+        res.status(400).json({ message: "entry does not exist" });
+      }
     } else {
       res.status(400).json({ message: "invalid entry identifier" });
     }

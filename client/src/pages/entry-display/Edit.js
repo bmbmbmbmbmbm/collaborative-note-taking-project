@@ -1,10 +1,10 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { createEditor, Transforms } from 'slate';
 import { Slate, Editable, useSlateStatic, ReactEditor, useSelected, useFocused, withReact } from 'slate-react';
 import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
-import { Tabs, Tab, Container, Row, Col, Card } from 'react-bootstrap';
+import { Row, Col, Card } from 'react-bootstrap';
 
 export default function Edit({user, created, suggestion}) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])

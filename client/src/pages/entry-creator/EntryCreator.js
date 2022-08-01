@@ -329,7 +329,6 @@ function isImageUrl(url) {
 // End of handling Images
 
 function onChange(value, editor) {
-    console.log(value);
     const isAChange = editor.operations.some(op => 'set_selection' !== op.type);
     if (isAChange) {
         console.log("hello")

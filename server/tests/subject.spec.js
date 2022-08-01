@@ -40,6 +40,10 @@ describe('Subject API Tests:', function () {
                         title: "",
                         code: "CM30072"
                     },
+                    {
+                        title: "",
+                        code: "GENERAL"
+                    }
                 ]
             }
         })

@@ -102,13 +102,31 @@ router.get('/view-all/:id', auth.verifyToken, async function (req, res) {
 router.get('/:id/view', auth.verifyToken, async function (req, res) {
     try {
         const unitCode = req.params.id;
+        const userId = req.userId;
         if (v.validUnitCode(unitCode)) {
-            const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
-            if (record[0].length > 0) {
-                const userThreads = await db.promise().query(`SELECT threads.id, threads.title, threads.created, threads.last_reply, threads.positive, threads.negative, users.username FROM threads INNER JOIN users ON threads.user_id=users.id WHERE unit_code='${unitCode}'`);
-                res.status(200).json(userThreads[0]);
+            const enrolments = await db.promise().query(`SELECT unit_code FROM enrolments WHERE user_id=${userId}`);
+            if (enrolments[0].length > 0) {
+                var hasEnrolled = false;
+                for (var i = 0; i < enrolments[0].length; ++i) {
+                    if (enrolments[0][i].unit_code === unitCode) {
+                        hasEnrolled = true;
+                        break;
+                    }
+                }
+                if (hasEnrolled) {
+                    const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+                    if (record[0].length > 0) {
+                        const userThreads = await db.promise().query(`SELECT threads.id, threads.title, threads.created, threads.last_reply, threads.positive, threads.negative, users.username FROM threads INNER JOIN users ON threads.user_id=users.id WHERE unit_code='${unitCode}'`);
+                        res.status(200).json(userThreads[0]);
+                    } else {
+                        res.status(400).json({ message: "unit does not exist" });
+                    }
+                }
+                else {
+                    res.status(400).json({ message: "not enrolled in unit" })
+                }
             } else {
-                res.status(400).json({ message: "unit does not exist" });
+                res.status(400).json({ messsage: "not enrolled in units" })
             }
         } else {
             res.status(400).json({ message: "unit does not exist" });
@@ -121,13 +139,31 @@ router.get('/:id/view', auth.verifyToken, async function (req, res) {
 
 router.get('/view/:id', auth.verifyToken, async function (req, res) {
     try {
+        const userId = req.userId;
         if (v.validId(req.params.id)) {
             const select = `SELECT threads.title, threads.thread, threads.created, threads.last_reply, threads.unit_code, users.username 
                             FROM threads INNER JOIN users ON threads.user_id=users.id WHERE threads.id=${req.params.id};`;
             var record = await db.promise().query(select);
-            record[0][0].thread.content = v.removeTags(record[0][0].thread.content);
-            v.removeTags(record[0][0].title)
-            res.status(200).json(record[0][0]);
+            const enrolled = await db.promise().query(`SELECT unit_code FROM enrolments WHERE user_id=${userId}`);
+            if (enrolled[0].length > 0) {
+                var isEnrolled = false;
+                for (var i = 0; i < enrolled[0].length; ++i) {
+                    if (enrolled[0][i].unit_code === record[0][0].unit_code) {
+                        isEnrolled = true;
+                        break;
+                    }
+                }
+                if (isEnrolled) {
+                    record[0][0].thread.content = v.removeTags(record[0][0].thread.content);
+                    v.removeTags(record[0][0].title)
+                    res.status(200).json(record[0][0]);
+                } else {
+                    res.status(400).json({ message: "not enrolled in unit" });
+                }
+            } else {
+                res.status(400).json({ message: "not enrolled in unit" });
+            }
+
         } else {
             res.status(400).json({ message: "invalid thread identifier" });
         }
@@ -140,16 +176,28 @@ router.get('/view/:id', auth.verifyToken, async function (req, res) {
 router.get('/view/:id/replies', auth.verifyToken, async function (req, res) {
     try {
         const threadId = req.params.id;
-        if (v.validId(+threadId)) {
-            const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NULL`;
-            const comments = await db.promise().query(select1);
-            v.removeTagsFromComments(comments);
-            const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NOT NULL`;
-            const replies = await db.promise().query(select2);
-            v.removeTagsFromComments(replies);
-            res.status(200).json({ comments: comments[0], replies: replies[0] });
+        const userId = req.userId;
+        if (v.validId(threadId)) {
+            const thread = await db.promise().query(`SELECT unit_code FROM threads WHERE id=${threadId}`);
+            if (thread[0].length === 1) {
+                const enrolled = await db.promise().query(`SELECT * FROM enrolments WHERE user_id=${userId} AND unit_code='${thread[0][0].unit_code}'`)
+                if (enrolled[0].length === 1) {
+                    const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NULL`;
+                    const comments = await db.promise().query(select1);
+                    v.removeTagsFromComments(comments);
+                    const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.thread_id=${threadId} AND replies.replyTo IS NOT NULL`;
+                    const replies = await db.promise().query(select2);
+                    v.removeTagsFromComments(replies);
+                    res.status(200).json({ comments: comments[0], replies: replies[0] });
+                }
+                else {
+                    res.status(400).json({ message: "not enrolled in unit" });
+                }
+            } else {
+                res.status(400).json({ message: "invalid thread identifier" });
+            }
         } else {
-            res.status(400).json({ message: "invalid thread identifier" });
+            res.status(400).json({ message: "invalid thread identifier"})
         }
     } catch (err) {
         console.log(err);

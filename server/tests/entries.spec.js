@@ -486,10 +486,10 @@ describe('Entry API Tests:', function () {
             })
         })
 
-        it('should respond 400 if the entry is private', function (done) {
+        it('should respond 200 if the entry is private but user is the owner', function (done) {
             chai.request(server).get('/entry/view/14').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
-                chai.expect(res.status).to.be.eq(400);
-                chai.expect(res.body).to.have.property('message');
+                chai.expect(res.status).to.be.eq(200);
+                chai.expect(res.body).to.be.an('object');
                 done();
             })
         })
@@ -654,7 +654,7 @@ describe('Entry API Tests:', function () {
     })
 
     describe('Testing /entry/view/:id/replies', function () {
-        it('should return 200 if entry exists', function (done) {
+        it('should return 200 if entry exists and user is enrolled in unit', function (done) {
             chai.request(server).get('/entry/view/13/replies').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
                 chai.expect(res.status).to.be.eq(200);
                 chai.expect(res.body).to.have.property('comments');
@@ -663,11 +663,10 @@ describe('Entry API Tests:', function () {
             })
         })
 
-        it('should return 200 if entry does not exist', function (done) {
+        it('should return 400 if entry does not exist', function (done) {
             chai.request(server).get('/entry/view/20000/replies').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
-                chai.expect(res.status).to.be.eq(200);
-                chai.expect(res.body).to.have.property('comments');
-                chai.expect(res.body).to.have.property('replies');
+                chai.expect(res.status).to.be.eq(400);
+                chai.expect(res.body).to.have.property('message');
                 done();
             })
         })

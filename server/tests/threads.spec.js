@@ -154,7 +154,7 @@ describe('Threads API Tests:', function () {
     })
 
     describe('Testing /threads/view-all/ route', function () {
-        it('should return 200 and entry information when user requesting is the same as asked for', function (done) {
+        it('should return 200 and thread information when user requesting is the same as asked for', function (done) {
             chai.request(server).get('/threads/view-all/bm639').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
                 chai.expect(res.status).to.be.eq(200);
                 chai.expect(res.body).to.be.an('array');
@@ -172,7 +172,7 @@ describe('Threads API Tests:', function () {
     })
 
     describe('Testing /threads/:id/view', function () {
-        it('should return 200 and entry list if unit exists', function (done) {
+        it('should return 200 and thread list if unit exists', function (done) {
             chai.request(server).get('/threads/CM30225/view').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
                 chai.expect(res.status).to.be.eq(200);
                 chai.expect(res.body).to.be.an('array');
@@ -198,7 +198,7 @@ describe('Threads API Tests:', function () {
     })
 
     describe('Testing /threads/view/:id/replies', function () {
-        it('should return 200 if entry exists', function (done) {
+        it('should return 200 if thread exists', function (done) {
             chai.request(server).get('/threads/view/1/replies').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
                 chai.expect(res.status).to.be.eq(200);
                 chai.expect(res.body).to.have.property('comments');
@@ -207,16 +207,15 @@ describe('Threads API Tests:', function () {
             })
         })
 
-        it('should return 200 if entry does not exist', function (done) {
+        it('should return 400 if thread does not exist', function (done) {
             chai.request(server).get('/threads/view/20000/replies').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
-                chai.expect(res.status).to.be.eq(200);
-                chai.expect(res.body).to.have.property('comments');
-                chai.expect(res.body).to.have.property('replies');
+                chai.expect(res.status).to.be.eq(400);
+                chai.expect(res.body).to.have.property('message');
                 done();
             })
         })
 
-        it('should return 200 if entry exists', function (done) {
+        it('should return 200 if thread exists', function (done) {
             chai.request(server).get('/threads/view/-1/replies').set('authorization', JWT).set('Content-Type', 'application/json').end(function (req, res) {
                 chai.expect(res.status).to.be.eq(400);
                 chai.expect(res.body).to.have.property('message');
