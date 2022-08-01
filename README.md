@@ -13,10 +13,12 @@ inside of both the client and server folders respectively.
 
 ## How to run the website
 
-### npm serve build
+Open a terminal and enter the client directory then use
 
-Within the client directory then...
+### npm start
 
-### npm run start
+Following this open another terminal and enter the server directory then use
 
-Within the server directory.
+### npm run dev
+
+Ensure that MySQL is installed and import the data from the MySQL Data folder
