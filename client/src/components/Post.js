@@ -2,7 +2,6 @@ import React from 'react';
 import { Badge, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-
 export default function Post({ isEntry, id, title, user, created, updated, code, positive, negative, unitTitle }) {
   return (
     <>
