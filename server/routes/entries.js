@@ -2,7 +2,6 @@ const express = require('express');
 const db = require('../database');
 const auth = require('../verify');
 const v = require('../validation.js');
-const { restart } = require('nodemon');
 
 const router = express.Router();
 

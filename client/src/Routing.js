@@ -1,5 +1,5 @@
 import { Route, Routes, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 
 import useToken from "./components/useToken";
@@ -23,12 +23,6 @@ export default function Routing() {
   const { username, setUsername, clearSession } = useToken();
 
   const navigate = useNavigate();
-
-  window.addEventListener('storage', function (e) {
-    if (e.storageArea === localStorage) {
-      // handle change here
-    }
-  });
 
   function logout() {
     localStorage.clear();
