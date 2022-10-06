@@ -439,7 +439,7 @@ router.get('/public/:id', auth.verifyToken, async function (req, res) {
   * @param {string} username the user to retrieve the public entries of
   * 
 */
-router.get('/view-all/:id', auth.verifyToken, async function (req, res) {
+router.get('/dashboard/:id', auth.verifyToken, async function (req, res) {
   try {
     const username = req.params.id;
     const userId = req.userId;

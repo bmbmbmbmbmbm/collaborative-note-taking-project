@@ -76,7 +76,7 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
     }
 });
 
-router.get('/view-all/:id', auth.verifyToken, async function (req, res) {
+router.get('/dashboard/:id', auth.verifyToken, async function (req, res) {
     try {
         const user = req.params.id;
         if (v.validUsername(user)) {

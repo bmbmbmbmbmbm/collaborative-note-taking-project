@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import Post from '../../components/Post.js';
 
@@ -42,6 +42,7 @@ export default function Profile() {
         fetch(`/entry/public/${params.username}`, {
             method: "GET",
             headers: {
+                "Content-Type": "application/json",
                 "authorization": token
             }
         })
@@ -51,9 +52,10 @@ export default function Profile() {
                 data => setPublicEntries(data)
             );
 
-        fetch(`/threads/view-all/${params.username}`, {
+        fetch(`/threads/dashboard/${params.username}`, {
             method: "GET",
             headers: {
+                "Content-Type": "application/json",
                 "authorization": token
             }
         })
@@ -64,9 +66,7 @@ export default function Profile() {
             )
     }, [])
 
-    const navigate = useNavigate();
-
-
+    console.log(units);
 
     return (
         <div className="Profile">

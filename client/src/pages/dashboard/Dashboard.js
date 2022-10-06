@@ -28,7 +28,7 @@ export default function Dashboard({ user }) {
     const sortBy = ["Recent", "Newest", "Oldest"];
 
     useEffect(() => {
-        fetch(`/entry/view-all/${user}`, {
+        fetch(`/entry/dashboard/${user}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -41,7 +41,7 @@ export default function Dashboard({ user }) {
                 data => setEntries(data)
             );
 
-        fetch(`/threads/view-all/${user}`, {
+        fetch(`/threads/dashboard/${user}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

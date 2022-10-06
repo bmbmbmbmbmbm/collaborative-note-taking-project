@@ -48,7 +48,7 @@ export default function Register({ setToken, setUsername }) {
         localStorage.clear()
         localStorage.clear();
 
-        await fetch("/register/", {
+        await fetch("/authentication/register/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -57,7 +57,7 @@ export default function Register({ setToken, setUsername }) {
         }).then(
             response => response.json()
         ).then((data) => {
-            if (data !== undefined) {
+            if (data.token) {
                 success = true;
                 localStorage.setItem('token', data.token)
                 setUsername(email.substring(0, email.indexOf("@")));

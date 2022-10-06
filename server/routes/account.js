@@ -47,7 +47,7 @@ router.put("/change-password", auth.verifyToken, async function (req, res) {
     }
 })
 
-router.post("/delete-account", auth.verifyToken, async function (req, res) {
+router.post("/delete", auth.verifyToken, async function (req, res) {
     try {
         const { email, password } = req.body;
     } catch (err) {

@@ -16,21 +16,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-/*app.use((req, res, next) => {
+app.use((req, res, next) => {
     console.log(`${req.method}: ${req.url}`)
     next();
-})*/
+})
 
 // Defining routes in the server
-const register = require('./routes/register');
-const login = require('./routes/login');
+const authentication = require('./routes/authentication');
 const entries = require('./routes/entries');
 const threads = require('./routes/threads');
 const subject = require('./routes/subject');
 const account = require('./routes/account');
 
-app.use('/login', login);
-app.use('/register', register);
+app.use('/authentication', authentication);
 app.use('/entry', entries);
 app.use('/threads', threads);
 app.use('/subject', subject);

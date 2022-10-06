@@ -189,7 +189,7 @@ router.get('/:id', auth.verifyToken, async function (req, res) {
     }
 })
 
-router.get('/', auth.verifyToken, async function (req, res) {
+router.get('/', async function (req, res) {
     try {
         const results = await db.promise().query(`SELECT * FROM subjects`);
         res.status(200).json(results[0]);

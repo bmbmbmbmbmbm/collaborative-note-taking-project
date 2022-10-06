@@ -28,7 +28,7 @@ export default function Login({ setToken, setUsername }) {
         localStorage.clear()
         localStorage.clear();
 
-        await fetch("/login/", {
+        await fetch("/authentication/login/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -38,11 +38,11 @@ export default function Login({ setToken, setUsername }) {
             response => response.json()
         ).then(
             data => {
-                if(data !== undefined) {
+                if(data.token) {
                     success = true;
                     localStorage.setItem('token', data.token)
                     setUsername(email.substring(0, email.indexOf('@')));
-                } 
+                }
             }
         )
 
