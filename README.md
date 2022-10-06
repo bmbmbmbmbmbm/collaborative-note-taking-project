@@ -1,24 +1,5 @@
 # Title: Collaborative Note Taking Project
 
-This is a final year dissertation project.
-This project has had it's frontend lifted from two GitHub projects of mine. If you have any queries as to why this is, feel free to ask. 
+This is a final year dissertation project aimed at providing University of Bath students with a space to create and share their notes with other students on their course. There are no plans to release this system, nor continue development of this system; although the idea for this system is fine, this project involved learning a number of different libraries thus a number of different files need work. 
 
-## How to set up the project on your computer
-
-You will need to use
-
-### npm install
-
-inside of both the client and server folders respectively.
-
-## How to run the website
-
-Open a terminal and enter the client directory then use
-
-### npm start
-
-Following this open another terminal and enter the server directory then use
-
-### npm run dev
-
-Ensure that MySQL is installed and import the data from the MySQL Data folder
+This website was created using React, ExpressJS, and MySQL.
