@@ -7,6 +7,7 @@ import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import v from '../../components/validation';
+import { entryUrls, subjectUrls } from '../../service/routes';
 
 export default function EntryCreator({ user }) {
     const [title, setTitle] = useState("");
@@ -24,7 +25,7 @@ export default function EntryCreator({ user }) {
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        fetch(`/subject/get-units/${user}`, {
+        fetch(subjectUrls.getUserUnits(user), {
             method: "GET",
             headers: {
                 "authorization": token,
@@ -40,7 +41,7 @@ export default function EntryCreator({ user }) {
 
         if (entryId === undefined && params.entryId !== undefined) {
             setEntryId(params.entryId);
-            fetch(`/entry/edit/${params.entryId}`, {
+            fetch(entryUrls.edit(params.entryId), {
                 method: "GET",
                 headers: {
                     "authorization": token,
@@ -77,7 +78,7 @@ export default function EntryCreator({ user }) {
                 unitCode: units[chosen - 1].code,
                 private: isPublic
             }
-            fetch('/entry/create', {
+            fetch(entryUrls.create, {
                 method: "POST",
                 headers: {
                     "authorization": token,
@@ -97,7 +98,7 @@ export default function EntryCreator({ user }) {
                 private: isPublic,
                 entryId: entryId
             }
-            fetch('/entry/update', {
+            fetch(entryUrls.update, {
                 method: "PUT",
                 headers: {
                     "authorization": token,
@@ -331,7 +332,6 @@ function isImageUrl(url) {
 function onChange(value, editor) {
     const isAChange = editor.operations.some(op => 'set_selection' !== op.type);
     if (isAChange) {
-        console.log("hello")
         const content = JSON.stringify(value);
         localStorage.setItem('content', content);
     }

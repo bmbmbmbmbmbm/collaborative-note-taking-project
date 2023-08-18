@@ -6,6 +6,7 @@ import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import { entryUrls } from '../../service/routes';
 
 export default function EntryCreator({ user }) {
     const [title, setTitle] = useState("");
@@ -21,7 +22,7 @@ export default function EntryCreator({ user }) {
 
     useEffect(() => {
         if (Number.isInteger(+params.entryId)) {
-            fetch(`/entry/edit-diff/${params.entryId}`, {
+            fetch(entryUrls.editDiff(params.entryId), {
                 method: "GET",
                 headers: {
                     "authorization": token,
@@ -55,7 +56,7 @@ export default function EntryCreator({ user }) {
                 entryId: params.entryId,
                 entry: JSON.parse(localStorage.getItem('content')),
             }
-            fetch('/entry/create-edit', {
+            fetch(entryUrls.createEdit, {
                 method: "POST",
                 headers: {
                     "authorization": token,

@@ -14,6 +14,7 @@ import {
 import Prompt from "../../components/Prompt";
 import Post from "../../components/Post";
 import UnitDisplay from "../../components/UnitDisplay";
+import { entryUrls, threadUrls, subjectUrls } from "../../service/routes";
 
 export default function Dashboard({ user }) {
     const [search, setSearch] = useState("");
@@ -28,7 +29,7 @@ export default function Dashboard({ user }) {
     const sortBy = ["Recent", "Newest", "Oldest"];
 
     useEffect(() => {
-        fetch(`/entry/dashboard/${user}`, {
+        fetch(entryUrls.getThisUsersEntries(user), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -41,7 +42,7 @@ export default function Dashboard({ user }) {
                 data => setEntries(data)
             );
 
-        fetch(`/threads/dashboard/${user}`, {
+        fetch(threadUrls.getUserThreads(user), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export default function Dashboard({ user }) {
                 }
             );
 
-        fetch(`/subject/get-units/${user}`, {
+        fetch(subjectUrls.getUserUnits(user), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

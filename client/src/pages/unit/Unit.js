@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Form, Dropdown, DropdownButton } from 'react-bootstrap';
 import Post from '../../components/Post';
-
+import { threadUrls, entryUrls, subjectUrls } from '../../service/routes';
 
 export default function Unit() {
     const [posts, setPosts] = useState([]);
@@ -19,7 +19,7 @@ export default function Unit() {
     useEffect(() => {
         setPosts([]);
 
-        fetch(`/threads/${params.unitId}/view`, {
+        fetch(threadUrls.getUnitThreads(params.unitId), {
             method: "GET",
             headers: {
                 "authorization": token
@@ -33,7 +33,7 @@ export default function Unit() {
                 }
             );
 
-        fetch(`/entry/${params.unitId}/view`, {
+        fetch(entryUrls.getUnitEntries(params.unitId), {
             method: "GET",
             headers: {
                 "authorization": token
@@ -47,7 +47,7 @@ export default function Unit() {
                 }
             )
 
-        fetch(`/subject/titleof/${params.unitId}`)
+        fetch(subjectUrls.getUnitTitle(params.unitId))
             .then(
                 response => response.json()
             ).then(

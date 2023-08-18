@@ -3,7 +3,8 @@ import { Form, FloatingLabel, Spinner, Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import v from "../../components/validation"
-
+import { authenticationUrls } from "../../service/routes";
+import { subjectUrls } from "../../service/routes";
 export default function Register({ setToken, setUsername }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -14,7 +15,7 @@ export default function Register({ setToken, setUsername }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch("/subject")
+        fetch(subjectUrls.base)
             .then((response) => response.json())
             .then((data) => {
                 setSubjects(data);
@@ -48,7 +49,7 @@ export default function Register({ setToken, setUsername }) {
         localStorage.clear()
         localStorage.clear();
 
-        await fetch("/authentication/register/", {
+        await fetch(authenticationUrls.register, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

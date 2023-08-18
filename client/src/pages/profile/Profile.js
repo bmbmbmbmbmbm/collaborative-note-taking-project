@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
-import Post from '../../components/Post.js';
+import { subjectUrls, entryUrls, threadUrls } from '../../service/routes';
 
 export default function Profile() {
     const params = useParams();
@@ -13,7 +13,7 @@ export default function Profile() {
     const token = localStorage.getItem('token')
 
     useEffect(() => {
-        fetch(`/subject/get-subject/${params.username}`, {
+        fetch(subjectUrls.getUserSubject(params.username), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export default function Profile() {
                 data => setSubject(data)
             );
 
-        fetch(`/subject/get-units/${params.username}`, {
+        fetch(subjectUrls.getUserUnits(params.username), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export default function Profile() {
                 data => setUnits(data)
             );
 
-        fetch(`/entry/public/${params.username}`, {
+        fetch(entryUrls.getUserEntries(params.username), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export default function Profile() {
                 data => setPublicEntries(data)
             );
 
-        fetch(`/threads/dashboard/${params.username}`, {
+        fetch(threadUrls.getUserThreads(params.username), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -65,8 +65,6 @@ export default function Profile() {
                 data => setThreads(data)
             )
     }, [])
-
-    console.log(units);
 
     return (
         <div className="Profile">

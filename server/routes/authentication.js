@@ -24,7 +24,6 @@ router.post("/login", async function (req, res) {
                             const username = record[0][0].username;
                             const token = jwt.sign({ id, username }, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF")
                             await db.promise().query(`INSERT INTO session(user_id, start) VALUES (${record[0][0].id}, NOW())`);
-                            console.log(token);
                             res.status(200).json({ token: token });
                         } else {
                             res.status(400).json({message: "invalid credentials"});

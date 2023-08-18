@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
 import v from '../../components/validation';
-
+import { threadUrls, entryUrls } from '../../service/routes';
 function Reply({ Id, commentId, depth, isThread }) {
     const [reply, setReply] = useState("");
     const myDepth = depth;
@@ -28,8 +28,7 @@ function Reply({ Id, commentId, depth, isThread }) {
                     "commentId": commentId,
                 }
             }
-            console.log(body);
-            fetch('/threads/add-reply', {
+            fetch(threadUrls.addReply, {
                 method: "POST",
                 headers: {
                     "authorization": token,
@@ -51,7 +50,7 @@ function Reply({ Id, commentId, depth, isThread }) {
                 }
             }
 
-            fetch('/entry/add-reply', {
+            fetch(entryUrls.addReply, {
                 method: "POST",
                 headers: {
                     "authorization": token,
