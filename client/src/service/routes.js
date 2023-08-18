@@ -1,17 +1,17 @@
-export const authenticationURL = {
+export const authenticationUrls = {
     base: "/authentication",
     login: this.base + "/login",
     register: this.base + "/register",
     logout: this.base + "/logout"
 }
 
-export const accountURL = {
+export const accountUrls = {
     base: "/account",
     changePassword: this.base + "/change-password",
     delete: this.base + "/delete"
 }
 
-export const entryURL = {
+export const entryUrls = {
     base: "/entry",
     create: this.base + "/create",
     update: this.base + "/update",
@@ -28,10 +28,21 @@ export const entryURL = {
     getThisUsersEntries: username => this.base + "/dashboard/" + username
 }
 
-export const thread_url = "/threads"
+export const threadUrls = {
+    base: "/threads",
+    create: this.base + "/create",
+    addReply: this.base + "/add-reply",
+    getUserThreads: username => this.base + "/dashboard/" + username,
+    getUnitThreads: unitCode => this.base + unitCode + "/view",
+    getThread: threadId => this.base + "/view" + threadId,
+    getThreadReplies: threadId => this.getThread(threadId) + "/replies"
+}
 
-export const subject_url = "/subject"
-
-export const account_url = "/account"
-export const change_password = account_url + "/change-password"
-export const delete_account_url = account_url + "/delete"
+export const subjectUrls = {
+    base: "/subject",
+    enrol: this.base + "/enrol",
+    getUserUnits: username => this.base + "/get-units/" + username,
+    getUserSubject: username => this.base + "/get-subject/" + username,
+    getUnitTitle: unitCode => this.base + "/titleof/" + unitCode,
+    getSubjectUnitsByUser: username => this.base + username
+}
