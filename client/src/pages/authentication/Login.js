@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button';
 import PropTypes from 'prop-types';
 import v from '../../components/validation';
 import { authenticationUrls } from '../../service/routes';
-
+import { login } from '../../service/authentication';
 export default function Login({ setUsername }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -19,37 +19,18 @@ export default function Login({ setUsername }) {
     async function handleSubmit(event) {
         event.preventDefault();
 
-        let success = false;
-
         let token = {
             email: email,
             password: password
         };
 
-        localStorage.clear()
-        localStorage.clear();
+        const data = await login(token)
 
-        await fetch(authenticationUrls.login, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(token)
-        }).then(
-            response => response.json()
-        ).then(
-            data => {
-                if(data.token) {
-                    success = true;
-                    localStorage.setItem('token', data.token)
-                    setUsername(email.substring(0, email.indexOf('@')));
-                }
-            }
-        )
-
-        if(success) {
+        if(data) {
+            localStorage.setItem('token', data)
+            setUsername(email.substring(0, email.indexOf('@')));
             navigate('/dashboard');
-        } 
+        }
     }
 
 
