@@ -10,6 +10,7 @@ import Comment from '../thread-display/Comment.js';
 import { useParams, Link } from 'react-router-dom';
 import Prompt from '../../components/Prompt.js';
 import Edit from './Edit';
+import { entryUrls } from '../../service/routes.js';
 
 export default function Entry({ user }) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
@@ -28,7 +29,7 @@ export default function Entry({ user }) {
 
     useEffect(() => {
         if(token) {
-            fetch(`/entry/view/${params.entryId}`, {
+            fetch(entryUrls.viewEntry(params.entryId), {
                 method: "GET",
                 headers: {
                     "authorization": token,
@@ -47,7 +48,7 @@ export default function Entry({ user }) {
                 }
             )
     
-            fetch(`/entry/view/${params.entryId}/replies`, {
+            fetch(entryUrls.getReplies(params.entryId), {
                 method: "GET",
                 headers: {
                     "authorization": token
@@ -58,7 +59,7 @@ export default function Entry({ user }) {
                 data => setInteractions(data)
             )
     
-            fetch(`/entry/edit-suggestions/${params.entryId}`, {
+            fetch(entryUrls.editSuggestions(params.entryId), {
                 method: "GET",
                 headers: {
                     "authorization": token

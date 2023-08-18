@@ -16,7 +16,7 @@ export const entryUrls = {
     create: this.base + "/create",
     update: this.base + "/update",
     delete: entryId => this.base + "/delete" + entryId,
-    viewUnitEntries: unitCode => this.base + "/" + unitCode + "/view",
+    getUnitEntries: unitCode => this.base + "/" + unitCode + "/view",
     viewEntry: entryId => this.base + "/view/" + entryId,
     createEdit: this.base + "/create_edit",
     edit: entryId => this.base + "/edit/" + entryId,

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Form, InputGroup, FloatingLabel, Button, Row, Col, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import v from '../../components/validation';
-
+import { threadUrls } from '../../service/routes';
+import { subjectUrls } from '../../service/routes';
 export default function ThreadCreator({ user }) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
@@ -15,7 +16,7 @@ export default function ThreadCreator({ user }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(`/subject/get-units/${user}`, {
+        fetch(subjectUrls.getUserUnits(user), {
             method: "GET",
             headers: {
                 "authorization": token
@@ -47,7 +48,7 @@ export default function ThreadCreator({ user }) {
                 content: content
             };
             
-            fetch('/threads/create', {
+            fetch(threadUrls.create, {
                 method: 'POST',
                 headers: {
                     "authorization": token,

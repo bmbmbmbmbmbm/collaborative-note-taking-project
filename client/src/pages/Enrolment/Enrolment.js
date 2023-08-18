@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Spinner, Container, Form, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-
+import { subjectUrls } from "../../service/routes";
 export default function Enrolment({user}) {
     const [units, setUnits] = useState([{}]);
     const [enrolled, setEnrolled] = useState([])
@@ -10,7 +10,7 @@ export default function Enrolment({user}) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(`/subject/${user}`, {
+        fetch(subjectUrls.getUserSubject(user), {
             method: "GET",
             headers: {
                 "authorization": localStorage.getItem('token')
@@ -21,7 +21,7 @@ export default function Enrolment({user}) {
                 setUnits(value);
             });
 
-        fetch(`/subject/get-units/${user}`, {
+        fetch(subjectUrls.getUserUnits(user), {
             method: "GET",
             headers: {
                 "authorization": localStorage.getItem('token')
@@ -78,7 +78,7 @@ export default function Enrolment({user}) {
             units: enrolled
         };
 
-        fetch('/subject/enrol', {
+        fetch(subjectUrls.enrol, {
             method: "POST",
             headers: {
                 "authorization": localStorage.getItem('token'),

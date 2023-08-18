@@ -3,7 +3,7 @@ import { Container, Card, Row, Col } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import Reply from './Reply';
 import Comment from './Comment';
-
+import { threadUrls } from '../../service/routes';
 export default function Thread({ user }) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
@@ -18,7 +18,7 @@ export default function Thread({ user }) {
     const params = useParams();
 
     useEffect(() => {
-        fetch(`/threads/view/${params.threadId}`, {
+        fetch(threadUrls.getThread(params.threadId), {
             method: "GET",
             headers: {
                 "authorization": token
@@ -36,7 +36,7 @@ export default function Thread({ user }) {
             }
         )
 
-        fetch(`/threads/view/${params.threadId}/replies`, {
+        fetch(threadUrls.getThreadReplies(params.threadId), {
             method: "GET",
             headers: {
                 "authorization": token

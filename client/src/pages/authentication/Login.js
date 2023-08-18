@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import PropTypes from 'prop-types';
 import v from '../../components/validation';
+import { authenticationUrls } from '../../service/routes';
 
 export default function Login({ setUsername }) {
     const [email, setEmail] = useState("");
@@ -28,7 +29,7 @@ export default function Login({ setUsername }) {
         localStorage.clear()
         localStorage.clear();
 
-        await fetch("/authentication/login/", {
+        await fetch(authenticationUrls.login, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
