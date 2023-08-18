@@ -1,48 +1,53 @@
+const authentication = "/authentication" 
 export const authenticationUrls = {
-    base: "/authentication",
-    login: this.base + "/login",
-    register: this.base + "/register",
-    logout: this.base + "/logout"
+    base: authentication,
+    login: authentication + "/login",
+    register: authentication + "/register",
+    logout: authentication + "/logout"
 }
 
+const account = "/account"
 export const accountUrls = {
-    base: "/account",
-    changePassword: this.base + "/change-password",
-    delete: this.base + "/delete"
+    base: account,
+    changePassword: account + "/change-password",
+    delete: account + "/delete"
 }
 
+const entry = "/entry"
 export const entryUrls = {
-    base: "/entry",
-    create: this.base + "/create",
-    update: this.base + "/update",
-    delete: entryId => this.base + "/delete" + entryId,
-    getUnitEntries: unitCode => this.base + "/" + unitCode + "/view",
-    viewEntry: entryId => this.base + "/view/" + entryId,
-    createEdit: this.base + "/create_edit",
-    edit: entryId => this.base + "/edit/" + entryId,
-    editSuggestions: entryId => this.base + "/edit-suggestions/" + entryId,
-    editDiff: entryId => this.base + "/edit-diff/" + entryId,
-    addReply: this.base + "/add-reply",
-    getReplies: entryId => this.base + "/view/" + entryId + "/replies",
-    getUserEntries: username => this.base + "/public/" + username,
-    getThisUsersEntries: username => this.base + "/dashboard/" + username
+    base: entry,
+    create: entry + "/create",
+    update: entry + "/update",
+    delete: entryId => entry + "/delete" + entryId,
+    getUnitEntries: unitCode => entry + "/" + unitCode + "/view",
+    viewEntry: entryId => entry + "/view/" + entryId,
+    createEdit: entry + "/create_edit",
+    edit: entryId => entry + "/edit/" + entryId,
+    editSuggestions: entryId => entry + "/edit-suggestions/" + entryId,
+    editDiff: entryId => entry + "/edit-diff/" + entryId,
+    addReply: entry + "/add-reply",
+    getReplies: entryId => entry + "/view/" + entryId + "/replies",
+    getUserEntries: username => entry + "/public/" + username,
+    getThisUsersEntries: username => entry + "/dashboard/" + username
 }
 
+const thread = "/threads"
 export const threadUrls = {
-    base: "/threads",
-    create: this.base + "/create",
-    addReply: this.base + "/add-reply",
-    getUserThreads: username => this.base + "/dashboard/" + username,
-    getUnitThreads: unitCode => this.base + unitCode + "/view",
-    getThread: threadId => this.base + "/view" + threadId,
+    base: thread,
+    create: thread + "/create",
+    addReply: thread + "/add-reply",
+    getUserThreads: username => thread + "/dashboard/" + username,
+    getUnitThreads: unitCode => thread + unitCode + "/view",
+    getThread: threadId => thread + "/view" + threadId,
     getThreadReplies: threadId => this.getThread(threadId) + "/replies"
 }
 
+const subject = "/subject"
 export const subjectUrls = {
-    base: "/subject",
-    enrol: this.base + "/enrol",
-    getUserUnits: username => this.base + "/get-units/" + username,
-    getUserSubject: username => this.base + "/get-subject/" + username,
-    getUnitTitle: unitCode => this.base + "/titleof/" + unitCode,
-    getSubjectUnitsByUser: username => this.base + username
+    base: subject,
+    enrol: subject + "/enrol",
+    getUserUnits: username => subject + "/get-units/" + username,
+    getUserSubject: username => subject + "/get-subject/" + username,
+    getUnitTitle: unitCode => subject + "/titleof/" + unitCode,
+    getSubjectUnitsByUser: username => subject + username
 }

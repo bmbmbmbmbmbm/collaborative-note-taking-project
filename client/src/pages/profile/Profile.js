@@ -66,8 +66,6 @@ export default function Profile() {
             )
     }, [])
 
-    console.log(units);
-
     return (
         <div className="Profile">
             <div className="user" style={{ backgroundColor: "white" }}>

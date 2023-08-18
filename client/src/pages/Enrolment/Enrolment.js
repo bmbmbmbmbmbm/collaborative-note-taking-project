@@ -3,7 +3,7 @@ import { Card, Button, Spinner, Container, Form, Row, Col } from "react-bootstra
 import { useNavigate } from "react-router-dom";
 import { subjectUrls } from "../../service/routes";
 export default function Enrolment({user}) {
-    const [units, setUnits] = useState([{}]);
+    const [units, setUnits] = useState();
     const [enrolled, setEnrolled] = useState([])
     const [search, setSearch] = useState("");
 
@@ -98,7 +98,7 @@ export default function Enrolment({user}) {
 
     return (
         <div className="units">
-            {typeof units[0].title === "undefined" ? (
+            {typeof units === "undefined" ? (
                 <Spinner animation="border" role="status" style={{ align: "center" }}>
                     <span className="visually-hidden">Loading...</span>
                 </Spinner>

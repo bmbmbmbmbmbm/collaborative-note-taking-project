@@ -332,7 +332,6 @@ function isImageUrl(url) {
 function onChange(value, editor) {
     const isAChange = editor.operations.some(op => 'set_selection' !== op.type);
     if (isAChange) {
-        console.log("hello")
         const content = JSON.stringify(value);
         localStorage.setItem('content', content);
     }
