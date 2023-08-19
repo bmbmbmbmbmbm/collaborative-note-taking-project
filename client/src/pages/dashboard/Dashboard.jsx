@@ -15,7 +15,7 @@ import Prompt from "../../components/Prompt";
 import Post from "../../components/Post";
 import UnitDisplay from "../../components/UnitDisplay";
 import { entryUrls, threadUrls, subjectUrls } from "../../service/routes";
-
+import { getThisUsersEntries } from "../../service/entry";
 export default function Dashboard({ user }) {
     const [search, setSearch] = useState("");
 
@@ -29,18 +29,10 @@ export default function Dashboard({ user }) {
     const sortBy = ["Recent", "Newest", "Oldest"];
 
     useEffect(() => {
-        fetch(entryUrls.getThisUsersEntries(user), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": localStorage.getItem('token')
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setEntries(data)
-            );
+        async function fetchData() {
+            setEntries(await getThisUsersEntries(user))
+        }
+        fetchData();
 
         fetch(threadUrls.getUserThreads(user), {
             method: "GET",

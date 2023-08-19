@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
 import v from '../../components/validation';
 import { threadUrls, entryUrls } from '../../service/routes';
+import { addReplyToEntry } from '../../service/entry';
 function Reply({ Id, commentId, depth, isThread }) {
     const [reply, setReply] = useState("");
     const myDepth = depth;
@@ -12,7 +13,7 @@ function Reply({ Id, commentId, depth, isThread }) {
         return v.validContent(reply);
     }
 
-    function addReply(event) {
+    async function addReply(event) {
         event.preventDefault();
         let body;
         if(isThread) {
@@ -37,31 +38,8 @@ function Reply({ Id, commentId, depth, isThread }) {
                 body: JSON.stringify(body),
             })
         } else {
-            if (commentId === undefined) {
-                body = {
-                    "content": reply,
-                    "entryId": Id,
-                }
-            } else {
-                body = {
-                    "content": reply,
-                    "entryId": Id,
-                    "commentId": commentId,
-                }
-            }
-
-            fetch(entryUrls.addReply, {
-                method: "POST",
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body),
-            })
+            addReplyToEntry({ content: reply, entryId: Id, commentId: commentId })
         }
-        
-
-        
     }
 
     return (

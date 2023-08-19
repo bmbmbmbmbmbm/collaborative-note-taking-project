@@ -7,6 +7,7 @@ import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { entryUrls } from '../../service/routes';
+import { createEdit, editDiff } from '../../service/entry';
 
 export default function EntryCreator({ user }) {
     const [title, setTitle] = useState("");
@@ -14,55 +15,38 @@ export default function EntryCreator({ user }) {
     const [unitTitle, setUnitTitle] = useState("");
     const [author, setAuthor] = useState("");
 
-    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || [{ type: 'paragraph', children: [{ text: 'A line of text in a paragraph.' }],}] || [], []);
+    const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || [{ type: 'paragraph', children: [{ text: 'A line of text in a paragraph.' }], }] || [], []);
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
     const params = useParams();
 
     const token = localStorage.getItem('token');
 
     useEffect(() => {
+        async function getData() {
+            const { title, unitTitle, unitCode, username, entry } = await editDiff(params.entryId)
+            setTitle(title);
+            setUnitCode(unitCode);
+            setUnitTitle(unitTitle);
+            setAuthor(username);
+            localStorage.setItem('content', JSON.stringify(entry));
+        }
         if (Number.isInteger(+params.entryId)) {
-            fetch(entryUrls.editDiff(params.entryId), {
-                method: "GET",
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                }
-            })
-                .then(
-                    response => response.json()
-                ).then(
-                    data => {
-                        setTitle(data.title);
-                        setUnitCode(data.unit_code);
-                        setUnitTitle(data.unitTitle);
-                        setAuthor(data.username);
-                        localStorage.setItem('content', JSON.stringify(data.entry));
-                    }
-                )
-        } 
-        
+            getData()
+        }
+
     }, [])
 
     const renderElement = useCallback(props => <Element {...props} />, [])
     const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
 
-    function handleSave(event) {
+    async function handleSave(event) {
         event.preventDefault();
 
         if (Number.isInteger(+params.entryId)) {
-            let body = {
+            await createEdit({
                 entryId: params.entryId,
                 entry: JSON.parse(localStorage.getItem('content')),
-            }
-            fetch(entryUrls.createEdit, {
-                method: "POST",
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
             })
         }
     }
@@ -77,7 +61,7 @@ export default function EntryCreator({ user }) {
                             <h5>{unitCode}: {unitTitle}</h5>
                         </Col>
                         <Col xs={2}>
-                            <Button type="submit" style={{float: "right"}}>Save Edit</Button>
+                            <Button type="submit" style={{ float: "right" }}>Save Edit</Button>
                         </Col>
                     </Row>
                 </div>
@@ -133,7 +117,7 @@ export default function EntryCreator({ user }) {
 
     return (<></>)
 }
-  
+
 
 // Start of handling images
 

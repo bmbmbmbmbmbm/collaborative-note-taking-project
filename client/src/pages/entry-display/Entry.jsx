@@ -11,6 +11,7 @@ import { useParams, Link } from 'react-router-dom';
 import Prompt from '../../components/Prompt';
 import Edit from './Edit';
 import { entryUrls } from '../../service/routes';
+import { getReplies, view } from '../../service/entry';
 
 export default function Entry({ user }) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
@@ -28,47 +29,19 @@ export default function Entry({ user }) {
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        if(token) {
-            fetch(entryUrls.viewEntry(params.entryId), {
-                method: "GET",
-                headers: {
-                    "authorization": token,
-                    'Content-Type': 'application/json'
-                }
-            }).then(
-                response => response.json()
-            ).then(
-                data => {
-                    setTitle(data.title);
-                    setEntry(data.entry);
-                    setUsername(data.username);
-                    setCreated(data.created);
-                    setUpdated(data.updated);
-                    setUnit(data.unit_code);
-                }
-            )
-    
-            fetch(entryUrls.getReplies(params.entryId), {
-                method: "GET",
-                headers: {
-                    "authorization": token
-                }
-            }).then(
-                response => response.json()
-            ).then(
-                data => setInteractions(data)
-            )
-    
-            fetch(entryUrls.editSuggestions(params.entryId), {
-                method: "GET",
-                headers: {
-                    "authorization": token
-                }
-            }).then(
-                response => response.json()
-            ).then(
-                data => setUserEdits(data)
-            )
+        async function getData() {
+            const { title, entry, username, created, updated, unitCode } = await view(params.entryId)
+            setTitle(title);
+            setEntry(entry);
+            setUsername(username);
+            setCreated(created);
+            setUpdated(updated);
+            setUnit(unitCode);
+            setInteractions(await getReplies(params.entryId))
+            setUserEdits(await getReplies(params.entryId))
+        }
+        if (token) {
+            getData();
         }
     }, [])
 
@@ -188,7 +161,7 @@ export default function Entry({ user }) {
                                 </div>
 
                                 {interactions.comments.map(comment =>
-                                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} depth={0} isThread={false}/>
+                                    <Comment key={comment.id} id={comment.id} threadId={params.threadId} content={comment.reply.content} user={comment.username} created={comment.created} replies={interactions.replies} depth={0} isThread={false} />
                                 )}
                             </Container>
                         </Tab>

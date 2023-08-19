@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { subjectUrls, entryUrls, threadUrls } from '../../service/routes';
+import { getUserEntries } from '../../service/entry';
 
 export default function Profile() {
     const params = useParams();
@@ -13,6 +14,10 @@ export default function Profile() {
     const token = localStorage.getItem('token')
 
     useEffect(() => {
+        async function getData() {
+            setPublicEntries(await getUserEntries(params.username))
+        }
+        getData();
         fetch(subjectUrls.getUserSubject(params.username), {
             method: "GET",
             headers: {
@@ -37,19 +42,6 @@ export default function Profile() {
                 response => response.json()
             ).then(
                 data => setUnits(data)
-            );
-
-        fetch(entryUrls.getUserEntries(params.username), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setPublicEntries(data)
             );
 
         fetch(threadUrls.getUserThreads(params.username), {
@@ -112,7 +104,7 @@ export default function Profile() {
                                 :
                                 <div className='userEntries'>
                                     <h3 style={{ borderBottom: "1px solid grey", marginBottom: "1%" }}>Entries</h3>
-                                    
+
                                 </div>
                             }
 
