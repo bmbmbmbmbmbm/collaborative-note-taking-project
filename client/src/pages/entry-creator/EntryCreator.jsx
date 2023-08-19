@@ -16,8 +16,8 @@ import { withHistory } from "slate-history";
 import { Tabs, Tab, Form, Container, Button, Col, Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import v from "../../components/validation";
-import { entryUrls, subjectUrls } from "../../service/routes";
 import { create, edit, update } from "../../service/entry";
+import { getUserUnits } from "../../service/subject";
 
 export default function EntryCreator({ user }) {
     const [title, setTitle] = useState("");
@@ -53,19 +53,11 @@ export default function EntryCreator({ user }) {
             setTitle(title);
             setChosen(units.indexOf({ title: unitTitle, code: code }));
             localStorage.setItem("content", JSON.stringify(entry));
+            setUnits(await getUserUnits(user))
         }
         getData();
-        fetch(subjectUrls.getUserUnits(user), {
-            method: "GET",
-            headers: {
-                authorization: token,
-                "Content-Type": "application/json",
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => setUnits(data));
 
-        if (entryId === undefined && params.entryId !== undefined) {
+        if (params.entryId !== undefined) {
             setEntryId(params.entryId);
         }
     }, []);

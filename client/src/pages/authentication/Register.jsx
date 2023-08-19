@@ -3,11 +3,10 @@ import { Form, FloatingLabel, Spinner, Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import v from "../../components/validation";
-import { authenticationUrls } from "../../service/routes";
-import { subjectUrls } from "../../service/routes";
 import { register } from "../../service/authentication";
+import { getSubjects } from "../../service/subject";
 
-export default function Register({ setToken, setUsername }) {
+export default function Register({ setUsername }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -17,11 +16,10 @@ export default function Register({ setToken, setUsername }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(subjectUrls.base)
-      .then((response) => response.json())
-      .then((data) => {
-        setSubjects(data);
-      });
+    async function getData() { 
+      setSubjects(await getSubjects())
+    }
+    getData()
   }, []);
 
   function validatePasswords() {

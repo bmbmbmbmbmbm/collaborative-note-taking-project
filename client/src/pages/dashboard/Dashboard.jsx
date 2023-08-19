@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
     Container,
     Row,
@@ -7,30 +7,31 @@ import {
     DropdownButton,
     Dropdown,
     Form,
-    Button,
     Tabs,
     Tab,
 } from "react-bootstrap";
 import Prompt from "../../components/Prompt";
 import Post from "../../components/Post";
 import UnitDisplay from "../../components/UnitDisplay";
-import { entryUrls, threadUrls, subjectUrls } from "../../service/routes";
+import { threadUrls } from "../../service/routes";
 import { getThisUsersEntries } from "../../service/entry";
+import { getUserUnits } from "../../service/subject";
 export default function Dashboard({ user }) {
-    const [search, setSearch] = useState("");
+    const [, setSearch] = useState("");
 
     const [units, setUnits] = useState([]);
     const [entries, setEntries] = useState([]);
     const [threads, setThreads] = useState([]);
-    const [pinnedEntries, setPinnedEntries] = useState([]);
-    const [pinnedThreads, setPinnedThreads] = useState([]);
+    const [pinnedEntries,] = useState([]);
+    const [pinnedThreads,] = useState([]);
 
-    const [chooseSort, setChooseSort] = useState(0);
+    const [chooseSort,] = useState(0);
     const sortBy = ["Recent", "Newest", "Oldest"];
 
     useEffect(() => {
         async function fetchData() {
             setEntries(await getThisUsersEntries(user))
+            setUnits(await getUserUnits(user))
         }
         fetchData();
 
@@ -47,19 +48,6 @@ export default function Dashboard({ user }) {
                 data => {
                     setThreads(data)
                 }
-            );
-
-        fetch(subjectUrls.getUserUnits(user), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": localStorage.getItem('token')
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setUnits(data)
             );
     }, []);
 

@@ -92,9 +92,17 @@ export async function getUserEntries(user) {
     }
 }
 
-export async function addReply(body) {
+export async function addReplyToEntry(body) {
     try {
         await fetch(entryUrls.addReply, { method: "POST", headers: headers, body: JSON.stringify(body),})
+    } catch(err) {
+        console.error(err)
+    }
+}
+
+export async function getUnitEntries(unitId) {
+    try {
+        return await fetch(entryUrls.getUnitEntries(unitId), { method: "GET", headers: headers }).then(response => response.json())
     } catch(err) {
         console.error(err)
     }

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
-import { subjectUrls, entryUrls, threadUrls } from '../../service/routes';
+import { threadUrls } from '../../service/routes';
 import { getUserEntries } from '../../service/entry';
+import { getUserSubject, getUserUnits } from '../../service/subject';
 
 export default function Profile() {
     const params = useParams();
@@ -16,33 +17,10 @@ export default function Profile() {
     useEffect(() => {
         async function getData() {
             setPublicEntries(await getUserEntries(params.username))
+            setSubject(await getUserSubject(params.username))
+            setUnits(await getUserUnits(params.username))
         }
         getData();
-        fetch(subjectUrls.getUserSubject(params.username), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setSubject(data)
-            );
-
-        fetch(subjectUrls.getUserUnits(params.username), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setUnits(data)
-            );
 
         fetch(threadUrls.getUserThreads(params.username), {
             method: "GET",

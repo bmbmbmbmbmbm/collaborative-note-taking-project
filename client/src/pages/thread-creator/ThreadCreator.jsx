@@ -3,7 +3,7 @@ import { Form, InputGroup, FloatingLabel, Button, Row, Col, Container } from 're
 import { useNavigate } from 'react-router-dom';
 import v from '../../components/validation';
 import { threadUrls } from '../../service/routes';
-import { subjectUrls } from '../../service/routes';
+import { getUserUnits } from '../../service/subject';
 export default function ThreadCreator({ user }) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
@@ -16,17 +16,10 @@ export default function ThreadCreator({ user }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(subjectUrls.getUserUnits(user), {
-            method: "GET",
-            headers: {
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setUnits(data)
-            );
+        async function getData() {
+            setUnits(await getUserUnits(user))
+        }
+        getData()
     }, [])
 
     function onChange(text) {
