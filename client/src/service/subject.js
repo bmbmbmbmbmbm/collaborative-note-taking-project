@@ -37,9 +37,9 @@ export async function enrol(body) {
     }
 }
 
-export async function getUnitTitle() {
+export async function getUnitTitle(unitId) {
     try {
-        return await fetch(subjectUrls.getUnitTitle(params.unitId), { method: "GET", headers: headers }).then(response => response.json())
+        return await fetch(subjectUrls.getUnitTitle(unitId), { method: "GET", headers: headers }).then(response => response.json())
     } catch(err) {
         console.error(err)
     }

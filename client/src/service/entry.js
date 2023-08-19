@@ -7,15 +7,8 @@ const headers = {
 
 export async function create(body) {
     try {
-        return { id } = await fetch(entryUrls.create,
-            {
-                method: "POST",
-                headers: headers,
-                body: JSON.stringify(body)
-            }
-        ).then(
-            response => response.json()
-        )
+        const { id } = await fetch(entryUrls.create, { method: "POST", headers: headers, body: JSON.stringify(body) }).then(response => response.json())
+        return id
     } catch (err) {
         console.error(err);
     }

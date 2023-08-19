@@ -4,6 +4,7 @@ import { Container, Row, Col, Form, Dropdown, DropdownButton } from 'react-boots
 import Post from '../../components/Post';
 import { getUnitEntries } from '../../service/entry';
 import { getUnitTitle } from '../../service/subject';
+import { getUnitThreads } from '../../service/thread';
 
 export default function Unit() {
     const [posts, setPosts] = useState([]);

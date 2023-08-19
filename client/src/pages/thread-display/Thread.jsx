@@ -3,7 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import Reply from './Reply';
 import Comment from './Comment';
-import { getThreadReplies } from '../../service/thread';
+import { getThreadReplies, getThread } from '../../service/thread';
 export default function Thread() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
