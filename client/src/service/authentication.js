@@ -10,3 +10,14 @@ export async function login(body) {
     }).then(response => response.json())
     return token
 }
+
+export async function register(body) {
+    const { token } = await fetch(authenticationUrls.register, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    }).then(response => response.json())
+    return token
+}
