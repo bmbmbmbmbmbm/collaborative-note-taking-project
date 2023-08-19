@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Form, InputGroup, FloatingLabel, Button, Row, Col, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import v from '../../components/validation';
-import { threadUrls } from '../../service/routes';
 import { getUserUnits } from '../../service/subject';
+import { create } from '../../service/thread';
 export default function ThreadCreator({ user }) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [units, setUnits] = useState([]);
     const [chosen, setChosen] = useState(0);
     const [wordCount, setWordCount] = useState(0);
-
-    const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
 
@@ -31,38 +29,15 @@ export default function ThreadCreator({ user }) {
         return v.validTitle(title) && v.validContent(content) && chosen > 0;
     }
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
-        if(valdiated()) {
-            let status = 0;
-            let body = {
-                title: title,
-                unitCode: units[chosen - 1].code,
-                content: content
-            };
-            
-            fetch(threadUrls.create, {
-                method: 'POST',
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-            }).then(
-                response => {
-                    status = response.status;
-                    return response.json();
-                }
-            ).then(
-                data => {
-                    if(status===200){
-                        navigate(`/${units[chosen-1].code}/thread/${data.id}`);
-                    }
-                }
-            )
-
+        if (valdiated()) {
+            const { status, data } = await create({ title: title, unitCode: units[chosen - 1].code, content: content })
+            if (status === 200) {
+                navigate(`/${units[chosen - 1].code}/thread/${data.id}`);
+            }
         } else {
-            alert(`${chosen === 0 ? "No unit chosen\n": ""}
+            alert(`${chosen === 0 ? "No unit chosen\n" : ""}
                 ${title.length < 6 ? "Title is less than 6 characters\n" : (title.length > 64 ? "Title longer than 64 characters" : "")}
                 ${content.split(" ").length > 1000 ? "Over 1000 words" : ""}`);
         }
@@ -84,7 +59,7 @@ export default function ThreadCreator({ user }) {
                                 <FloatingLabel controlId="floatinginput" label="What's the thread about?">
                                     <Form.Control autoFocus type="text" placeholder="What's the thread about?" onChange={(e) => setTitle(e.target.value)} />
                                 </FloatingLabel>
-                                <Form.Label style={{"color": title.length > 64 ? "red" : "black"}}>Length({title.length}/64)</Form.Label>
+                                <Form.Label style={{ "color": title.length > 64 ? "red" : "black" }}>Length({title.length}/64)</Form.Label>
                             </Form.Group>
                         </Col>
                         <Col xs={3}>
@@ -107,7 +82,7 @@ export default function ThreadCreator({ user }) {
                         <InputGroup>
                             <Form.Control as="textarea" aria-label="With textarea" placeholder='Your thoughts?' onChange={e => onChange(e.target.value)} />
                         </InputGroup>
-                        <Form.Label style={{"color": wordCount > 1000 ? "red" : "black" }}>
+                        <Form.Label style={{ "color": wordCount > 1000 ? "red" : "black" }}>
                             Words({wordCount}/1000)
                         </Form.Label>
                     </Form.Group>

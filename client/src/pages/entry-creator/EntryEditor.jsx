@@ -6,7 +6,6 @@ import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import { entryUrls } from '../../service/routes';
 import { createEdit, editDiff } from '../../service/entry';
 
 export default function EntryCreator({ user }) {

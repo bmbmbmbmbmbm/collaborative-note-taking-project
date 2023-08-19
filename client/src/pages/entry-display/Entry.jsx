@@ -10,7 +10,6 @@ import Comment from '../thread-display/Comment';
 import { useParams, Link } from 'react-router-dom';
 import Prompt from '../../components/Prompt';
 import Edit from './Edit';
-import { entryUrls } from '../../service/routes';
 import { getReplies, view } from '../../service/entry';
 
 export default function Entry({ user }) {

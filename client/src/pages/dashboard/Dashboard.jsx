@@ -13,9 +13,9 @@ import {
 import Prompt from "../../components/Prompt";
 import Post from "../../components/Post";
 import UnitDisplay from "../../components/UnitDisplay";
-import { threadUrls } from "../../service/routes";
 import { getThisUsersEntries } from "../../service/entry";
 import { getUserUnits } from "../../service/subject";
+import { getUserThreads } from "../../service/thread";
 export default function Dashboard({ user }) {
     const [, setSearch] = useState("");
 
@@ -29,26 +29,12 @@ export default function Dashboard({ user }) {
     const sortBy = ["Recent", "Newest", "Oldest"];
 
     useEffect(() => {
-        async function fetchData() {
+        async function getData() {
             setEntries(await getThisUsersEntries(user))
             setUnits(await getUserUnits(user))
+            setThreads(await getUserThreads(user))
         }
-        fetchData();
-
-        fetch(threadUrls.getUserThreads(user), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": localStorage.getItem('token')
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => {
-                    setThreads(data)
-                }
-            );
+        getData();
     }, []);
 
     return (
@@ -91,7 +77,7 @@ export default function Dashboard({ user }) {
                         {entries.length > 0 ? (
                             <div className="entries">
                                 <div className="newEntryPrompt" style={{ borderBottom: "1px solid lightgrey", paddingBottom: "2%", marginBottom: "1%", textAlign: "center" }}>
-                                    <Prompt title="Want to make a new entry?" desc="" link="/entry-creator" img=""/>
+                                    <Prompt title="Want to make a new entry?" desc="" link="/entry-creator" img="" />
                                 </div>
 
                                 {entries.map(entry =>
@@ -126,7 +112,7 @@ export default function Dashboard({ user }) {
                         {threads.length > 0 ? (
                             <div className="threads">
                                 <div className="newEntryPrompt" style={{ borderBottom: "1px solid lightgrey", paddingBottom: "2%", marginBottom: "1%", textAlign: "center" }}>
-                                    <Prompt title="Want to make a new thread?" desc="" link="/thread-creator" img=""/>
+                                    <Prompt title="Want to make a new thread?" desc="" link="/thread-creator" img="" />
                                 </div>
                                 {threads.map(thread =>
                                     <Post
@@ -160,7 +146,7 @@ export default function Dashboard({ user }) {
                         {units.length > 0 ? (
                             <div className="units">
                                 {units.map(unit =>
-                                    <UnitDisplay unitCode={unit.code} title={unit.title} key={unit.code + unit.title}/>
+                                    <UnitDisplay unitCode={unit.code} title={unit.title} key={unit.code + unit.title} />
                                 )}
                                 <div className="missingUnit" style={{ textAlign: "center" }}>
                                     <h4>Missing a unit?</h4>

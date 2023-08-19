@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
 import v from '../../components/validation';
-import { threadUrls, entryUrls } from '../../service/routes';
 import { addReplyToEntry } from '../../service/entry';
+import { addReplyToThread } from '../../service/thread';
 function Reply({ Id, commentId, depth, isThread }) {
     const [reply, setReply] = useState("");
     const myDepth = depth;
-
-    const token = localStorage.getItem('token');
 
     function validated() {
         return v.validContent(reply);
@@ -15,30 +13,10 @@ function Reply({ Id, commentId, depth, isThread }) {
 
     async function addReply(event) {
         event.preventDefault();
-        let body;
         if(isThread) {
-            if (commentId === undefined) {
-                body = {
-                    "content": reply,
-                    "threadId": Id,
-                }
-            } else {
-                body = {
-                    "content": reply,
-                    "threadId": Id,
-                    "commentId": commentId,
-                }
-            }
-            fetch(threadUrls.addReply, {
-                method: "POST",
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body),
-            })
+            await addReplyToThread({ content: reply, threadId: Id, commentId: commentId }) 
         } else {
-            addReplyToEntry({ content: reply, entryId: Id, commentId: commentId })
+            await addReplyToEntry({ content: reply, entryId: Id, commentId: commentId })
         }
     }
 

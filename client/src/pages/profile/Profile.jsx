@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
-import { threadUrls } from '../../service/routes';
 import { getUserEntries } from '../../service/entry';
 import { getUserSubject, getUserUnits } from '../../service/subject';
+import { getUserThreads } from '../../service/thread';
 
 export default function Profile() {
     const params = useParams();
@@ -12,28 +12,14 @@ export default function Profile() {
     const [threads, setThreads] = useState();
     const [units, setUnits] = useState()
 
-    const token = localStorage.getItem('token')
-
     useEffect(() => {
         async function getData() {
             setPublicEntries(await getUserEntries(params.username))
             setSubject(await getUserSubject(params.username))
             setUnits(await getUserUnits(params.username))
+            setThreads(await getUserThreads(params.username))
         }
         getData();
-
-        fetch(threadUrls.getUserThreads(params.username), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setThreads(data)
-            )
     }, [])
 
     return (
@@ -70,7 +56,6 @@ export default function Profile() {
                             </div>
 
                         }
-
                     </Row>
                     <Row>
                         <Col>
@@ -85,7 +70,6 @@ export default function Profile() {
 
                                 </div>
                             }
-
                         </Col>
                         <Col>
                             {(threads === undefined) ?
@@ -97,7 +81,6 @@ export default function Profile() {
                                     <h3 style={{ borderBottom: "1px solid grey", marginBottom: "1%" }}>Threads</h3>
                                 </div>
                             }
-
                         </Col>
                     </Row>
                 </Container>

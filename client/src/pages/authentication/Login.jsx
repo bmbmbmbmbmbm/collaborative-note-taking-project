@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import PropTypes from 'prop-types';
 import v from '../../components/validation';
-import { authenticationUrls } from '../../service/routes';
 import { login } from '../../service/authentication';
 export default function Login({ setUsername }) {
     const [email, setEmail] = useState("");

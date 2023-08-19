@@ -51,3 +51,7 @@ export const subjectUrls = {
     getUnitTitle: unitCode => subject + "/titleof/" + unitCode,
     getSubjectUnitsByUser: username => subject + username
 }
+
+export const pageUrls = {
+    
+}

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Form, Dropdown, DropdownButton } from 'react-bootstrap';
 import Post from '../../components/Post';
-import { threadUrls } from '../../service/routes';
 import { getUnitEntries } from '../../service/entry';
 import { getUnitTitle } from '../../service/subject';
 
@@ -21,24 +20,11 @@ export default function Unit() {
     useEffect(() => {
         async function getData() {
             const unitEntries = await getUnitEntries(params.unitId)
-            setPosts([...unitEntries, ...posts])
+            const unitThreads = await getUnitThreads(params.unitId)
+            setPosts([...unitEntries, ...unitThreads])
             setTitle(await getUnitTitle(params.unitId))
         }
         getData()
-
-        fetch(threadUrls.getUnitThreads(params.unitId), {
-            method: "GET",
-            headers: {
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => {
-                    setPosts(data);
-                }
-            );
     }, [])
 
     return (
