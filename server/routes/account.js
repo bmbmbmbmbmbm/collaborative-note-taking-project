@@ -17,33 +17,33 @@ router.put("/change-password", auth.verifyToken, async function (req, res) {
                     bcrypt.compare(oldPassword, record[0][0].password, async (err, result) => {
                         if (err) {
                             console.log(err);
-                            res.status(500).json({ message: 'server error' });
+                            res.status(500)
                         } else if (result) {
                             bcrypt.hash(newPassword, 10, async function (err, hash) {
                                 if (err) {
                                     console.log(err);
-                                    res.status(500).json({ message: "server error" });
+                                    res.status(500)
                                 } else {
                                     await db.promise().query(`UPDATE users SET password='${hash}' WHERE email='${email}'`)
-                                    res.status(200).json({ message: 'successfully changed password' })
+                                    res.status(200)
                                 }
                             })
                         } else {
-                            res.status(400).json({ message: 'invalid credentials' })
+                            res.status(400)
                         }
                     })
                 } else {
-                    res.status(400).json({ message: 'invalid credentials' });
+                    res.status(400)
                 }
             } else {
-                res.status(400).json({ message: 'invalid credentials' });
+                res.status(400)
             }
         } else {
-            res.status(400).json({ message: 'invalid crednetials' })
+            res.status(400)
         }
     } catch (err) {
         console.log(err);
-        res.status(500).json({ message: 'server error' });
+        res.status(500)
     }
 })
 
