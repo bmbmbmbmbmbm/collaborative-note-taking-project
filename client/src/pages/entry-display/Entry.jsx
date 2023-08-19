@@ -5,12 +5,12 @@ import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
 import { Tabs, Tab, Container, Row, Col } from 'react-bootstrap';
-import Reply from '../thread-display/Reply.js';
-import Comment from '../thread-display/Comment.js';
+import Reply from '../thread-display/Reply';
+import Comment from '../thread-display/Comment';
 import { useParams, Link } from 'react-router-dom';
-import Prompt from '../../components/Prompt.js';
-import Edit from './Edit.jsx';
-import { entryUrls } from '../../service/routes.js';
+import Prompt from '../../components/Prompt';
+import Edit from './Edit';
+import { entryUrls } from '../../service/routes';
 
 export default function Entry({ user }) {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
