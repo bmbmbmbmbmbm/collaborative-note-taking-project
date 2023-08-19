@@ -9,7 +9,7 @@ import Reply from '../thread-display/Reply.js';
 import Comment from '../thread-display/Comment.js';
 import { useParams, Link } from 'react-router-dom';
 import Prompt from '../../components/Prompt.js';
-import Edit from './Edit';
+import Edit from './Edit.jsx';
 import { entryUrls } from '../../service/routes.js';
 
 export default function Entry({ user }) {
