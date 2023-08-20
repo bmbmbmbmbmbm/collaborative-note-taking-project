@@ -5,14 +5,14 @@ import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
 import { Tabs, Tab, Container, Row, Col } from 'react-bootstrap';
-import Reply from '../thread-display/Reply';
+import Reply from '../../components/Reply';
 import Comment from '../thread-display/Comment';
 import { useParams, Link } from 'react-router-dom';
 import Prompt from '../../components/Prompt';
 import Edit from './Edit';
 import { getReplies, view } from '../../service/entry';
 
-export default function Entry({ user }) {
+export default function Entry() {
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), [])
     const [entry, setEntry] = useState([{}]);
     const [title, setTitle] = useState("");

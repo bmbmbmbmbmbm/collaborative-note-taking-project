@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
-import Reply from './Reply';
+import Reply from '../../components/Reply';
 import Comment from './Comment';
 import { getThreadReplies, getThread } from '../../service/thread';
 export default function Thread() {

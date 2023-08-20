@@ -22,11 +22,11 @@ app.use((req, res, next) => {
 })
 
 // Defining routes in the server
-const authentication = require('./routes/authentication');
-const entries = require('./routes/entries');
-const threads = require('./routes/threads');
-const subject = require('./routes/subject');
-const account = require('./routes/account');
+const authentication = require('./controller/authentication');
+const entries = require('./controller/entries');
+const threads = require('./controller/threads');
+const subject = require('./controller/subject');
+const account = require('./controller/account');
 
 app.use('/authentication', authentication);
 app.use('/entry', entries);
