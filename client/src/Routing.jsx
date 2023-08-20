@@ -2,7 +2,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 
-import useToken from "./components/useToken";
+import useToken from "./hooks/useToken";
 
 import Dashboard from "./pages/dashboard/Dashboard";
 import EntryCreator from "./pages/entry-creator/EntryCreator";
