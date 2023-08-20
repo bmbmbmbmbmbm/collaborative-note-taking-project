@@ -17,14 +17,7 @@ export default function Login({ setUsername }) {
 
     async function handleSubmit(event) {
         event.preventDefault();
-
-        let token = {
-            email: email,
-            password: password
-        };
-
-        const data = await login(token)
-
+        const data = await login({ email: email, password: password })
         if(data) {
             localStorage.setItem('token', data)
             setUsername(email.substring(0, email.indexOf('@')));

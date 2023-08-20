@@ -9,7 +9,6 @@ async function verifyToken(req, res, next) {
         jwt.verify(token, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF",
             function (err, decoded) {
                 if (err) {
-
                     res.status(400).json({ message: "Failed authorisation" });
                 } else {
                     req.userId = decoded.id;

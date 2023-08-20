@@ -26,17 +26,17 @@ export default function EntryCreator({ user }) {
     const [entryId, setEntryId] = useState();
     const [isPublic, setIsPublic] = useState(false);
 
-    const initialValue = useMemo(
-        () =>
-            JSON.parse(localStorage.getItem("content")) || [
+    const initialValue = useMemo(() => {
+        const content = localStorage.getItem("content")
+        return content === undefined ?
+            JSON.parse(localStorage.getItem("content")) :
+            [
                 {
                     type: "paragraph",
                     children: [{ text: "A line of text in a paragraph." }],
                 },
-            ] ||
-            [],
-        []
-    );
+            ]
+    }, []);
 
     const editor = useMemo(
         () => withImages(withHistory(withReact(createEditor()))),
@@ -44,8 +44,6 @@ export default function EntryCreator({ user }) {
     );
 
     const params = useParams();
-
-    const token = localStorage.getItem("token");
 
     useEffect(() => {
         async function getData() {
@@ -55,10 +53,10 @@ export default function EntryCreator({ user }) {
             localStorage.setItem("content", JSON.stringify(entry));
             setUnits(await getUserUnits(user))
         }
-        getData();
 
         if (params.entryId !== undefined) {
             setEntryId(params.entryId);
+            getData();
         }
     }, []);
 
