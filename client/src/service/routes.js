@@ -37,9 +37,9 @@ export const threadUrls = {
     create: thread + "/create",
     addReply: thread + "/add-reply",
     getUserThreads: username => thread + "/dashboard/" + username,
-    getUnitThreads: unitCode => thread + unitCode + "/view",
-    getThread: threadId => thread + "/view" + threadId,
-    getThreadReplies: threadId => this.getThread(threadId) + "/replies"
+    getUnitThreads: unitCode => thread + "/" + unitCode + "/view",
+    getThread: threadId => thread + "/view/" + threadId,
+    getThreadReplies: threadId => thread + "/view/" + threadId + "/replies"
 }
 
 const subject = "/subject"
@@ -49,5 +49,9 @@ export const subjectUrls = {
     getUserUnits: username => subject + "/get-units/" + username,
     getUserSubject: username => subject + "/get-subject/" + username,
     getUnitTitle: unitCode => subject + "/titleof/" + unitCode,
-    getSubjectUnitsByUser: username => subject + username
+    getSubjectUnitsByUser: username => subject + "/" + username
+}
+
+export const pageUrls = {
+    
 }

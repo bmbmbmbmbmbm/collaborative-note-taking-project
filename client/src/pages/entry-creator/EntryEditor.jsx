@@ -6,57 +6,31 @@ import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
 import { Tabs, Tab, Form, Container, Button, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import v from '../../components/validation';
-import { entryUrls, subjectUrls } from '../../service/routes';
+import { createEdit, editDiff } from '../../service/entry';
 
 export default function EntryCreator({ user }) {
     const [title, setTitle] = useState("");
-    const [units, setUnits] = useState([]);
-    const [chosen, setChosen] = useState(0);
-    const [entryId, setEntryId] = useState();
-    const [isPublic, setIsPublic] = useState(false);
+    const [unitCode, setUnitCode] = useState("");
+    const [unitTitle, setUnitTitle] = useState("");
+    const [author, setAuthor] = useState("");
 
     const initialValue = useMemo(() => JSON.parse(localStorage.getItem('content')) || [{ type: 'paragraph', children: [{ text: 'A line of text in a paragraph.' }], }] || [], []);
-
     const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
-
     const params = useParams();
 
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        fetch(subjectUrls.getUserUnits(user), {
-            method: "GET",
-            headers: {
-                "authorization": token,
-                "Content-Type": "application/json"
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => setUnits(data)
-            );
-
-
-        if (entryId === undefined && params.entryId !== undefined) {
-            setEntryId(params.entryId);
-            fetch(entryUrls.edit(params.entryId), {
-                method: "GET",
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                }
-            })
-                .then(
-                    response => response.json()
-                ).then(
-                    data => {
-                        setTitle(data.title);
-                        setChosen(units.indexOf({ title: data.unitTitle, code: data.unit_code }) + 1);
-                        localStorage.setItem('content', JSON.stringify(data.entry));
-                    }
-                )
+        async function getData() {
+            const { title, unitTitle, unitCode, username, entry } = await editDiff(params.entryId)
+            setTitle(title);
+            setUnitCode(unitCode);
+            setUnitTitle(unitTitle);
+            setAuthor(username);
+            localStorage.setItem('content', JSON.stringify(entry));
+        }
+        if (Number.isInteger(+params.entryId)) {
+            getData()
         }
 
     }, [])
@@ -65,52 +39,15 @@ export default function EntryCreator({ user }) {
     const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
 
-    function handleSave(event) {
+    async function handleSave(event) {
         event.preventDefault();
 
-        if (chosen === 0) {
-            alert("Choose a valid unit")
-        } else if (entryId === undefined) {
-
-            let body = {
-                title: title,
+        if (Number.isInteger(+params.entryId)) {
+            await createEdit({
+                entryId: params.entryId,
                 entry: JSON.parse(localStorage.getItem('content')),
-                unitCode: units[chosen - 1].code,
-                private: isPublic
-            }
-            fetch(entryUrls.create, {
-                method: "POST",
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-            }).then(
-                response => response.json()
-            ).then(
-                data => setEntryId(data.id)
-            )
-        } else {
-            let body = {
-                title: title,
-                entry: JSON.parse(localStorage.getItem('content')),
-                unitCode: units[chosen - 1].code,
-                private: isPublic,
-                entryId: entryId
-            }
-            fetch(entryUrls.update, {
-                method: "PUT",
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
             })
         }
-    }
-
-    function validation() {
-        return v.validTitle(title) && chosen > 0;
     }
 
     if (initialValue) {
@@ -118,24 +55,12 @@ export default function EntryCreator({ user }) {
             <Form onSubmit={handleSave}>
                 <div className="settings" style={{ backgroundColor: "white", padding: "0.3%" }}>
                     <Row style={{ paddingBottom: "0.5%", paddingTop: "0.5%" }}>
-                        <Col xs={7}>
-                            <Form.Control autoFocus type="text" placeholder="Entry title" onChange={(e) => setTitle(e.target.value)} required />
+                        <Col xs={10}>
+                            <h3>Editing {title} by {author}</h3>
+                            <h5>{unitCode}: {unitTitle}</h5>
                         </Col>
-                        <Col xs={3}>
-                            <Form.Select onChange={(e) => setChosen(e.target.value)} required>
-                                <option value={0}>What unit are you writing about?</option>
-                                {units.map((unit, index) => (
-                                    <option key={unit.code} value={index + 1}>
-                                        {unit.title}
-                                    </option>
-                                ))}
-                            </Form.Select>
-                        </Col>
-                        <Col xs={1} className="d-grid gap-2">
-                            <Button type="submit" disabled={!validation()}>Save</Button>
-                        </Col>
-                        <Col xs={1} className="d-grid gap-2">
-                            <Button variant={isPublic ? "warning" : "success"} onClick={() => setIsPublic(!isPublic)}>{isPublic ? "Make Private" : "Make Public"}</Button>
+                        <Col xs={2}>
+                            <Button type="submit" style={{ float: "right" }}>Save Edit</Button>
                         </Col>
                     </Row>
                 </div>
@@ -184,6 +109,7 @@ export default function EntryCreator({ user }) {
                         <Editable renderElement={renderElement} renderLeaf={renderLeaf} onKeyDown={event => onKeyDown(event, editor)} />
                     </Container>
                 </Slate>
+
             </Form>
         )
     }

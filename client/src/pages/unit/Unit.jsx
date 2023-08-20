@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Form, Dropdown, DropdownButton } from 'react-bootstrap';
 import Post from '../../components/Post';
-import { threadUrls, entryUrls, subjectUrls } from '../../service/routes';
+import { getUnitEntries } from '../../service/entry';
+import { getUnitTitle } from '../../service/subject';
+import { getUnitThreads } from '../../service/thread';
 
 export default function Unit() {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
 
-    const [search, setSearch] = useState("");
+    const [, setSearch] = useState("");
     
     const sortBy = ["Recent", "Old", "Top Voted"];
 
@@ -17,42 +19,13 @@ export default function Unit() {
     const params = useParams();
 
     useEffect(() => {
-        setPosts([]);
-
-        fetch(threadUrls.getUnitThreads(params.unitId), {
-            method: "GET",
-            headers: {
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => {
-                    setPosts(data);
-                }
-            );
-
-        fetch(entryUrls.getUnitEntries(params.unitId), {
-            method: "GET",
-            headers: {
-                "authorization": token
-            }
-        })
-            .then(
-                response => response.json()
-            ).then(
-                data => {
-                    setPosts([...data, ...posts]);
-                }
-            )
-
-        fetch(subjectUrls.getUnitTitle(params.unitId))
-            .then(
-                response => response.json()
-            ).then(
-                data => setTitle(data.title)
-            )
+        async function getData() {
+            const unitEntries = await getUnitEntries(params.unitId)
+            const unitThreads = await getUnitThreads(params.unitId)
+            setPosts([...unitEntries, ...unitThreads])
+            setTitle(await getUnitTitle(params.unitId))
+        }
+        getData()
     }, [])
 
     return (

@@ -12,7 +12,7 @@ import Profile from "./pages/profile/Profile";
 import ThreadCreator from "./pages/thread-creator/ThreadCreator";
 import Entry from "./pages/entry-display/Entry";
 import Thread from "./pages/thread-display/Thread";
-import Enrolment from "./pages/Enrolment/Enrolment";
+import Enrolment from "./pages/enrolment/Enrolment";
 import Login from "./pages/authentication/Login";
 import Register from "./pages/authentication/Register";
 import Unit from "./pages/unit/Unit";

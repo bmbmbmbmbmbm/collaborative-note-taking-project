@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Spinner, Container, Form, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { subjectUrls } from "../../service/routes";
-export default function Enrolment({user}) {
+import { enrol, getSubjectUnitsByUser, getUserUnits } from "../../service/subject";
+
+export default function Enrolment({ user }) {
     const [units, setUnits] = useState();
     const [enrolled, setEnrolled] = useState([])
     const [search, setSearch] = useState("");
@@ -10,39 +11,21 @@ export default function Enrolment({user}) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(subjectUrls.getUserSubject(user), {
-            method: "GET",
-            headers: {
-                "authorization": localStorage.getItem('token')
-            }
-        })
-            .then((response) => response.json())
-            .then((value) => {
-                setUnits(value);
-            });
-
-        fetch(subjectUrls.getUserUnits(user), {
-            method: "GET",
-            headers: {
-                "authorization": localStorage.getItem('token')
-            }
-        }).then(
-            response => response.json()
-        ).then(
-            value => {
-                setEnrolled(value);
-            }
-        )
+        async function getData() {
+            setUnits(await getSubjectUnitsByUser(user))
+            setEnrolled(await getUserUnits(user))
+        }
+        getData();
     }, []);
 
     function isEnrolled(unit) {
-        for(var i = 0; i < enrolled.length; ++i) {
-            if(unit.code === enrolled[i].code) return true;
+        for (var i = 0; i < enrolled.length; ++i) {
+            if (unit.code === enrolled[i].code) return true;
         }
     }
 
     function handleEnrol(unit) {
-        if(enrolled.length === 0) {
+        if (enrolled.length === 0) {
             setEnrolled([unit]);
         } else {
             var enrol = enrolled;
@@ -55,7 +38,7 @@ export default function Enrolment({user}) {
             } else {
                 setEnrolled([...enrol, unit]);
             }
-        }  
+        }
     }
 
     function checkSearch(available) {
@@ -70,30 +53,14 @@ export default function Enrolment({user}) {
         return filtered;
     }
 
-    function enrolUnits(event) {
+    async function enrolUnits(event) {
         event.preventDefault();
-        
-        let body = {
-            username: user,
-            units: enrolled
-        };
-
-        fetch(subjectUrls.enrol, {
-            method: "POST",
-            headers: {
-                "authorization": localStorage.getItem('token'),
-                "Content-Type" : "application/json"
-            },
-            body: JSON.stringify(body)
-        }).then(
-            response => {
-                if(response.status === 200) {
-                    navigate('/dashboard');
-                } else {
-                    alert(response.json());
-                }
-            }
-        )
+        const status = await enrol({ username: user, units: enrolled })
+        if (status === 200) {
+            navigate('/dashboard');
+        } else {
+            alert(status + ": failed to enrol units")
+        }
     }
 
     return (
@@ -113,11 +80,11 @@ export default function Enrolment({user}) {
                                 <p>
                                     Choose units to enroll into. Obviously, the units you are taking are probably the best choice but feel free to explore units available on your course.
                                     By default, all units below are those available on your course. If you need to enroll in a unit ordinarily not on your course, please contact an admin.
-                               
+
                                 </p>
                             </Row>
-                                <Form onSubmit={enrolUnits}>
-                                    <Row>
+                            <Form onSubmit={enrolUnits}>
+                                <Row>
                                     <Col xs={11}>
                                         <Form.Group>
                                             <Form.Control
@@ -129,12 +96,12 @@ export default function Enrolment({user}) {
                                         </Form.Group>
                                     </Col>
                                     <Col xs={1}>
-                                        <Button style={{float: "right"}} type="submit">
+                                        <Button style={{ float: "right" }} type="submit">
                                             Enrol
                                         </Button>
                                     </Col>
-                                    </Row>
-                                </Form>
+                                </Row>
+                            </Form>
 
                         </Container>
                     </div>
