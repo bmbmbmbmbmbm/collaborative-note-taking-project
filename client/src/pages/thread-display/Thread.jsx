@@ -17,14 +17,16 @@ export default function Thread() {
 
     useEffect(() => {
         async function getData() {
-            const { title, thread, username, created, lastReply, unitCode } = await getThread()
+            const { title, thread, username, created, lastReply, unitCode } = await getThread(params.threadId)
+            const replies = await getThreadReplies(params.threadId)
+
             setTitle(title);
             setContent(thread.content);
             setAuthor(username);
             setCreated(created);
             setLastReply(lastReply)
             setUnitCode(unitCode)
-            setInteractions(await getThreadReplies(params.threadId))
+            setInteractions(replies)
         }
         getData();
     }, []);

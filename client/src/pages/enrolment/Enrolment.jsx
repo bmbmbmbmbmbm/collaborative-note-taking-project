@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Spinner, Container, Form, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { enrol, getUserSubject, getUserUnits } from "../../service/subject";
+import { enrol, getSubjectUnitsByUser, getUserUnits } from "../../service/subject";
 
 export default function Enrolment({ user }) {
     const [units, setUnits] = useState();
@@ -12,7 +12,7 @@ export default function Enrolment({ user }) {
 
     useEffect(() => {
         async function getData() {
-            setUnits(await getUserSubject(user))
+            setUnits(await getSubjectUnitsByUser(user))
             setEnrolled(await getUserUnits(user))
         }
         getData();

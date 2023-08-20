@@ -46,17 +46,22 @@ export default function EntryCreator({ user }) {
     const params = useParams();
 
     useEffect(() => {
-        async function getData() {
+        async function getEntryData() {
             const { title, unitTitle, code, entry } = await edit(params.entryId);
             setTitle(title);
             setChosen(units.indexOf({ title: unitTitle, code: code }));
             localStorage.setItem("content", JSON.stringify(entry));
+        }
+
+        async function getUnits() {
             setUnits(await getUserUnits(user))
         }
 
+        getUnits()
+
         if (params.entryId !== undefined) {
             setEntryId(params.entryId);
-            getData();
+            getEntryData();
         }
     }, []);
 

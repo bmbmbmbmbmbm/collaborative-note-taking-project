@@ -13,6 +13,14 @@ export async function getSubjects() {
     }
 }
 
+export async function getSubjectUnitsByUser(user) {
+    try {
+        return await fetch(subjectUrls.getSubjectUnitsByUser(user), { method: "GET", headers: headers }).then(response => response.json())
+    } catch(err) {
+        console.error(err)
+    }
+}
+
 export async function getUserSubject(user) {
     try { 
         return await fetch(subjectUrls.getUserSubject(user), { method: "GET", headers: headers }).then((response) => response.json())
@@ -31,7 +39,7 @@ export async function getUserUnits(user) {
 
 export async function enrol(body) {
     try { 
-        return await fetch(subjectUrls.enrol, { method: "POST", headers: headers, body: JSON.stringify(body)}).then(response => response.status === 200) 
+        return await fetch(subjectUrls.enrol, { method: "POST", headers: headers, body: JSON.stringify(body)}).then(response => response.status) 
     } catch(err) {
         console.error()
     }

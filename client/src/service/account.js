@@ -11,7 +11,7 @@ export async function changePassword(body) {
             body: JSON.stringify(body)
         })
     } catch(err) {
-        console.log(err);
+        console.error(err);
     }
 }
 
@@ -26,6 +26,6 @@ export async function deleteAccount(body) {
             body: JSON.stringify(body)
         })
     } catch(err) {
-        console.log(err);
+        console.error(err);
     }
 }
