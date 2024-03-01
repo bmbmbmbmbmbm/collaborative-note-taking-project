@@ -5,9 +5,7 @@ This dissertation describes the development of a collaborative note taking syste
 
 ## Status of Project
 
-There are no plans to release this system, ~~nor continue development of this system~~; although the idea for this system is fine, this project involved learning a number of different libraries thus a number of different files need work. Furthermore, the approach taken for implementing this system would be somewhat revised.
-
-Originally, I had no plans of continuing with this project; however, I believe updating this project would prove good practice. This will involve mostly refining processes, but may also involve a change in packages, libraries, and other fun things (like switching out ExpressJS for a more involved backend environment, switching JS and JSX to TS and TSX). Further, there is still some outstanding work needing to be done.
+There are no plans to release this system, nor continue development of this system; although the idea for this system is fine, this project involved learning a number of different libraries thus a number of different files need work. Furthermore, the approach taken for implementing this system would be somewhat revised.
 
 ## Information about the System
 
