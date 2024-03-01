@@ -8,7 +8,8 @@ const app = express();
 app.use(session({
     secret: "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF",
     cookie: { maxAge: 30000 },
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     store
 }))
 
