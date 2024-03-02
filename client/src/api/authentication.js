@@ -1,6 +1,6 @@
-async function login(username, password) {
+async function login(email, password) {
     let body = {
-        username,
+        email,
         password
     }
 
@@ -44,4 +44,9 @@ async function register(email, password, subject_id) {
         return true
     }
     return false
+}
+
+export {
+    login,
+    register
 }

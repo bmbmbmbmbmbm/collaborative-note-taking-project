@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Card, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
-import Reply from './Reply';
-import Comment from './Comment';
+import Reply from '../components/Reply';
+import Comment from '../components/Comment';
 
 export default function Thread({ user }) {
     const [title, setTitle] = useState("");

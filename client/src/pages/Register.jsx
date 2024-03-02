@@ -3,7 +3,7 @@ import { Form, FloatingLabel, Spinner, Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import v from "../components/validation"
-import register from '../api/authentication'
+import { register } from '../api/authentication'
 
 export default function Register({ setToken, setUsername }) {
     const [email, setEmail] = useState("");

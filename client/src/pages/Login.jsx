@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import PropTypes from 'prop-types';
 import v from '../components/validation';
+import { login } from '../api/authentication';
 
 export default function Login({ setToken, setUsername }) {
     const [email, setEmail] = useState("");
@@ -18,37 +19,10 @@ export default function Login({ setToken, setUsername }) {
     async function handleSubmit(event) {
         event.preventDefault();
 
-        let success = false;
-
-        let token = {
-            email: email,
-            password: password
-        };
-
-        localStorage.clear()
-        localStorage.clear();
-
-        await fetch("/authentication/login/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(token)
-        }).then(
-            response => response.json()
-        ).then(
-            data => {
-                if(data.token) {
-                    success = true;
-                    localStorage.setItem('token', data.token)
-                    setUsername(email.substring(0, email.indexOf('@')));
-                }
-            }
-        )
-
-        if(success) {
+        if(login(email, password)) {
+            setUsername(email.substring(0, email.indexOf('@')));
             navigate('/dashboard');
-        } 
+        }
     }
 
 

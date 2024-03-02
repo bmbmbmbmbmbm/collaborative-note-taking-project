@@ -5,10 +5,10 @@ import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
 import { withHistory } from 'slate-history';
 import { Tabs, Tab, Container, Row, Col } from 'react-bootstrap';
-import Reply from './Reply';
-import Comment from './Comment';
+import Reply from '../components/Reply';
+import Comment from '../components/Comment';
 import { useParams, Link } from 'react-router-dom';
-import Prompt from '../components/Prompt.js';
+import Prompt from '../components/Prompt';
 import Edit from './Edit';
 
 export default function Entry({ user }) {

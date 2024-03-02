@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
-import Post from '../components/Post.js';
 
 export default function Profile() {
     const params = useParams();

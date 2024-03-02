@@ -25,18 +25,18 @@ router.post('/create-edit', auth.verifyToken, async function (req, res) {
     const { entry, entryId } = req.body;
     const userId = req.userId;
     if (v.validId(entryId) && Array.isArray(entry) && isValidEntry(entry)) {
-      const entryRecord = await db.promise().query(`SELECT id FROM entries WHERE id=${entryId}`);
+      const entryRecord = await db.query(`SELECT id FROM entries WHERE id=${entryId}`);
       if (entryRecord[0].length === 1) {
-        const editRecord = await db.promise().query(`SELECT entry_id, user_id FROM user_edits WHERE user_id=${userId} AND entry_id=${entryId}`)
+        const editRecord = await db.query(`SELECT entry_id, user_id FROM user_edits WHERE user_id=${userId} AND entry_id=${entryId}`)
         if (editRecord[0].length === 0) {
           const stringEntry = JSON.stringify(filterEntry(entry));
           const insert = `INSERT INTO user_edits(user_id, entry_id, edit, created) VALUES (${userId}, ${entryId}, '${stringEntry}', NOW())`
-          await db.promise().query(insert);
+          await db.query(insert);
           res.status(200).json({ message: "created edit" });
         } else {
           const stringEntry = JSON.stringify(filterEntry(entry));
           const update = `UPDATE user_edits SET edit='${stringEntry}' WHERE entry_id=${entryId} AND user_id=${userId}`
-          await db.promise().query(update);
+          await db.query(update);
           res.status(200).json({ message: "updated edit" })
         }
       } else {
@@ -63,7 +63,7 @@ router.get('/edit-suggestions/:id', auth.verifyToken, async function (req, res) 
     if (v.validId(entryId)) {
       const select = `SELECT user_edits.edit, user_edits.created, users.username 
                       FROM user_edits INNER JOIN users ON users.id=user_edits.user_id WHERE entry_id=${entryId}`;
-      var records = await db.promise().query(select);
+      var records = await db.query(select);
       for (var i = 0; i < records[0].length; ++i) {
         records[0][i].edit = filterEntry(records[0][i].edit);
       }
@@ -90,7 +90,7 @@ router.get('/edit-diff/:id', auth.verifyToken, async function (req, res) {
       const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle, users.username 
                       FROM users INNER JOIN entries ON users.id=entries.user_id INNER JOIN units ON entries.unit_code=units.code 
                       WHERE entries.id=${entryId}`
-      var record = await db.promise().query(select);
+      var record = await db.query(select);
       if (record[0].length === 1) {
         v.removeTagsFromTitles(record);
         record[0][0].entry = filterEntry(record[0][0].entry, true);
@@ -130,15 +130,15 @@ router.post('/create', auth.verifyToken, async function (req, res) {
     const userId = req.userId;
 
     if (v.validTitle(title) && v.validUnitCode(unitCode) && Array.isArray(entry) && isValidEntry(entry) && typeof private === 'boolean') {
-      const unit = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+      const unit = await db.query(`SELECT * FROM units WHERE code='${unitCode}'`);
       if (unit[0].length === 1) {
         const stringEntry = JSON.stringify(filterEntry(entry));
         const newTitle = v.addTags(title);
         const insert = `INSERT INTO entries(title, entry, created, updated, user_id, unit_code, private, positive, negative) 
                       VALUES ('${newTitle}', '${stringEntry}', NOW(), NOW(), ${userId}, '${unitCode}', ${private}, 0 , 0);`;
-        await db.promise().query(insert);
+        await db.query(insert);
         const select = `SELECT id FROM entries WHERE title='${newTitle}' AND user_id=${userId} AND unit_code='${unitCode}';`;
-        const entryRecord = await db.promise().query(select);
+        const entryRecord = await db.query(select);
         res.status(200).json({ id: entryRecord[0][0].id });
       } else {
         res.status(400).json({ message: 'invalid unit' })
@@ -164,12 +164,12 @@ router.put('/update', auth.verifyToken, async function (req, res) {
     const { entry, entryId } = req.body;
     const userId = req.userId;
     if (Array.isArray(entry) && isValidEntry(entry) && v.validId(entryId)) {
-      const entryRecord = await db.promise().query(`SELECT id, user_id FROM entries WHERE id=${entryId}`)
+      const entryRecord = await db.query(`SELECT id, user_id FROM entries WHERE id=${entryId}`)
       if (entryRecord[0].length === 1) {
         if (entryRecord[0][0].user_id === userId) {
           const stringEntry = JSON.stringify(filterEntry(entry));
           const update = `UPDATE entries SET entry='${stringEntry}', updated=NOW() WHERE user_id=${userId} AND id=${entryId}`;
-          await db.promise().query(update);
+          await db.query(update);
           res.status(200).json({ message: "successfully updated entry" });
         } else {
           res.status(400).json({ message: 'invalid permissions' })
@@ -200,7 +200,7 @@ router.get('/edit/:id', auth.verifyToken, async function (req, res) {
     if (v.validId(entryId)) {
       const select = `SELECT entries.title, entries.entry, entries.unit_code, units.title As unitTitle FROM entries INNER JOIN units ON entries.unit_code=units.code 
                       WHERE id=${entryId} AND user_id=${userId}`
-      var record = await db.promise().query(select);
+      var record = await db.query(select);
       if (record[0].length === 1) {
         v.removeTagsFromTitles(record);
         record[0][0].entry = filterEntry(record[0][0].entry, true);
@@ -236,7 +236,7 @@ router.get('/:id/view', auth.verifyToken, async function (req, res) {
     const unitCode = req.params.id;
     const userId = req.userId;
     if (v.validUnitCode(unitCode)) {
-      const enrolments = await db.promise().query(`SELECT unit_code FROM enrolments WHERE user_id=${userId}`);
+      const enrolments = await db.query(`SELECT unit_code FROM enrolments WHERE user_id=${userId}`);
       if (enrolments[0].length > 0) {
         var hasEnrolled = false;
         for (var i = 0; i < enrolments[0].length; ++i) {
@@ -246,9 +246,9 @@ router.get('/:id/view', auth.verifyToken, async function (req, res) {
           }
         }
         if (hasEnrolled) {
-          const record = await db.promise().query(`SELECT * FROM units WHERE code='${unitCode}'`);
+          const record = await db.query(`SELECT * FROM units WHERE code='${unitCode}'`);
           if (record[0].length > 0) {
-            var entries = await db.promise().query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE entries.unit_code='${unitCode}' AND private=FALSE`);
+            var entries = await db.query(`SELECT entries.id, entries.title, entries.created, entries.updated, entries.positive, entries.negative, users.username FROM entries INNER JOIN users ON entries.user_id=users.id WHERE entries.unit_code='${unitCode}' AND private=FALSE`);
             v.removeTagsFromTitles(entries);
             res.status(200).json(entries[0]);
           } else {
@@ -280,9 +280,9 @@ router.get('/view/:id', auth.verifyToken, async function (req, res) {
       const select = `SELECT entries.title, entries.entry, entries.created, entries.updated, entries.unit_code, 
                       entries.positive, entries.negative, entries.private, users.username 
                       FROM entries INNER JOIN users ON users.id=entries.user_id WHERE entries.id=${req.params.id};`;
-      var record = await db.promise().query(select);
+      var record = await db.query(select);
       if (record[0].length === 1) {
-        const userRecord = await db.promise().query(`SELECT id FROM users WHERE username='${record[0][0].username}'`)
+        const userRecord = await db.query(`SELECT id FROM users WHERE username='${record[0][0].username}'`)
         if (record[0][0].private === 1 && userRecord[0][0].id !== userId) {
           res.status(400).json({ message: "resource does not exist" });
         } else {
@@ -325,16 +325,16 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
     const userId = req.userId;
     if (v.validContent(content) && v.validId(entryId)) {
       const select = `SELECT id FROM entries WHERE id=${entryId}`;
-      const entry = await db.promise().query(select);
+      const entry = await db.query(select);
       const newContent = v.addTags(content);
       if (v.validId(commentId)) {
         const select2 = `SELECT id, entry_id FROM replies WHERE id=${commentId}`;
-        const comment = await db.promise().query(select2);
+        const comment = await db.query(select2);
         if (comment[0].length === 1 && entry[0].length === 1) {
           if (comment[0][0].entry_id === entry[0][0].id) {
             const insert = `INSERT INTO replies(reply, replyTo, user_id, entry_id, created) 
                             VALUES ('${JSON.stringify({ "content": newContent })}', ${commentId}, ${userId}, ${entryId}, NOW());`
-            await db.promise().query(insert);
+            await db.query(insert);
             res.status(200).json({ message: "added reply" });
           } else {
             res.status(400).json({ message: "entry or comment does not exist" });
@@ -346,7 +346,7 @@ router.post('/add-reply', auth.verifyToken, async function (req, res) {
         if (entry[0].length === 1) {
           const insert = `INSERT INTO replies(reply, user_id, entry_id, created) 
                           VALUES ('${JSON.stringify({ "content": newContent })}', ${userId}, ${entryId}, NOW());`
-          await db.promise().query(insert);
+          await db.query(insert);
           res.status(200).json({ message: "added reply" });
         } else {
           res.status(400).json({ message: "entry does not exist" })
@@ -372,16 +372,16 @@ router.get('/view/:id/replies', auth.verifyToken, async function (req, res) {
     const entryId = req.params.id;
     const userId = req.userId;
     if (v.validId(+entryId)) {
-      const entry = await db.promise().query(`SELECT unit_code FROM entries WHERE id=${entryId}`);
+      const entry = await db.query(`SELECT unit_code FROM entries WHERE id=${entryId}`);
       if (entry[0].length === 1) {
-        const enrolled = await db.promise().query(`SELECT * FROM enrolments WHERE user_id=${userId} AND unit_code='${entry[0][0].unit_code}'`)
+        const enrolled = await db.query(`SELECT * FROM enrolments WHERE user_id=${userId} AND unit_code='${entry[0][0].unit_code}'`)
         if (enrolled[0].length === 1) {
           const select1 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
                            FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NULL`;
-          const comments = await db.promise().query(select1);
+          const comments = await db.query(select1);
           const select2 = `SELECT replies.id, replies.reply, replies.replyTo, replies.created, users.username 
                            FROM replies INNER JOIN users ON users.id=replies.user_id WHERE replies.entry_id=${entryId} AND replies.replyTo IS NOT NULL`;
-          const replies = await db.promise().query(select2);
+          const replies = await db.query(select2);
           res.status(200).json({ comments: comments[0], replies: replies[0] });
         } else {
           res.status(400).json({message: "not enrolled in unit"});
@@ -416,9 +416,9 @@ router.get('/public/:id', auth.verifyToken, async function (req, res) {
   try {
     const username = req.params.id;
     if (v.validUsername(username)) {
-      const user = await db.promise().query(`SELECT id FROM users WHERE username='${username}'`);
+      const user = await db.query(`SELECT id FROM users WHERE username='${username}'`);
       if (user[0].length > 0) {
-        var publicEntries = await db.promise().query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
+        var publicEntries = await db.query(`SELECT id, title, created, updated, unit_code, positive, negative FROM entries WHERE user_id=${user[0][0].id} AND private=FALSE`);
         v.removeTagsFromTitles(publicEntries)
         res.status(200).json(publicEntries[0]);
       } else {
@@ -444,7 +444,7 @@ router.get('/dashboard/:id', auth.verifyToken, async function (req, res) {
     const username = req.params.id;
     const userId = req.userId;
     if (v.validUsername(username)) {
-      const getId = await db.promise().query(`SELECT id FROM users WHERE username='${username}' AND id=${userId}`);
+      const getId = await db.query(`SELECT id FROM users WHERE username='${username}' AND id=${userId}`);
       if (getId[0].length > 0) {
         const select =
           `SELECT entries.id, entries.title, users.username, entries.created, entries.updated, units.title AS unit_title, units.code, entries.positive, entries.negative
@@ -452,7 +452,7 @@ router.get('/dashboard/:id', auth.verifyToken, async function (req, res) {
            INNER JOIN enrolments ON units.code=enrolments.unit_code
            INNER JOIN users ON enrolments.user_id=users.id
            WHERE enrolments.user_id=${userId};`
-        var result = await db.promise().query(select);
+        var result = await db.query(select);
         v.removeTagsFromTitles(result);
         res.status(200).json(result[0]);
       } else {
