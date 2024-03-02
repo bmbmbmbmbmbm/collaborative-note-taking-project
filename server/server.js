@@ -1,12 +1,14 @@
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
+require('dotenv').config();
+
 
 const store = new session.MemoryStore();
 const app = express();
 
 app.use(session({
-    secret: "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF",
+    secret: process.env.SECRET,
     cookie: { maxAge: 30000 },
     resave: true,
     saveUninitialized: true,
@@ -17,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-app.use((req, res, next) => {
+app.use((req, _, next) => {
     console.log(`${req.method}: ${req.url}`)
     next();
 })

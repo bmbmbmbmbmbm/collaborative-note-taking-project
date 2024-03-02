@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Row, Col } from 'react-bootstrap';
-import Reply from './Reply';
+import Reply from '../pages/Reply';
 
 export default function Commment({ id, postId, isThread, content, user, created, replies, depth }) {
     const myDepth = depth;
