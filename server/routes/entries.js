@@ -24,7 +24,7 @@ const router = Router()
   * @param {Number} entryId is required for identifying entry recieving suggestion
   *
 */
-router.post('/create-edit', verifyToken, async function (req, res) {
+router.post('/create-edit', verifyToken, async (req, res) => {
   try {
     const { entry, entryId } = req.body
     const userId = req.userId
@@ -61,7 +61,7 @@ router.post('/create-edit', verifyToken, async function (req, res) {
   * @param {Number} entryId is required for identifying entry to retrieve suggestions for
   *
 */
-router.get('/edit-suggestions/:id', verifyToken, async function (req, res) {
+router.get('/edit-suggestions/:id', verifyToken, async (req, res) => {
   try {
     const entryId = req.params.id
     if (validId(entryId)) {
@@ -87,7 +87,7 @@ router.get('/edit-suggestions/:id', verifyToken, async function (req, res) {
   * @param {Number} entryId is required for identifying entry to retrieve suggestions for
   *
 */
-router.get('/edit-diff/:id', verifyToken, async function (req, res) {
+router.get('/edit-diff/:id', verifyToken, async (req, res) => {
   try {
     const entryId = req.params.id
     if (validId(entryId)) {
@@ -127,7 +127,7 @@ router.get('/edit-diff/:id', verifyToken, async function (req, res) {
   * @param {boolean} private is required for knowing whether this should be a private entry
   *
 */
-router.post('/create', verifyToken, async function (req, res) {
+router.post('/create', verifyToken, async (req, res) => {
   try {
     const { title, entry, unitCode, isPrivate } = req.body
     const userId = req.userId
@@ -162,7 +162,7 @@ router.post('/create', verifyToken, async function (req, res) {
   * @param {JSON} entry is required for updating value of the original entry
   *
 */
-router.put('/update', verifyToken, async function (req, res) {
+router.put('/update', verifyToken, async (req, res) => {
   try {
     const { entry, entryId } = req.body
     const userId = req.userId
@@ -196,7 +196,7 @@ router.put('/update', verifyToken, async function (req, res) {
   * @param {Number} entryId is required for identifying entry to retrieve suggestions for
   *
 */
-router.get('/edit/:id', verifyToken, async function (req, res) {
+router.get('/edit/:id', verifyToken, async (req, res) => {
   try {
     const userId = req.userId
     const entryId = req.params.id
@@ -233,7 +233,7 @@ router.get('/edit/:id', verifyToken, async function (req, res) {
   * @param {string} unitCode is required for identifying which entries to retrieve
   *
 */
-router.get('/:id/view', verifyToken, async function (req, res) {
+router.get('/:id/view', verifyToken, async (req, res) => {
   try {
     const unitCode = req.params.id
     const userId = req.userId
@@ -275,7 +275,7 @@ router.get('/:id/view', verifyToken, async function (req, res) {
   * @param {number} entryId is required for identifying which entries to retrieve
   *
 */
-router.get('/view/:id', verifyToken, async function (req, res) {
+router.get('/view/:id', verifyToken, async (req, res) => {
   try {
     const userId = req.userId
     if (validId(req.params.id)) {
@@ -319,7 +319,7 @@ router.get('/view/:id', verifyToken, async function (req, res) {
   * @param {number} commentId the comment to add the reply to
   *
 */
-router.post('/add-reply', verifyToken, async function (req, res) {
+router.post('/add-reply', verifyToken, async (req, res) => {
   try {
     const { content, entryId, commentId } = req.body
     const userId = req.userId
@@ -367,7 +367,7 @@ router.post('/add-reply', verifyToken, async function (req, res) {
   * @param {number} entryId the id of the entry to retrieve the comments of
   *
 */
-router.get('/view/:id/replies', verifyToken, async function (req, res) {
+router.get('/view/:id/replies', verifyToken, async (req, res) => {
   try {
     const entryId = req.params.id
     const userId = req.userId
@@ -411,7 +411,7 @@ router.get('/view/:id/replies', verifyToken, async function (req, res) {
   * @param {string} username the user to retrieve the public entries of
   *
 */
-router.get('/public/:id', verifyToken, async function (req, res) {
+router.get('/public/:id', verifyToken, async (req, res) => {
   try {
     const username = req.params.id
     if (validUsername(username)) {
@@ -438,7 +438,7 @@ router.get('/public/:id', verifyToken, async function (req, res) {
   * @param {string} username the user to retrieve the public entries of
   *
 */
-router.get('/dashboard/:id', verifyToken, async function (req, res) {
+router.get('/dashboard/:id', verifyToken, async (req, res) => {
   try {
     const username = req.params.id
     const userId = req.userId
@@ -470,7 +470,7 @@ router.get('/dashboard/:id', verifyToken, async function (req, res) {
   * Not functional
   *
 */
-router.delete('/delete/:id', verifyToken, async function (req, res) {
+router.delete('/delete/:id', verifyToken, async (req, res) => {
   try {
 
   } catch (err) {

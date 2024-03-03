@@ -4,7 +4,7 @@ import { changePassword, removeAccount } from '../services/account-service.js'
 
 const router = Router()
 
-router.put('/change-password', verifyToken, async function (req, res) {
+router.put('/change-password', verifyToken, async (req, res) => {
     try {
         changePassword(req.userId, req.body)
         res.status(200)
@@ -14,7 +14,7 @@ router.put('/change-password', verifyToken, async function (req, res) {
     }
 })
 
-router.post('/delete', verifyToken, async function (req, res) {
+router.post('/delete', verifyToken, async (req, res) => {
     try {
         removeAccount(req.body)
         res.status(200)

@@ -5,7 +5,7 @@ import { enrol, getSubject, getUnits } from '../services/subject-service.js'
 
 const router = Router()
 
-router.post('/enrol', verifyToken, async function (req, res) {
+router.post('/enrol', verifyToken, async (req, res) => {
     try {
         enrol(req)
         res.status(200)
@@ -15,7 +15,7 @@ router.post('/enrol', verifyToken, async function (req, res) {
     }
 })
 
-router.get('/get-units/:id', verifyToken, async function (req, res) {
+router.get('/get-units/:id', verifyToken, async (req, res) => {
     try {
         const units = await getUnits(req)
         res.status(200).json(units)
@@ -25,7 +25,7 @@ router.get('/get-units/:id', verifyToken, async function (req, res) {
     }
 })
 
-router.get('/get-subject/:id', verifyToken, async function (req, res) {
+router.get('/get-subject/:id', verifyToken, async (req, res) => {
     try {
         const subject = await getSubject(req)
         res.status(200).json(subject)
@@ -35,7 +35,7 @@ router.get('/get-subject/:id', verifyToken, async function (req, res) {
     }
 })
 
-router.get('/:id', verifyToken, async function (req, res) {
+router.get('/:id', verifyToken, async (req, res) => {
     try {
         const units = await getUnits(req)
         res.status(200).json(units)
@@ -45,7 +45,7 @@ router.get('/:id', verifyToken, async function (req, res) {
     }
 })
 
-router.get('/', async function (_, res) {
+router.get('/', async (_, res) => {
     try {
         const results = await query('SELECT * FROM subjects')
         res.status(200).json(results[0])

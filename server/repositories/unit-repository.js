@@ -9,6 +9,12 @@ async function getUserUnits (userId) {
     `)
 }
 
+async function getUnitsByCode (unitCode) {
+    const units = await query(`SELECT code FROM units WHERE code='${unitCode}'`)
+    return units[0]
+}
+
 export {
-    getUserUnits
+    getUserUnits,
+    getUnitsByCode
 }

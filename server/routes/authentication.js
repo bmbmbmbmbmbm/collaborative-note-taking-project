@@ -3,7 +3,7 @@ import { login, register } from '../services/authentication-service.js'
 
 const router = Router()
 
-router.post('/login', async function (req, res) {
+router.post('/login', async (req, res) => {
     try {
         const body = await login(req.body)
         res.status(200).json(body)
@@ -13,7 +13,7 @@ router.post('/login', async function (req, res) {
     }
 })
 
-router.post('/register', async function (req, res) {
+router.post('/register', async (req, res) => {
     try {
         const { user, token } = register(req.body)
         req.session.user = user

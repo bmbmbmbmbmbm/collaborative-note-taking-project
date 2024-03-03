@@ -7,7 +7,7 @@ const service = 'account-service'
 
 async function setPassword (email, password) {
     let hashed
-    _hash(password, 10, async function (err, hash) {
+    _hash(password, 10, async (err, hash) => {
         if (err) {
             throw new Error(`${service}::setPassword() ${err}`)
         }

@@ -2,85 +2,34 @@ import { Router } from 'express'
 import { query as _query } from '../repositories/database.js'
 import verifyToken from '../verify.js'
 import {
-    validTitle, validUnitCode, validContent,
-    addTags, validId, validUsername,
+    validUnitCode, validId, validUsername,
     removeTagsFromTitles, removeTags, removeTagsFromComments
 } from '../validation.js'
+import { createThread, reply } from '../services/thread-service.js'
 
 const router = Router()
 
-router.post('/create', verifyToken, async function (req, res) {
+router.post('/create', verifyToken, async (req, res) => {
     try {
-        const { title, unitCode, content } = req.body
-        const userId = req.userId
-        if (validTitle(title) && validUnitCode(unitCode) && validContent(content)) {
-            const unit = await _query(`SELECT code FROM units WHERE code='${unitCode}'`)
-            if (unit[0].length === 1) {
-                const newTitle = addTags(title)
-                const insert = `INSERT INTO threads(title, thread, created, last_reply, user_id, unit_code, positive, negative) 
-                                VALUES ('${newTitle}', '${JSON.stringify({ content: addTags(content) })}', NOW(), NOW(), ${userId}, '${unitCode}', 0 , 0)`
-                await _query(insert)
-                const id = await _query(`SELECT id FROM threads WHERE title='${newTitle}' AND user_id=${userId} ORDER BY created DESC`)
-                if (id[0].length > 0) {
-                    res.status(200).json({ id: id[0][id[0].length - 1].id })
-                } else {
-                    res.status(400).json({ message: 'failed to create thread' })
-                }
-            } else {
-                res.status(400).json({ message: 'invalid unit' })
-            }
-        } else {
-            res.status(400).json({ message: 'invalid thread details' })
-        }
+        createThread(req)
+        res.status(200)
     } catch (err) {
         console.trace(err)
-        res.status(400).json({ message: 'server error' })
+        res.status(400)
     }
 })
 
-router.post('/add-reply', verifyToken, async function (req, res) {
+router.post('/add-reply', verifyToken, async (req, res) => {
     try {
-        const { content, threadId, commentId } = req.body
-        const userId = req.userId
-        if (validContent(content) && validId(threadId)) {
-            const select = `SELECT id FROM threads WHERE id=${threadId}`
-            const thread = await _query(select)
-            const newContent = addTags(content)
-            if (validId(commentId)) {
-                const select2 = `SELECT id, thread_id FROM replies WHERE id=${commentId}`
-                const comment = await _query(select2)
-                if (comment[0].length === 1 && thread[0].length === 1) {
-                    if (comment[0][0].thread_id === thread[0][0].id) {
-                        const insert = `INSERT INTO replies(reply, replyTo, user_id, thread_id, created) 
-                                        VALUES ('${JSON.stringify({ content: newContent })}', ${commentId}, ${userId}, ${threadId}, NOW());`
-                        await _query(insert)
-                        res.status(200).json({ message: 'added reply' })
-                    } else {
-                        res.status(400).json({ message: 'thread or comment does not exist' })
-                    }
-                } else {
-                    res.status(400).json({ message: 'thread or comment does not exist' })
-                }
-            } else {
-                if (thread[0].length === 1) {
-                    const insert = `INSERT INTO replies(reply, user_id, thread_id, created) 
-                                    VALUES ('${JSON.stringify({ content: newContent })}', ${userId}, ${threadId}, NOW());`
-                    await _query(insert)
-                    res.status(200).json({ message: 'added reply' })
-                } else {
-                    res.status(400).json({ message: 'thread does not exist' })
-                }
-            }
-        } else {
-            res.status(400).json({ message: 'thread or comment does not exist' })
-        }
+        await reply(req)
+        res.status(200)
     } catch (err) {
         console.trace(err)
-        res.status(400).json({ message: 'server error' })
+        res.status(400)
     }
 })
 
-router.get('/dashboard/:id', verifyToken, async function (req, res) {
+router.get('/dashboard/:id', verifyToken, async (req, res) => {
     try {
         const user = req.params.id
         if (validUsername(user)) {
@@ -103,7 +52,7 @@ router.get('/dashboard/:id', verifyToken, async function (req, res) {
     }
 })
 
-router.get('/:id/view', verifyToken, async function (req, res) {
+router.get('/:id/view', verifyToken, async (req, res) => {
     try {
         const unitCode = req.params.id
         const userId = req.userId
@@ -140,7 +89,7 @@ router.get('/:id/view', verifyToken, async function (req, res) {
     }
 })
 
-router.get('/view/:id', verifyToken, async function (req, res) {
+router.get('/view/:id', verifyToken, async (req, res) => {
     try {
         const userId = req.userId
         if (validId(req.params.id)) {
@@ -175,7 +124,7 @@ router.get('/view/:id', verifyToken, async function (req, res) {
     }
 })
 
-router.get('/view/:id/replies', verifyToken, async function (req, res) {
+router.get('/view/:id/replies', verifyToken, async (req, res) => {
     try {
         const threadId = req.params.id
         const userId = req.userId
