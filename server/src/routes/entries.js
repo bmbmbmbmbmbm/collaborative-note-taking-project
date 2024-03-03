@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { query } from '../repositories/database.js'
+import { query } from '../data/database.js'
 import verifyToken from '../verify.js'
 import {
   validId, removeTagsFromTitles, validTitle,

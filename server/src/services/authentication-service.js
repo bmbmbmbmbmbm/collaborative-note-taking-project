@@ -1,9 +1,9 @@
 import JWT from 'jsonwebtoken'
 import { validEmail, validPassword, validId } from '../validation.js'
-import { execute } from '../repositories/database.js'
-import { getUserByEmail, getUsers, addUser } from '../repositories/user-repository.js'
+import { execute } from '../data/database.js'
+import { getUserByEmail, getUsers, addUser } from '../data/user-repository.js'
 import { compareHash, createHash } from '../helpers/password-helper.js'
-import { getSubject } from '../repositories/subject-repository.js'
+import { getSubject } from '../data/subject-repository.js'
 import env from 'dotenv'
 
 env.config()

@@ -1,7 +1,7 @@
 import { hash as _hash, compare } from 'bcrypt'
-import { query } from '../repositories/database.js'
+import { query } from '../data/database.js'
 import { validEmail, validPassword } from '../validation.js'
-import { getUserByEmail, removeUser } from '../repositories/user-repository.js'
+import { getUserByEmail, removeUser } from '../data/user-repository.js'
 
 const service = 'account-service'
 

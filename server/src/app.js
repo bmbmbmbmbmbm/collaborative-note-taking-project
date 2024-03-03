@@ -3,7 +3,6 @@ import session, { MemoryStore } from 'express-session'
 import cors from 'cors'
 import env from 'dotenv'
 
-// Defining routes in the server
 import authentication from './routes/authentication.js'
 import entries from './routes/entries.js'
 import threads from './routes/threads.js'
@@ -38,4 +37,4 @@ app.use('/threads', threads)
 app.use('/subject', subject)
 app.use('/account', account)
 
-export default app.listen(5000, () => { console.log('localhost:5000') })
+export default app

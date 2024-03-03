@@ -1,7 +1,7 @@
-import { getUnitsByCode } from '../repositories/unit-repository.js'
+import { getUnitsByCode } from '../data/unit-repository.js'
 import { validTitle, validUnitCode, validContent, validId } from '../validation.js'
-import { createThread as addThread, getThreadById } from '../repositories/thread-repository.js'
-import { addReplyToComment, addReplyToThread, getComment } from '../repositories/thread-replies-repository.js'
+import { createThread as addThread, getThreadById } from '../data/thread-repository.js'
+import { addReplyToComment, addReplyToThread, getComment } from '../data/thread-replies-repository.js'
 
 const service = 'thread-service'
 

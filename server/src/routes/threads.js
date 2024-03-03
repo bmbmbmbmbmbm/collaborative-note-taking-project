@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { query as _query } from '../repositories/database.js'
+import { query as _query } from '../data/database.js'
 import verifyToken from '../verify.js'
 import {
     validUnitCode, validId, validUsername,

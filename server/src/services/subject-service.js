@@ -1,7 +1,7 @@
-import { deleteUserEnrolments, enrolUser } from '../repositories/enrolment-repository.js'
-import { getUserUnits } from '../repositories/unit-repository.js'
-import { getUserByName } from '../repositories/user-repository.js'
-import { getSubject as getSubjectById } from '../repositories/subject-repository.js'
+import { deleteUserEnrolments, enrolUser } from '../data/enrolment-repository.js'
+import { getUserUnits } from '../data/unit-repository.js'
+import { getUserByName } from '../data/user-repository.js'
+import { getSubject as getSubjectById } from '../data/subject-repository.js'
 import { validUnitCode, validUsername } from '../validation.js'
 
 const service = 'subject-service'
