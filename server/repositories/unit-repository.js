@@ -1,4 +1,4 @@
-import { query } from './database'
+import { query } from './database.js'
 
 async function getUnits (userId) {
     return await query(`

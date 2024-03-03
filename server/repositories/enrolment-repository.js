@@ -1,4 +1,4 @@
-import { execute } from './database'
+import { execute } from './database.js'
 
 async function deleteUserEnrolments (userId) {
     await execute(`DELETE FROM enrolments WHERE user_id='${userId}'`)

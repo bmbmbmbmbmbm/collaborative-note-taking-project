@@ -1,12 +1,15 @@
 import { hash as _hash, compare } from 'bcrypt'
 import { query } from '../repositories/database.js'
 import { validEmail, validPassword } from '../validation.js'
+import { getUser, removeUser } from '../repositories/user-repository.js'
+
+const service = 'account-service'
 
 async function setPassword (email, password) {
     let hashed
     _hash(password, 10, async function (err, hash) {
         if (err) {
-            throw new Error(err)
+            throw new Error(`${service}::setPassword() ${err}`)
         }
         hashed = hash
     })
@@ -20,7 +23,7 @@ async function passwordCheck (userId, email, password) {
             throw new Error(err)
         }
         if (!result) {
-            throw new Error(`Attempt to change password for ${email} failed. Passwords did not match during crypt comparison.`)
+            throw new Error(`${service}::passwordCheck() ${email} invalid credentials`)
         }
     })
 }
@@ -31,13 +34,26 @@ async function changePassword (userId, { email, oldPassword, newPassword, confir
         !validPassword(oldPassword) ||
         !validPassword(newPassword) ||
         !validPassword(confirmPassword)) {
-        throw new Error(`Attempt to change password for ${email} failed initial checks.`)
+        throw new Error(`${service}::changePassword() ${email} invalid credentials`)
     }
 
     passwordCheck(userId, email, oldPassword)
     setPassword(email, newPassword)
 }
 
+async function removeAccount ({ email, password }) {
+    if (!validEmail(email, '@bath.ac.uk') || !validPassword(password)) {
+        throw new Error(`${service}::removeAccount() ${email} invalid credentials`)
+    }
+    const user = await getUser(email)
+    const match = await passwordCheck(user.id, user.email, user.password)
+    if (!match) {
+        throw new Error(`${service}::removeAccount() ${email} passwords did not match`)
+    }
+    await removeUser(email)
+}
+
 export {
-    changePassword
+    changePassword,
+    removeAccount
 }

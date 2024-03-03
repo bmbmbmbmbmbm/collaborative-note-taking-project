@@ -16,8 +16,13 @@ async function addUser (email, password, subjectId) {
     `)
 }
 
+async function removeUser (email) {
+    return await execute(`UPDATE users SET toRemove=TRUE WHERE email='${email}';`)
+}
+
 export {
     getUser,
     getUsers,
-    addUser
+    addUser,
+    removeUser
 }
