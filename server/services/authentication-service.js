@@ -1,13 +1,16 @@
-const v = require("../validation")
-const jwt = require("jsonwebtoken")
-const { execute } = require("../database")
-const { getUser, getUsers, addUser } = require("../repositories/user-repository")
-const { compareHash, createHash } = require("../helpers/password-helper")
-const { getSubject } = require("../repositories/subject-repository")
-require("dotenv").config()
+import JWT from "jsonwebtoken"
+import { validEmail, validPassword, validId } from "../validation.js"
+import { execute } from "../repositories/database.js"
+import { getUser, getUsers, addUser } from "../repositories/user-repository.js"
+import { compareHash, createHash } from "../helpers/password-helper.js"
+import { getSubject } from "../repositories/subject-repository.js"
+import env from 'dotenv'
+
+env.config()
+const sign = JWT.sign
 
 async function login({ email, password }) {
-    if (!v.validEmail(email, "@bath.ac.uk") || !v.validPassword(password)) {
+    if (!validEmail(email, "@bath.ac.uk") || !validPassword(password)) {
         throw new Error(`authentication-service: user credentials invalid - ${email}`)
     }
 
@@ -22,7 +25,7 @@ async function login({ email, password }) {
     console.trace(`authentication-service: successful login - ${email}`)
 
     return {
-        token: jwt.sign({
+        token: sign({
             id: user.id,
             username: user.username
         }, process.env.SECRET)
@@ -30,7 +33,7 @@ async function login({ email, password }) {
 }
 
 async function register({ email, password, subject_id }) {
-    if (!v.validEmail(email, "@bath.ac.uk") || !v.validPassword(password) || !v.validId(subject_id)) {
+    if (!validEmail(email, "@bath.ac.uk") || !validPassword(password) || !validId(subject_id)) {
         throw new Error("Credentials invalid")
     }
 
@@ -45,7 +48,7 @@ async function register({ email, password, subject_id }) {
 
     await addUser(email, hashed, subject.id)
     const user = await getUser(email)
-    const token = jwt.sign({ 
+    const token = sign({ 
         id: user.id, 
         username: user.username 
     }, process.env.SECRET)
@@ -53,7 +56,7 @@ async function register({ email, password, subject_id }) {
     return { user, token }
 }
 
-module.exports = {
+export {
     login,
     register
 }

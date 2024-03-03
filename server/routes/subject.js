@@ -1,9 +1,9 @@
-const express = require('express');
-const db = require('../database');
-const auth = require('../verify');
-const v = require('../validation');
+import { Router } from 'express';
+import { query } from '../repositories/database.js';
+import verifyToken from '../verify.js';
+import { validUnitCode, validUsername } from '../validation.js';
 
-const router = express.Router();
+const router = Router();
 
 // Used to check what units to enrol and un-enrol. Both inputs should be JSON.
 function exclusiveTo(A, B) {
@@ -39,12 +39,12 @@ function validateUnits(units) {
     units.forEach(function (unit) {
         if (!unit.hasOwnProperty('title') || !unit.hasOwnProperty('code')) valid = false;
         else if (typeof unit.title !== 'string' || typeof unit.code !== 'string') valid = false;
-        else if (!v.validUnitCode(unit.code))  valid = false;
+        else if (!validUnitCode(unit.code))  valid = false;
     })
     return valid;
 }
 
-router.post('/enrol', auth.verifyToken, async function (req, res) {
+router.post('/enrol', verifyToken, async function (req, res) {
     try {
         const { units } = req.body;
         const userId = req.userId;
@@ -52,7 +52,7 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
             const select = `SELECT units.code, units.title, users.subject_id 
                             FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code INNER JOIN users ON enrolments.user_id=users.id 
                             WHERE enrolments.user_id=${userId}`;
-            const currentUnits = await db.query(select)
+            const currentUnits = await query(select)
 
             // Do all units exist?
             var select2 = `SELECT code FROM units WHERE `
@@ -63,7 +63,7 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
                     select2 += `code='${units[i].code}' OR `
                 }
             }
-            const unitList = await db.query(select2);
+            const unitList = await query(select2);
 
             // If so, the list should be the same length;
             if (unitList[0].length === units.length) {
@@ -78,7 +78,7 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
                             insert += ` ('${toAdd[i].code}', ${userId}),`;
                         }
                     }
-                    await db.query(insert);
+                    await query(insert);
                 }
 
                 if (toRemove.length > 0) {
@@ -90,7 +90,7 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
                             del += `unit_code='${toRemove[i].code}' OR `
                         }
                     }
-                    await db.query(del);
+                    await query(del);
                 }
 
                 res.status(200).json({ message: 'enrolled' });
@@ -106,15 +106,15 @@ router.post('/enrol', auth.verifyToken, async function (req, res) {
     }
 });
 
-router.get('/get-units/:id', auth.verifyToken, async function (req, res) {
+router.get('/get-units/:id', verifyToken, async function (req, res) {
     try {
         const username = req.params.id;
-        if (v.validUsername(username)) {
-            const user = await db.query(`SELECT * FROM users WHERE username='${username}'`);
+        if (validUsername(username)) {
+            const user = await query(`SELECT * FROM users WHERE username='${username}'`);
             if (user[0].length > 0) {
                 const select = `SELECT units.code, units.title FROM units INNER JOIN enrolments ON units.code=enrolments.unit_code
                                 INNER JOIN users ON users.id=enrolments.user_id WHERE users.username='${username}';`;
-                const result = await db.query(select);
+                const result = await query(select);
                 res.status(200).json(result[0]);
             } else {
                 res.status(400).json({ message: 'invalid credentials' });
@@ -129,13 +129,13 @@ router.get('/get-units/:id', auth.verifyToken, async function (req, res) {
     }
 })
 
-router.get('/get-subject/:id', auth.verifyToken, async function (req, res) {
+router.get('/get-subject/:id', verifyToken, async function (req, res) {
     try {
         const username = req.params.id;
-        if (v.validUsername(username)) {
-            const user = await db.query(`SELECT subject_id FROM users WHERE username='${username}'`);
+        if (validUsername(username)) {
+            const user = await query(`SELECT subject_id FROM users WHERE username='${username}'`);
             if (user[0].length > 0) {
-                const record = await db.query(`SELECT title FROM subjects WHERE id=${user[0][0].subject_id}`)
+                const record = await query(`SELECT title FROM subjects WHERE id=${user[0][0].subject_id}`)
                 res.status(200).json(record[0][0]);
             } else {
                 res.status(400).json({ message: "invalid credentials" });
@@ -149,11 +149,11 @@ router.get('/get-subject/:id', auth.verifyToken, async function (req, res) {
     }
 });
 
-router.get('/titleof/:id', auth.verifyToken, async function (req, res) {
+router.get('/titleof/:id', verifyToken, async function (req, res) {
     try {
         const code = req.params.id;
-        if (v.validUnitCode(code)) {
-            const title = await db.query(`SELECT title FROM units WHERE code='${code}'`);
+        if (validUnitCode(code)) {
+            const title = await query(`SELECT title FROM units WHERE code='${code}'`);
             if (title[0].length === 1) {
                 res.status(200).json(title[0][0]);
             } else {
@@ -168,17 +168,17 @@ router.get('/titleof/:id', auth.verifyToken, async function (req, res) {
     }
 });
 
-router.get('/:id', auth.verifyToken, async function (req, res) {
+router.get('/:id', verifyToken, async function (req, res) {
     try {
         const user = req.params.id;
-        if (v.validUsername(user)) {
+        if (validUsername(user)) {
             const select1 = `SELECT subjects.title FROM subjects INNER JOIN users ON users.subject_id=subjects.id WHERE users.username='${user}'`;
-            const subject = await db.query(select1);
+            const subject = await query(select1);
             const select2 = `SELECT units.code, units.title FROM units INNER JOIN subject_unit 
                         ON units.code=subject_unit.unit_code 
                         INNER JOIN subjects ON subject_unit.subject_id=subjects.id 
                         WHERE subjects.title='${subject[0][0].title}';`
-            const results = await db.query(select2);
+            const results = await query(select2);
             res.status(200).json(results[0]);
         } else {
             res.status(400).json({ message: "invalid credentials" });
@@ -191,7 +191,7 @@ router.get('/:id', auth.verifyToken, async function (req, res) {
 
 router.get('/', async function (req, res) {
     try {
-        const results = await db.query(`SELECT * FROM subjects`);
+        const results = await query(`SELECT * FROM subjects`);
         res.status(200).json(results[0]);
     } catch (err) {
         console.log(err);
@@ -199,4 +199,4 @@ router.get('/', async function (req, res) {
     }
 })
 
-module.exports = router;
+export default router;

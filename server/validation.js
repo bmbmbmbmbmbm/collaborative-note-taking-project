@@ -132,7 +132,7 @@ function validUnitCode(string) {
   return containsCapAlphanumeric(string) && !containsSpecial(string) && string.length > 6 && string.length < 9;
 }
 
-module.exports = {
+export {
   addTags,
   removeTags,
   containsSpecial,

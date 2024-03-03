@@ -1,21 +1,21 @@
-const bcrypt = require("bcrypt");
-const db = require("../database");
-const v = require("../validation");
+import { hash as _hash, compare } from "bcrypt";
+import { query } from "../repositories/database.js";
+import { validEmail, validPassword } from "../validation.js";
 
 async function setPassword(email, password) {
     let hashed;
-    bcrypt.hash(password, 10, async function (err, hash) {
+    _hash(password, 10, async function (err, hash) {
         if (err) {
             throw new Error(err);
         }
         hashed = hash;
     })
-    await db.query(`UPDATE users SET password='${hashed}' WHERE email='${email}'`)
+    await query(`UPDATE users SET password='${hashed}' WHERE email='${email}'`)
 }
 
 async function passwordCheck(userId, email, password) {
-    const [results,] = await db.query(`SELECT * FROM users WHERE email='${email}' AND id=${userId}`)
-    bcrypt.compare(password, results[0].password, async (err, result) => {
+    const [results,] = await query(`SELECT * FROM users WHERE email='${email}' AND id=${userId}`)
+    compare(password, results[0].password, async (err, result) => {
         if (err) {
             throw new Error(err)
         }
@@ -27,10 +27,10 @@ async function passwordCheck(userId, email, password) {
 
 async function changePassword(userId, { email, oldPassword, newPassword, confirmPassword }) {
     if (newPassword !== confirmPassword ||
-        !v.validEmail(email, "@bath.ac.uk") ||
-        !v.validPassword(oldPassword) ||
-        !v.validPassword(newPassword) ||
-        !v.validPassword(confirmPassword)) {
+        !validEmail(email, "@bath.ac.uk") ||
+        !validPassword(oldPassword) ||
+        !validPassword(newPassword) ||
+        !validPassword(confirmPassword)) {
         throw new Error(`Attempt to change password for ${email} failed initial checks.`)
     }
 
@@ -38,6 +38,6 @@ async function changePassword(userId, { email, oldPassword, newPassword, confirm
     setPassword(email, newPassword)
 }
 
-module.exports = {
+export {
     changePassword
 }

@@ -1,9 +1,11 @@
-const express = require('express');
-const session = require('express-session');
-const cors = require('cors');
-require('dotenv').config();
+import express, { json, urlencoded } from 'express';
+import session, { MemoryStore } from 'express-session';
+import cors from 'cors';
+import env from 'dotenv';
 
-const store = new session.MemoryStore();
+env.config()
+
+const store = new MemoryStore();
 const app = express();
 
 app.use(session({
@@ -14,8 +16,8 @@ app.use(session({
     store
 }))
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(json());
+app.use(urlencoded({ extended: true }));
 app.use(cors());
 
 app.use((req, _, next) => {
@@ -24,11 +26,11 @@ app.use((req, _, next) => {
 })
 
 // Defining routes in the server
-const authentication = require('./routes/authentication');
-const entries = require('./routes/entries');
-const threads = require('./routes/threads');
-const subject = require('./routes/subject');
-const account = require('./routes/account');
+import authentication from './routes/authentication.js';
+import entries from './routes/entries.js';
+import threads from './routes/threads.js';
+import subject from './routes/subject.js';
+import account from './routes/account.js';
 
 app.use('/authentication', authentication);
 app.use('/entry', entries);
@@ -36,4 +38,4 @@ app.use('/threads', threads);
 app.use('/subject', subject);
 app.use('/account', account);
  
-module.exports = app.listen(5000, () => { console.log("localhost:5000") });
+export default app.listen(5000, () => { console.log("localhost:5000") });

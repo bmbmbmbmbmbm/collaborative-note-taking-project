@@ -1,4 +1,5 @@
-const jwt = require("jsonwebtoken");
+import JWT from "jsonwebtoken";
+const verify = JWT.verify
 
 async function verifyToken(req, res, next) {
     const token = req.headers["authorization"];
@@ -6,7 +7,7 @@ async function verifyToken(req, res, next) {
     if (!token) {
         res.status(400).json({ message: "invalid credentials" });
     } else {
-        jwt.verify(token, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF",
+        verify(token, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF",
             function (err, decoded) {
                 if (err) {
 
@@ -20,6 +21,4 @@ async function verifyToken(req, res, next) {
     }
 }
 
-module.exports = {
-    verifyToken: verifyToken
-}
+export default verifyToken

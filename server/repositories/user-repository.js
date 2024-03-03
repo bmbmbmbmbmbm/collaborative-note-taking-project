@@ -1,4 +1,4 @@
-const { query, execute } = require('../database')
+import { query, execute } from './database.js'
 
 async function getUser(email) {
     const results = await query(`SELECT * FROM users WHERE email='${email}'`)
@@ -16,7 +16,7 @@ async function addUser(email, password, subjectId) {
     `)
 }
 
-module.exports = {
+export {
     getUser,
     getUsers,
     addUser

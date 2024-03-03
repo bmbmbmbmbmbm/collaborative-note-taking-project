@@ -1,7 +1,8 @@
-const express = require("express");
-const auth = require("../verify");
-const { login, register } = require("../services/authentication-service")
-const router = express.Router();
+import { Router } from "express";
+import verifyToken from "../verify.js";
+import { login, register } from "../services/authentication-service.js";
+
+const router = Router();
 
 router.post("/login", async function (req, res) {
     try {
@@ -25,7 +26,7 @@ router.post('/register', async function (req, res) {
 
 })
 
-router.get("/logout", auth.verifyToken, async function (req, res) {
+router.get("/logout", verifyToken, async function (req, res) {
     try {
         const userId = req.userId;
         const sessionRec = await db.query(`SELECT * FROM session WHERE user_id=${userId} AND end IS NULL`);
@@ -41,4 +42,4 @@ router.get("/logout", auth.verifyToken, async function (req, res) {
     }
 });
 
-module.exports = router;
+export default router;
