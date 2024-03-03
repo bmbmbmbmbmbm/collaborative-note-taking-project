@@ -3,7 +3,6 @@ const session = require('express-session');
 const cors = require('cors');
 require('dotenv').config();
 
-
 const store = new session.MemoryStore();
 const app = express();
 

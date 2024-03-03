@@ -19,7 +19,7 @@ router.post("/login", async function (req, res) {
                         console.log(err)
                         res.status(500).json({message: "server error"});
                     } else {
-                        if (result === true) {
+                        if (result) {
                             const id = record[0][0].id;
                             const username = record[0][0].username;
                             const token = jwt.sign({ id, username }, "aISxTgwXv6COzRBj4xK34NVvhe7PTqBjP7Tfh0ORcHTxuaAPWRtw2nCZCruQPq4NyxqMcIhPG1Nyq6skY4RXCkPrXQOkvcwEBxuD008mZlkCF4QXT38QqPpFHiQOSDGF")
