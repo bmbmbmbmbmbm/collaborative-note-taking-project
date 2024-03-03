@@ -1,20 +1,20 @@
-import { hash as _hash, compare } from "bcrypt";
-import { query } from "../repositories/database.js";
-import { validEmail, validPassword } from "../validation.js";
+import { hash as _hash, compare } from 'bcrypt'
+import { query } from '../repositories/database.js'
+import { validEmail, validPassword } from '../validation.js'
 
-async function setPassword(email, password) {
-    let hashed;
+async function setPassword (email, password) {
+    let hashed
     _hash(password, 10, async function (err, hash) {
         if (err) {
-            throw new Error(err);
+            throw new Error(err)
         }
-        hashed = hash;
+        hashed = hash
     })
     await query(`UPDATE users SET password='${hashed}' WHERE email='${email}'`)
 }
 
-async function passwordCheck(userId, email, password) {
-    const [results,] = await query(`SELECT * FROM users WHERE email='${email}' AND id=${userId}`)
+async function passwordCheck (userId, email, password) {
+    const [results] = await query(`SELECT * FROM users WHERE email='${email}' AND id=${userId}`)
     compare(password, results[0].password, async (err, result) => {
         if (err) {
             throw new Error(err)
@@ -25,9 +25,9 @@ async function passwordCheck(userId, email, password) {
     })
 }
 
-async function changePassword(userId, { email, oldPassword, newPassword, confirmPassword }) {
+async function changePassword (userId, { email, oldPassword, newPassword, confirmPassword }) {
     if (newPassword !== confirmPassword ||
-        !validEmail(email, "@bath.ac.uk") ||
+        !validEmail(email, '@bath.ac.uk') ||
         !validPassword(oldPassword) ||
         !validPassword(newPassword) ||
         !validPassword(confirmPassword)) {

@@ -13,20 +13,20 @@ const pool = mysql.createPool({
     enableKeepAlive: true
 })
 
-async function query(statement) {
+async function query (statement) {
     try {
-        const [result, _] = await pool.query(statement)
+        const [result] = await pool.query(statement)
         return result
-    } catch(e) {
+    } catch (e) {
         console.error(e)
     }
 }
 
-async function execute(statement) {
+async function execute (statement) {
     try {
-        const [result, _] = await pool.execute(statement)
+        const [result] = await pool.execute(statement)
         return result
-    } catch(e) {
+    } catch (e) {
         console.error(e)
     }
 }

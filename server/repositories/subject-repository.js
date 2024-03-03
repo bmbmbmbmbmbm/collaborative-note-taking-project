@@ -1,7 +1,7 @@
-import { query } from "./database.js";
+import { query } from './database.js'
 
-async function getSubject(id) {
-    const results = await query(`SELECT id FROM subjects WHERE id=${id}`);
+async function getSubject (id) {
+    const results = await query(`SELECT id FROM subjects WHERE id=${id}`)
     return results[0]
 }
 
