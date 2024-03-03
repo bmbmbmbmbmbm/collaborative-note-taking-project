@@ -7,7 +7,8 @@
   "scripts": {
     "test": "mocha tests",
     "start": "node server",
-    "dev": "nodemon server"
+    "dev": "nodemon server",
+    "lint": "eslint"
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +26,11 @@
   "devDependencies": {
     "chai": "^4.3.6",
     "chai-http": "^4.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
     "mocha": "^10.0.0",
     "nodemon": "^2.0.16",
     "nyc": "^15.1.0",
