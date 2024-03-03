@@ -5,7 +5,7 @@ import Button from "react-bootstrap/Button";
 import v from "../components/validation"
 import { register } from '../api/authentication'
 
-export default function Register({ setToken, setUsername }) {
+export default function Register({ setUsername }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
@@ -38,7 +38,7 @@ export default function Register({ setToken, setUsername }) {
     async function handleSubmit(event) {
         event.preventDefault()
 
-        if (register(email, password, chosenSubject)) {
+        if (await register(email, password, chosenSubject)) {
             setUsername(email.substring(0, email.indexOf("@")));
             navigate("/enrolment");
         }
@@ -50,7 +50,7 @@ export default function Register({ setToken, setUsername }) {
             The statement below is querying if the subjects users can choose from has been loaded from the backend yet. If they haven't been, then they should have
             undefined types, in this case a spinner is displayed to show it's being loaded.
             */}
-            {typeof subjects[0].title === "undefined" ? (
+            {typeof subjects[0]?.title === "undefined" ? (
                 <Spinner animation="border" role="status" style={{ align: "center" }}>
                     <span className="visually-hidden">Loading...</span>
                 </Spinner>

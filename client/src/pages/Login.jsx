@@ -19,7 +19,7 @@ export default function Login({ setToken, setUsername }) {
     async function handleSubmit(event) {
         event.preventDefault();
 
-        if(login(email, password)) {
+        if(await login(email, password)) {
             setUsername(email.substring(0, email.indexOf('@')));
             navigate('/dashboard');
         }
