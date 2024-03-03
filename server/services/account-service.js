@@ -1,7 +1,7 @@
 import { hash as _hash, compare } from 'bcrypt'
 import { query } from '../repositories/database.js'
 import { validEmail, validPassword } from '../validation.js'
-import { getUser, removeUser } from '../repositories/user-repository.js'
+import { getUserByEmail, removeUser } from '../repositories/user-repository.js'
 
 const service = 'account-service'
 
@@ -45,7 +45,7 @@ async function removeAccount ({ email, password }) {
     if (!validEmail(email, '@bath.ac.uk') || !validPassword(password)) {
         throw new Error(`${service}::removeAccount() ${email} invalid credentials`)
     }
-    const user = await getUser(email)
+    const user = await getUserByEmail(email)
     const match = await passwordCheck(user.id, user.email, user.password)
     if (!match) {
         throw new Error(`${service}::removeAccount() ${email} passwords did not match`)

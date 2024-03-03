@@ -1,7 +1,12 @@
 import { query, execute } from './database.js'
 
-async function getUser (email) {
+async function getUserByEmail (email) {
     const results = await query(`SELECT * FROM users WHERE email='${email}'`)
+    return results[0]
+}
+
+async function getUserByName (username) {
+    const results = await query(`SELECT * FROM users WHERE username='${username}'`)
     return results[0]
 }
 
@@ -21,7 +26,8 @@ async function removeUser (email) {
 }
 
 export {
-    getUser,
+    getUserByEmail,
+    getUserByName,
     getUsers,
     addUser,
     removeUser

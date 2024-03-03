@@ -1,7 +1,7 @@
 import JWT from 'jsonwebtoken'
 import { validEmail, validPassword, validId } from '../validation.js'
 import { execute } from '../repositories/database.js'
-import { getUser, getUsers, addUser } from '../repositories/user-repository.js'
+import { getUserByEmail, getUsers, addUser } from '../repositories/user-repository.js'
 import { compareHash, createHash } from '../helpers/password-helper.js'
 import { getSubject } from '../repositories/subject-repository.js'
 import env from 'dotenv'
@@ -14,7 +14,7 @@ async function login ({ email, password }) {
         throw new Error(`authentication-service: user credentials invalid - ${email}`)
     }
 
-    const user = await getUser(email)
+    const user = await getUserByEmail(email)
     const passwordsMatch = await compareHash(password, user.password)
     if (!passwordsMatch) {
         throw new Error(`authentication-service: passwords did not match - ${email}`)
@@ -47,7 +47,7 @@ async function register ({ email, password, subjectId }) {
     const hashed = createHash(password)
 
     await addUser(email, hashed, subject.id)
-    const user = await getUser(email)
+    const user = await getUserByEmail(email)
     const token = sign({
         id: user.id,
         username: user.username

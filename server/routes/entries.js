@@ -50,8 +50,8 @@ router.post('/create-edit', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'invalid entry or entry identifier' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -76,8 +76,8 @@ router.get('/edit-suggestions/:id', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'entry does not exist' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -106,8 +106,8 @@ router.get('/edit-diff/:id', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'resource does not exist' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -150,8 +150,8 @@ router.post('/create', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'invalid entry information' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -184,8 +184,8 @@ router.put('/update', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'entry identifier or entry does not exist' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -215,8 +215,8 @@ router.get('/edit/:id', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'resource does not exist' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -264,8 +264,8 @@ router.get('/:id/view', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'unit does not exist' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -299,8 +299,8 @@ router.get('/view/:id', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'resource does not exist' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -356,8 +356,8 @@ router.post('/add-reply', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'entry or comment does not exist' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -393,8 +393,8 @@ router.get('/view/:id/replies', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'invalid entry identifier' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -427,8 +427,8 @@ router.get('/public/:id', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'invalid credentials' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -461,8 +461,8 @@ router.get('/dashboard/:id', verifyToken, async function (req, res) {
       res.status(400).json({ message: 'invalid credentials' })
     }
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 
@@ -474,8 +474,8 @@ router.delete('/delete/:id', verifyToken, async function (req, res) {
   try {
 
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ message: 'server error' })
+    console.trace(err)
+    res.status(400).json({ message: 'server error' })
   }
 })
 

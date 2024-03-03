@@ -24,7 +24,7 @@ router.post('/create', verifyToken, async function (req, res) {
                 if (id[0].length > 0) {
                     res.status(200).json({ id: id[0][id[0].length - 1].id })
                 } else {
-                    res.status(500).json({ message: 'failed to create thread' })
+                    res.status(400).json({ message: 'failed to create thread' })
                 }
             } else {
                 res.status(400).json({ message: 'invalid unit' })
@@ -33,8 +33,8 @@ router.post('/create', verifyToken, async function (req, res) {
             res.status(400).json({ message: 'invalid thread details' })
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: 'server error' })
+        console.trace(err)
+        res.status(400).json({ message: 'server error' })
     }
 })
 
@@ -75,8 +75,8 @@ router.post('/add-reply', verifyToken, async function (req, res) {
             res.status(400).json({ message: 'thread or comment does not exist' })
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: 'server error' })
+        console.trace(err)
+        res.status(400).json({ message: 'server error' })
     }
 })
 
@@ -98,8 +98,8 @@ router.get('/dashboard/:id', verifyToken, async function (req, res) {
             res.status(400).json({ message: 'invalid credentials' })
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: 'server error' })
+        console.trace(err)
+        res.status(400).json({ message: 'server error' })
     }
 })
 
@@ -135,8 +135,8 @@ router.get('/:id/view', verifyToken, async function (req, res) {
             res.status(400).json({ message: 'unit does not exist' })
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: 'server error' })
+        console.trace(err)
+        res.status(400).json({ message: 'server error' })
     }
 })
 
@@ -170,8 +170,8 @@ router.get('/view/:id', verifyToken, async function (req, res) {
             res.status(400).json({ message: 'invalid thread identifier' })
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: 'server error' })
+        console.trace(err)
+        res.status(400).json({ message: 'server error' })
     }
 })
 
@@ -201,8 +201,8 @@ router.get('/view/:id/replies', verifyToken, async function (req, res) {
             res.status(400).json({ message: 'invalid thread identifier' })
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: 'server error' })
+        console.trace(err)
+        res.status(400).json({ message: 'server error' })
     }
 })
 

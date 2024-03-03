@@ -1,14 +1,14 @@
 import { query } from './database.js'
 
-async function getUnits (userId) {
+async function getUserUnits (userId) {
     return await query(`
-        SELECT units.code, units.title, users.subject_id FROM units 
-        INNER JOIN enrolments ON units.code=enrolments.unit_code 
-        INNER JOIN users ON enrolments.user_id=users.id 
-        WHERE enrolments.user_id=${userId}
+        SELECT units.code, units.title FROM units 
+        INNER JOIN enrolments ON units.code=enrolments.unit_code
+        INNER JOIN users ON users.id=enrolments.user_id 
+        WHERE users.id='${userId}';
     `)
 }
 
 export {
-    getUnits
+    getUserUnits
 }

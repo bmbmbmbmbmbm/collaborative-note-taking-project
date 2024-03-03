@@ -9,7 +9,7 @@ router.put('/change-password', verifyToken, async function (req, res) {
         changePassword(req.userId, req.body)
         res.status(200)
     } catch (err) {
-        console.log(err)
+        console.trace(err)
         res.status(400)
     }
 })

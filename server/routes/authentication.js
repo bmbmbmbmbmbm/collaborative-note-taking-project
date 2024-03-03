@@ -19,8 +19,8 @@ router.post('/register', async function (req, res) {
         req.session.user = user
         res.status(200).json({ token })
     } catch (err) {
-        console.log(err)
-        res.status(500)
+        console.trace(err)
+        res.status(400)
     }
 })
 
